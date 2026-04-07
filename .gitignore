@@ -1,0 +1,64 @@
+﻿# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.py,cover
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+__pypackages__/
+
+# Test and type-check caches
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.nox/
+.tox/
+.cache/
+coverage.xml
+
+# Build artifacts
+build/
+dist/
+*.spec
+*.egg-info/
+pip-wheel-metadata/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Local runtime outputs
+logs/
+tmp/
+runtime/
+*.log
+*.tmp
+*.temp
+*.bak
+
+# Access database files and lock files
+*.accdb
+*.mdb
+*.laccdb
+*.ldb
+
+# SQLite and local scratch databases
+*.db
+*.sqlite3

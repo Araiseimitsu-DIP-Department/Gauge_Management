@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GaugePro Precision - Lending Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "error-container": "#ffdad6",
+                "primary-container": "#005fb8",
+                "on-error-container": "#93000a",
+                "on-tertiary-fixed-variant": "#783100",
+                "inverse-primary": "#a8c8ff",
+                "surface-bright": "#f8f9fa",
+                "on-error": "#ffffff",
+                "tertiary": "#7b3200",
+                "error": "#ba1a1a",
+                "inverse-surface": "#2e3132",
+                "surface-container-high": "#e7e8e9",
+                "on-primary-fixed-variant": "#00468b",
+                "on-primary-fixed": "#001b3d",
+                "on-background": "#191c1d",
+                "surface-container": "#edeeef",
+                "secondary-container": "#c0d5ff",
+                "on-surface-variant": "#424752",
+                "secondary": "#4a5f83",
+                "surface-container-low": "#f3f4f5",
+                "background": "#f8f9fa",
+                "on-tertiary": "#ffffff",
+                "on-tertiary-fixed": "#341100",
+                "outline": "#727783",
+                "tertiary-fixed-dim": "#ffb691",
+                "primary-fixed": "#d6e3ff",
+                "on-secondary-fixed-variant": "#324769",
+                "on-tertiary-container": "#ffd1bc",
+                "primary-fixed-dim": "#a8c8ff",
+                "surface": "#f8f9fa",
+                "on-primary-container": "#cadcff",
+                "on-secondary-fixed": "#011b3c",
+                "surface-variant": "#e1e3e4",
+                "on-primary": "#ffffff",
+                "surface-tint": "#005db5",
+                "secondary-fixed-dim": "#b2c7f0",
+                "inverse-on-surface": "#f0f1f2",
+                "secondary-fixed": "#d6e3ff",
+                "primary": "#00488d",
+                "outline-variant": "#c2c6d4",
+                "on-secondary-container": "#475c7f",
+                "surface-container-lowest": "#ffffff",
+                "tertiary-container": "#a04401",
+                "on-secondary": "#ffffff",
+                "on-surface": "#191c1d",
+                "tertiary-fixed": "#ffdbcb",
+                "surface-container-highest": "#e1e3e4",
+                "surface-dim": "#d9dadb"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "fontFamily": {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface flex min-h-screen">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 border-r-0 flex flex-col py-6 px-4 gap-2 z-50">
+<div class="mb-8 px-2">
+<h1 class="text-lg font-black text-blue-900 tracking-tight">Precision Ops</h1>
+<p class="text-xs text-on-surface-variant">Main Warehouse</p>
+</div>
+<nav class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-3 py-2 bg-white text-blue-700 shadow-sm rounded-lg font-medium transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+<span class="text-sm">Lending</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="keyboard_return">keyboard_return</span>
+<span class="text-sm">Return</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-sm">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="text-sm">Master Data</span>
+</a>
+</nav>
+<button class="mb-8 mx-2 bg-gradient-to-br from-primary to-primary-container text-white py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 shadow-sm hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+            Add New Gauge
+        </button>
+<div class="pt-4 border-t border-surface-container-high flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+                Logs
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-64 p-8">
+<!-- TopNavBar Shell -->
+<header class="flex justify-between items-center mb-10 w-full">
+<div>
+<h2 class="text-3xl font-extrabold text-blue-900 tracking-tight">Lending Dashboard</h2>
+<p class="text-on-surface-variant text-sm mt-1">Manage gauge disbursements and active field operations.</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-0 rounded-full text-sm focus:ring-2 focus:ring-primary w-64 transition-all" placeholder="Search gauges..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="professional headshot of a senior operations manager in a clean office setting, soft lighting, neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBb9Z_FpB_bGUWscWp4w3gXb4GHYI5jpWMJ8o8Mbw4JZwcmIACH_hRtjuMOuGrGF1PUMl0khZ8liccXy7Sgo0wYNODYfUfASxniGQAljbamD50hnkuWAtFI6GbNQJmvPf_HK1CGBOmjJzLWoCImBTUs9MShPoVuP9AoqMkfTIOSbrvro0mAFXBfpPYTleZREevKM9yaGcMloD7GSspnNhWhLEN1LKRMc6Jpizswh3F4nBP2LELkzW-XSvKmgNO2ao1dabLRAGEj-pep"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Recording Form Section -->
+<section class="col-span-12 lg:col-span-5 bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-lg font-bold text-on-surface">Record New Lending</h3>
+<span class="material-symbols-outlined text-primary" data-icon="edit_document">edit_document</span>
+</div>
+<form class="space-y-6">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Date</label>
+<input class="w-full bg-surface-container-highest border-0 rounded-lg p-3 text-sm focus:ring-0 focus:border-b-2 focus:border-primary transition-all" type="date"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Shift</label>
+<select class="w-full bg-surface-container-highest border-0 rounded-lg p-3 text-sm focus:ring-0 focus:border-b-2 focus:border-primary transition-all">
+<option>Morning (06:00 - 14:00)</option>
+<option>Evening (14:00 - 22:00)</option>
+<option>Night (22:00 - 06:00)</option>
+</select>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Machine ID / Asset Tag</label>
+<input class="w-full bg-surface-container-highest border-0 rounded-lg p-3 text-sm focus:ring-0 focus:border-b-2 focus:border-primary transition-all" placeholder="e.g. CNC-094-X" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Operator Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="person">person</span>
+<input class="w-full pl-10 bg-surface-container-highest border-0 rounded-lg p-3 text-sm focus:ring-0 focus:border-b-2 focus:border-primary transition-all" placeholder="Start typing name..." type="text"/>
+</div>
+</div>
+<div class="pt-4">
+<h4 class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">Gauge Sizes Required</h4>
+<div class="grid grid-cols-4 gap-3">
+<!-- Matrix of Gauge Sizes -->
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="10mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="12mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="15mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="20mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="25mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="30mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="35mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="40mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="45mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="50mm" type="number"/>
+<input class="bg-surface-container border-0 rounded-lg p-2 text-xs text-center focus:ring-1 focus:ring-primary" placeholder="60mm" type="number"/>
+<button class="border-2 border-dashed border-outline-variant rounded-lg p-2 flex items-center justify-center text-outline hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<button class="w-full bg-primary text-white py-4 rounded-lg font-bold shadow-lg shadow-primary/20 hover:scale-[0.98] active:scale-95 transition-all duration-200 mt-6">
+                        Confirm &amp; Issue Gauge
+                    </button>
+</form>
+</section>
+<!-- Active Loans & Statistics Section -->
+<section class="col-span-12 lg:col-span-7 space-y-8">
+<!-- Summary Stats -->
+<div class="grid grid-cols-3 gap-6">
+<div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Active Out</p>
+<h4 class="text-4xl font-black text-blue-900 mt-1">42</h4>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-tertiary">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Due Today</p>
+<h4 class="text-4xl font-black text-tertiary mt-1">08</h4>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-surface-tint">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Available</p>
+<h4 class="text-4xl font-black text-on-surface mt-1">156</h4>
+</div>
+</div>
+<!-- Active Loans Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="px-8 py-6 flex justify-between items-center bg-white">
+<h3 class="text-lg font-bold text-on-surface">Active Field Loans</h3>
+<div class="flex gap-2">
+<button class="text-xs font-semibold px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary hover:text-white transition-colors">Today</button>
+<button class="text-xs font-semibold px-3 py-1.5 rounded-full bg-primary text-white">All Active</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Operator</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Asset / Size</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Time Issued</th>
+<th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary font-bold text-xs">RJ</div>
+<div>
+<p class="text-sm font-semibold text-on-surface">Robert J. Fisher</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Line B-12</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-medium text-on-surface">CAL-9042</p>
+<p class="text-xs text-on-surface-variant">25.00mm Precision</p>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-on-surface">06:45 AM</p>
+<p class="text-[10px] text-on-surface-variant uppercase">2h 15m ago</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                            Active
+                                        </span>
+</td>
+<td class="px-8 py-4 text-right">
+<button class="text-primary hover:bg-primary-fixed p-1.5 rounded-md transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-tertiary font-bold text-xs">SK</div>
+<div>
+<p class="text-sm font-semibold text-on-surface">Sarah K. Miller</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Line A-04</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-medium text-on-surface">MIC-1158</p>
+<p class="text-xs text-on-surface-variant">12.00mm Standard</p>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-on-surface font-semibold text-tertiary">Yesterday</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Overdue</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-fixed text-tertiary text-[10px] font-bold uppercase tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary shadow-[0_0_8px_#7b3200]"></span>
+                                            Due Soon
+                                        </span>
+</td>
+<td class="px-8 py-4 text-right">
+<button class="text-primary hover:bg-primary-fixed p-1.5 rounded-md transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary font-bold text-xs">TH</div>
+<div>
+<p class="text-sm font-semibold text-on-surface">Thomas H.</p>
+<p class="text-[10px] text-on-surface-variant uppercase">QA Lab</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-medium text-on-surface">THD-220</p>
+<p class="text-xs text-on-surface-variant">Thread Pitch 1.5</p>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-on-surface">08:12 AM</p>
+<p class="text-[10px] text-on-surface-variant uppercase">45m ago</p>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                                            Active
+                                        </span>
+</td>
+<td class="px-8 py-4 text-right">
+<button class="text-primary hover:bg-primary-fixed p-1.5 rounded-md transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="bg-white px-8 py-4 flex justify-center">
+<button class="text-xs font-bold text-primary hover:underline transition-all flex items-center gap-1">
+                            View Full History 
+                            <span class="material-symbols-outlined text-xs" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Secondary Dashboard Card -->
+<div class="grid grid-cols-2 gap-8">
+<div class="bg-primary p-8 rounded-xl text-white relative overflow-hidden group">
+<div class="relative z-10">
+<h4 class="text-xl font-bold mb-2">Calibration Due</h4>
+<p class="text-primary-fixed text-sm mb-6 opacity-80">There are 12 items requiring calibration this week.</p>
+<button class="bg-white text-primary px-4 py-2 rounded-lg text-xs font-bold hover:bg-surface-bright transition-colors">
+                                View Schedule
+                            </button>
+</div>
+<span class="material-symbols-outlined absolute -bottom-4 -right-4 text-white opacity-10 text-[120px] group-hover:scale-110 transition-transform" data-icon="architecture">architecture</span>
+</div>
+<div class="bg-surface-container-high p-8 rounded-xl border border-transparent hover:border-outline-variant transition-all cursor-pointer">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</div>
+<h4 class="font-bold text-on-surface">Yield Report</h4>
+</div>
+<p class="text-sm text-on-surface-variant">Usage yield is up 14% this month compared to last. Optimal distribution achieved.</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Contextual FAB Suppression: FAB only on relevant screens -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-blue-900 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-[60]">
+<span class="material-symbols-outlined" data-icon="barcode_reader">barcode_reader</span>
+</button>
+</body></html>
