@@ -51,10 +51,8 @@ def _resolve_app_icon(app: QApplication) -> QIcon | None:
             return executable_icon
 
     project_root = Path(__file__).resolve().parents[1]
-    for candidate in (
-        project_root / "docs" / "icon.ico",
-        project_root / "docs" / "icon.png",
-    ):
+    # アプリアイコン（配布用アセットは docs/Gauge_Management_icon.png）
+    for candidate in (project_root / "docs" / "Gauge_Management_icon.png",):
         if candidate.exists():
             icon = QIcon(str(candidate))
             if not icon.isNull():
