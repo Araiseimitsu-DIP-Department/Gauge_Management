@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,15 +27,30 @@ def load_app_settings(env_file: Path | None = None) -> AppSettings:
 
 
 def _resolve_default_env_file() -> Path | None:
-    project_root = Path(__file__).resolve().parents[2]
-    candidates = [
-        project_root / ".env",
-        project_root / ".env.example",
-        Path.cwd() / ".env",
-    ]
+    """開発時はリポジトリルート。exe(onefile) 時は同梱 .env（_MEIPASS）→ exe 横 → カレントの順。"""
+    candidates: list[Path] = []
+    if getattr(sys, "frozen", False):
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            candidates.append(Path(meipass) / ".env")
+        candidates.append(Path(sys.executable).resolve().parent / ".env")
+    else:
+        project_root = Path(__file__).resolve().parents[2]
+        candidates.extend(
+            [
+                project_root / ".env",
+                project_root / ".env.example",
+            ]
+        )
+    candidates.append(Path.cwd() / ".env")
 
     for candidate in candidates:
         if candidate.exists():
             return candidate
 
-    return project_root / ".env"
+    if getattr(sys, "frozen", False):
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            return Path(meipass) / ".env"
+        return Path(sys.executable).resolve().parent / ".env"
+    return Path(__file__).resolve().parents[2] / ".env"

@@ -44,18 +44,28 @@ def run() -> int:
     return app.exec()
 
 
+def _app_asset_root() -> Path:
+    """開発時はプロジェクトルート、PyInstaller onefile 実行時は展開先 (_MEIPASS)。"""
+    if getattr(sys, "frozen", False):
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            return Path(meipass)
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parents[1]
+
+
 def _resolve_app_icon(app: QApplication) -> QIcon | None:
+    # 配布用アイコン（docs/icon.png）
+    candidate = _app_asset_root() / "docs" / "icon.png"
+    if candidate.exists():
+        icon = QIcon(str(candidate))
+        if not icon.isNull():
+            return icon
+
+    # バンドル PNG が無い場合のみ exe 埋め込みアイコンを使う（PyInstaller --icon 未設定時は効果が薄い）
     if getattr(sys, "frozen", False):
         executable_icon = QIcon(app.applicationFilePath())
         if not executable_icon.isNull():
             return executable_icon
-
-    project_root = Path(__file__).resolve().parents[1]
-    # アプリアイコン（配布用アセットは docs/Gauge_Management_icon.png）
-    for candidate in (project_root / "docs" / "Gauge_Management_icon.png",):
-        if candidate.exists():
-            icon = QIcon(str(candidate))
-            if not icon.isNull():
-                return icon
 
     return None

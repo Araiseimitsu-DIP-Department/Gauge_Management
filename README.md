@@ -69,13 +69,13 @@ python main.py
 ## アイコン
 
 - アプリアイコン（実行時・配布元画像）
-  - [docs/Gauge_Management_icon.png](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/docs/Gauge_Management_icon.png)
+  - [docs/icon.png](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/docs/icon.png)
 
 アプリ起動時は `app/bootstrap.py` で上記 PNG を読み込み、ウィンドウアイコンに設定しています。  
-`onefile` で exe 化する場合は、PyInstaller のバージョンに応じて PNG をそのまま指定するか、Windows 向けに `.ico` へ変換して `--icon` に指定してください。
+`onefile` で exe 化する場合は、`--icon` で exe のアイコンを指定し、実行時も同じ画像を使うため `--add-data` で `docs` 配下へ同梱してください。PNG をそのまま指定できない PyInstaller の場合は `.ico` に変換して `--icon` に指定してください。
 
 ```powershell
-pyinstaller --onefile --windowed --icon docs/Gauge_Management_icon.png --name "ピンゲージ管理" main.py
+pyinstaller --onefile --windowed --icon docs/icon.png --add-data "docs/icon.png;docs" --name "ピンゲージ管理" main.py
 ```
 
 生成物は `dist/ピンゲージ管理.exe` です。
