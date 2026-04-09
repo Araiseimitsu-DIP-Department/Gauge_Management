@@ -16,6 +16,9 @@ from app.services.operation_service import OperationService
 from app.ui.styles.theme import build_light_palette
 from app.ui.main_window import MainWindow
 
+# アプリアイコン画像（docs 配下。PyInstaller の --icon / datas と揃える）
+_APP_ICON_FILENAME = "精密計測具のアイコン.png"
+
 
 def run() -> int:
     """Application entry point."""
@@ -55,8 +58,7 @@ def _app_asset_root() -> Path:
 
 
 def _resolve_app_icon(app: QApplication) -> QIcon | None:
-    # 配布用アイコン（docs/icon.png）
-    candidate = _app_asset_root() / "docs" / "icon.png"
+    candidate = _app_asset_root() / "docs" / _APP_ICON_FILENAME
     if candidate.exists():
         icon = QIcon(str(candidate))
         if not icon.isNull():
