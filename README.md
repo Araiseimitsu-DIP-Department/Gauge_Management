@@ -1,7 +1,10 @@
-﻿# ピンゲージ管理
+# ピンゲージ管理
 
 Windows 業務 PC 向けの `Python + PySide6` デスクトップアプリです。  
 既存の Access データベース `ピンゲージ管理.accdb` を利用し、ピンゲージの `貸出`、`返却`、`確認`、`PGマスタ管理`、`担当者マスタ管理` を行います。
+
+内部構成は `presentation / application / domain / infrastructure / shared` に分離し、将来的な PostgreSQL 移行を前提にしています。  
+現在は `DB_BACKEND=access` を既定にして、既存の Access 運用を維持したまま PostgreSQL へ切り替えやすい形に整えています。
 
 ## 主な機能
 
@@ -32,6 +35,7 @@ Windows 業務 PC 向けの `Python + PySide6` デスクトップアプリです
 - Access を参照できる `pyodbc` 実行環境
 - 接続対象の Access ファイル
   - ファイル名は `ピンゲージ管理.accdb`
+- PostgreSQL に切り替える場合は `psycopg` 系ドライバを追加
 
 ## セットアップ
 
@@ -46,14 +50,26 @@ pip install -r requirements.txt
 
 ```env
 APP_ENV=local
+APP_NAME=ピンゲージ管理
+DB_BACKEND=access
 ACCESS_DB_DIRECTORY=C:\Path\To\AccessFolder
 ```
 
-または
+または:
 
 ```env
 APP_ENV=local
+APP_NAME=ピンゲージ管理
+DB_BACKEND=access
 ACCESS_DB_DIRECTORY=C:\Path\To\AccessFolder\ピンゲージ管理.accdb
+```
+
+PostgreSQL に切り替える場合は以下を追加します。
+
+```env
+DB_BACKEND=postgres
+POSTGRES_CONNECTION_URL=postgresql://user:password@localhost:5432/pingauge
+POSTGRES_SCHEMA=public
 ```
 
 補足は [docs/SETUP.md](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/docs/SETUP.md) を参照してください。
@@ -66,16 +82,13 @@ ACCESS_DB_DIRECTORY=C:\Path\To\AccessFolder\ピンゲージ管理.accdb
 python main.py
 ```
 
-## アイコン
+## 配布ビルド
 
-- アプリアイコン（実行時・配布元画像）
-  - [docs/精密計測具のアイコン.png](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/docs/精密計測具のアイコン.png)
-
-アプリ起動時は `app/bootstrap.py` で上記 PNG を読み込み、ウィンドウアイコンに設定しています。  
-`onefile` で exe 化する場合は、`--icon` で exe のアイコンを指定し、実行時も同じ画像を使うため `--add-data` で `docs` 配下へ同梱してください。PNG をそのまま指定できない PyInstaller の場合は `.ico` に変換して `--icon` に指定してください。
+配布用 exe は `PinGaugeMgmt.spec` を使って生成します。  
+アイコンは `docs/精密計測具のアイコン.png` を使用します。
 
 ```powershell
-pyinstaller --onefile --windowed --icon "docs/精密計測具のアイコン.png" --add-data "docs/精密計測具のアイコン.png;docs" --name "ピンゲージ管理" main.py
+pyinstaller PinGaugeMgmt.spec
 ```
 
 生成物は `dist/ピンゲージ管理.exe` です。
@@ -85,12 +98,14 @@ pyinstaller --onefile --windowed --icon "docs/精密計測具のアイコン.png
 ```text
 Gauge_Management/
 ├─ app/
-│  ├─ main.py                 app 直下から実行する場合の入口
 │  ├─ bootstrap.py            アプリ起動初期化
-│  ├─ config/                 設定読込、Access 接続設定
-│  ├─ models/                 業務データモデル
-│  ├─ repositories/           Access データアクセス層
-│  ├─ services/               業務ロジック層
+│  ├─ config/                 設定読込、DB 接続設定
+│  ├─ models/                 既存の業務データモデル
+│  ├─ shared/                 共通例外、共通ユーティリティ
+│  ├─ domain/                 業務概念モデル、値オブジェクト
+│  ├─ application/            DTO、Repository port、usecase
+│  ├─ infrastructure/         Access 実装、PostgreSQL 実装、接続、mapper
+│  ├─ services/               UI 向けファサード
 │  ├─ ui/
 │  │  ├─ main_window.py       メインウィンドウ、サイドバー
 │  │  ├─ screens/             貸出、返却、確認、マスタ画面
@@ -101,6 +116,7 @@ Gauge_Management/
 ├─ docs/                      業務仕様、デザイン案、セットアップ資料
 ├─ tests/                     テスト用補助ファイル
 ├─ .env.example               環境変数サンプル
+├─ PinGaugeMgmt.spec          PyInstaller 配布定義
 ├─ requirements.txt           依存関係
 └─ main.py                    推奨起動入口
 ```
@@ -114,7 +130,9 @@ Gauge_Management/
 - [app/config/app_settings.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/config/app_settings.py)
   - アプリ設定読込
 - [app/config/db_settings.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/config/db_settings.py)
-  - Access パス解決と接続設定
+  - Access / PostgreSQL の接続設定
+- [app/infrastructure/repository_factory.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/infrastructure/repository_factory.py)
+  - `DB_BACKEND` に応じた repository 切替
 - [app/ui/main_window.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/ui/main_window.py)
   - サイドバーと各画面の切替
 - [app/ui/widgets/busy_indicator.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/ui/widgets/busy_indicator.py)
@@ -131,7 +149,10 @@ Gauge_Management/
 
 ## 開発メモ
 
-- 画面イベントに SQL を直接書かず、`services -> repositories` を通す構成です。
+- 画面イベントに SQL を直接書かず、`ui -> services -> application/usecases -> infrastructure` を通す構成です。
 - Access の実データを使うため、DB スキーマ変更は慎重に扱ってください。
+- Access 固有の実装は `app/infrastructure/access/` に寄せ、PostgreSQL 実装は `app/infrastructure/postgres/` に置く前提です。
+- `app/infrastructure/repository_factory.py` が `DB_BACKEND` を見て Access / PostgreSQL を切り替えます。
+- PostgreSQL 側はまだ骨格段階なので、`DB_BACKEND=postgres` に切り替える前に依存パッケージと接続先を用意してください。
 - 生成物は `.gitignore` で除外していますが、`__pycache__` などはローカルで再生成されます。
 - 既存の業務仕様は [docs/Gauge_Management.txt](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/docs/Gauge_Management.txt) を基準にしています。

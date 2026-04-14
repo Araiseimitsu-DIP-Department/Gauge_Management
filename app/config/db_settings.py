@@ -7,6 +7,9 @@ from typing import Mapping
 
 ACCESS_DB_FILENAME = "ピンゲージ管理.accdb"
 ACCESS_DB_DIRECTORY_KEY = "ACCESS_DB_DIRECTORY"
+DATABASE_BACKEND_KEY = "DB_BACKEND"
+POSTGRES_CONNECTION_URL_KEY = "POSTGRES_CONNECTION_URL"
+POSTGRES_SCHEMA_KEY = "POSTGRES_SCHEMA"
 
 
 @dataclass(frozen=True)
@@ -35,6 +38,16 @@ class AccessDbSettings:
             return False
 
 
+@dataclass(frozen=True)
+class PostgresDbSettings:
+    connection_url: str | None
+    schema: str = "public"
+
+    @property
+    def is_configured(self) -> bool:
+        return bool(self.connection_url)
+
+
 def load_access_db_settings(env_values: Mapping[str, str]) -> AccessDbSettings:
     directory_value = env_values.get(ACCESS_DB_DIRECTORY_KEY, "").strip()
     if not directory_value:
@@ -47,3 +60,9 @@ def load_access_db_settings(env_values: Mapping[str, str]) -> AccessDbSettings:
         database_directory = configured_path
 
     return AccessDbSettings(database_directory=database_directory)
+
+
+def load_postgres_db_settings(env_values: Mapping[str, str]) -> PostgresDbSettings:
+    connection_url = env_values.get(POSTGRES_CONNECTION_URL_KEY, "").strip() or None
+    schema = env_values.get(POSTGRES_SCHEMA_KEY, "public").strip() or "public"
+    return PostgresDbSettings(connection_url=connection_url, schema=schema)

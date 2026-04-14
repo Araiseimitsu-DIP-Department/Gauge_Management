@@ -6,10 +6,11 @@ from pathlib import Path
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
+from app.application.usecases.lending_usecase import LendingUseCase
+from app.application.usecases.master_usecase import MasterUseCase
+from app.application.usecases.operation_usecase import OperationUseCase
 from app.config.app_settings import load_app_settings
-from app.repositories.lending_repository import LendingRepository
-from app.repositories.master_repository import MasterRepository
-from app.repositories.operation_repository import OperationRepository
+from app.infrastructure.repository_factory import build_repository_bundle
 from app.services.lending_service import LendingService
 from app.services.master_service import MasterService
 from app.services.operation_service import OperationService
@@ -23,9 +24,11 @@ _APP_ICON_FILENAME = "精密計測具のアイコン.png"
 def run() -> int:
     """Application entry point."""
     settings = load_app_settings()
-    lending_service = LendingService(LendingRepository(settings.access_db))
-    operation_service = OperationService(OperationRepository(settings.access_db))
-    master_service = MasterService(MasterRepository(settings.access_db))
+    repositories = build_repository_bundle(settings)
+
+    lending_service = LendingService(LendingUseCase(repositories.lending))
+    operation_service = OperationService(OperationUseCase(repositories.operation))
+    master_service = MasterService(MasterUseCase(repositories.master))
 
     app = QApplication(sys.argv)
     app.setApplicationName(settings.app_name)

@@ -1,0 +1,5 @@
+from __future__ import annotations
+
+from .lending_repository import PostgresLendingRepository
+from .master_repository import PostgresMasterRepository
+from .operation_repository import PostgresOperationRepository
