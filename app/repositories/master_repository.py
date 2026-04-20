@@ -7,6 +7,11 @@ from app.models.pg_master import PgMasterRecord
 from app.models.staff import StaffMember
 from app.repositories.access_connection import open_access_connection
 
+STAFF_DEPARTMENT_REPLACEMENTS = {
+    "総務": "製造",
+    "検査": "数値",
+}
+
 
 class MasterRepository:
     def __init__(self, settings: AccessDbSettings) -> None:
@@ -94,3 +99,19 @@ class MasterRepository:
                 staff.staff_id,
             )
             connection.commit()
+
+    def normalize_staff_departments(self) -> int:
+        updated = 0
+        with open_access_connection(self._settings) as connection:
+            cursor = connection.cursor()
+            rows = cursor.execute("SELECT 担当者ID, 部署, 担当者名, かな, 表示 FROM t_担当者マスタ").fetchall()
+            for row in rows:
+                current_department = "" if row.部署 is None else str(row.部署).strip()
+                replacement = STAFF_DEPARTMENT_REPLACEMENTS.get(current_department)
+                if not replacement or replacement == current_department:
+                    continue
+                cursor.execute("UPDATE t_担当者マスタ SET 部署 = ? WHERE 担当者ID = ?", replacement, row.担当者ID)
+                updated += 1
+            if updated:
+                connection.commit()
+        return updated

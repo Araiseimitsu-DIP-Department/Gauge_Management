@@ -13,6 +13,11 @@ from app.repositories.errors import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+STAFF_DEPARTMENT_REPLACEMENTS = {
+    "総務": "製造",
+    "検査": "数値",
+}
+
 
 class AccessMasterRepository:
     def __init__(self, settings: AccessDbSettings) -> None:
@@ -113,7 +118,26 @@ class AccessMasterRepository:
             logger.exception("failed to update staff member")
             raise RepositoryError("担当者マスタの更新に失敗しました。") from exc
 
+    def normalize_staff_departments(self) -> int:
+        updated = 0
+        try:
+            with open_access_connection(self._settings) as connection:
+                cursor = connection.cursor()
+                rows = cursor.execute("SELECT 担当者ID, 部署, 担当者名, かな, 表示 FROM t_担当者マスタ").fetchall()
+                for row in rows:
+                    current_department = "" if row.部署 is None else str(row.部署).strip()
+                    replacement = STAFF_DEPARTMENT_REPLACEMENTS.get(current_department)
+                    if not replacement or replacement == current_department:
+                        continue
+                    cursor.execute("UPDATE t_担当者マスタ SET 部署 = ? WHERE 担当者ID = ?", replacement, row.担当者ID)
+                    updated += 1
+                if updated:
+                    connection.commit()
+        except pyodbc.Error as exc:
+            logger.exception("failed to normalize staff departments")
+            raise RepositoryError("担当者マスタの部署更新に失敗しました。") from exc
+        return updated
+
 
 def build_access_master_repository(settings: AccessDbSettings) -> AccessMasterRepository:
     return AccessMasterRepository(settings)
-

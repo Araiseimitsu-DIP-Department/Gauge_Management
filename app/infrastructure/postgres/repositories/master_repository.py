@@ -11,6 +11,11 @@ from app.repositories.errors import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+STAFF_DEPARTMENT_REPLACEMENTS = {
+    "総務": "製造",
+    "検査": "数値",
+}
+
 
 class PostgresMasterRepository:
     def __init__(self, settings: PostgresDbSettings) -> None:
@@ -127,6 +132,32 @@ class PostgresMasterRepository:
         except Exception as exc:
             logger.exception("failed to update staff member")
             raise RepositoryError("担当者マスタの更新に失敗しました。") from exc
+
+    def normalize_staff_departments(self) -> int:
+        updated = 0
+        try:
+            rows = self.fetch_staff_master(None)
+            for staff in rows:
+                current_department = staff.department.strip()
+                replacement = STAFF_DEPARTMENT_REPLACEMENTS.get(current_department)
+                if not replacement or replacement == current_department:
+                    continue
+                self.update_staff_member(
+                    StaffMember(
+                        staff_id=staff.staff_id,
+                        name=staff.name,
+                        department=replacement,
+                        kana=staff.kana,
+                        visible=staff.visible,
+                    )
+                )
+                updated += 1
+        except RepositoryError:
+            raise
+        except Exception as exc:
+            logger.exception("failed to normalize staff departments")
+            raise RepositoryError("担当者マスタの部署更新に失敗しました。") from exc
+        return updated
 
 
 def build_postgres_master_repository(settings: PostgresDbSettings) -> PostgresMasterRepository:

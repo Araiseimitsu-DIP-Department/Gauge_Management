@@ -100,3 +100,12 @@ class MasterService:
         except RepositoryError as exc:
             raise AppDataAccessError(str(exc)) from exc
 
+    def normalize_staff_departments(self) -> int:
+        try:
+            return self._usecase.normalize_staff_departments()
+        except AppConfigurationError:
+            raise
+        except ValidationError as exc:
+            raise AppValidationError(str(exc)) from exc
+        except RepositoryError as exc:
+            raise AppDataAccessError(str(exc)) from exc

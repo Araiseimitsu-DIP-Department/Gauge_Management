@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from app.application.dto.master import PgMasterDto, StaffMemberDto
 from app.application.ports.master_repository import MasterRepositoryPort
 from app.shared.errors import ValidationError
@@ -11,7 +13,8 @@ class MasterUseCase:
         self._repository = repository
 
     def search_pg_master(self, size_query: str = "") -> list[PgMasterDto]:
-        return self._repository.search_pg_master(size_query.strip().upper() or None)
+        normalized_query = self._normalize_pg_master_query(size_query)
+        return self._repository.search_pg_master(normalized_query)
 
     def save_pg_master(
         self,
@@ -73,3 +76,14 @@ class MasterUseCase:
             )
         )
 
+    def normalize_staff_departments(self) -> int:
+        return self._repository.normalize_staff_departments()
+
+    def _normalize_pg_master_query(self, size_query: str) -> str | None:
+        normalized_query = size_query.strip().upper()
+        if not normalized_query:
+            return None
+
+        if re.fullmatch(r"\d+(?:\.\d+)?", normalized_query):
+            normalized_query = normalized_query.rstrip("0").rstrip(".")
+        return normalized_query or None

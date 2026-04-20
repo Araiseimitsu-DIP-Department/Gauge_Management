@@ -57,6 +57,9 @@ class MasterRepositoryPort(Protocol):
     def update_staff_member(self, staff: StaffMember) -> None:
         ...
 
+    def normalize_staff_departments(self) -> int:
+        ...
+
 
 class OperationRepositoryPort(Protocol):
     def search_returnable_loans(self, machine_code: str) -> list[LoanRecord]:
@@ -79,4 +82,3 @@ class OperationRepositoryPort(Protocol):
 
     def confirm_one(self, loan_id: int) -> None:
         ...
-

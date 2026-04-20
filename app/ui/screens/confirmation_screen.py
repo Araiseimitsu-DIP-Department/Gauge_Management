@@ -260,7 +260,7 @@ class ConfirmationScreen(QWidget):
                 loan.staff_name,
                 self._format_date(loan.returned_on),
                 loan.case_no or "",
-                loan.completion_flag or "未確認",
+                self._format_completion_flag(loan.completion_flag),
             ]
             for column_index, value in enumerate(values):
                 self._detail_table.setItem(row_index, column_index, QTableWidgetItem(value))
@@ -279,3 +279,12 @@ class ConfirmationScreen(QWidget):
         if "-" not in normalized:
             return ""
         return normalized.split("-", 1)[1].strip()
+
+    @staticmethod
+    def _format_completion_flag(value: str | None) -> str:
+        normalized = (value or "").strip().upper()
+        if normalized == "Y":
+            return "確認済"
+        if normalized == "N" or not normalized:
+            return "未確認"
+        return normalized
