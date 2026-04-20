@@ -28,6 +28,7 @@ coverage.xml
 build/
 dist/
 *.spec
+!PinGaugeMgmt.spec
 *.egg-info/
 pip-wheel-metadata/
 
