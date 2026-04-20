@@ -1,2 +1,0 @@
-"""UI stylesheet package."""
-

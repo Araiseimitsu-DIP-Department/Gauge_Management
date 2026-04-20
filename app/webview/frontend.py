@@ -320,12 +320,21 @@ _HTML = r"""<!DOCTYPE html>
       z-index: 55;
       background: rgba(246, 247, 249, 0.72);
       backdrop-filter: blur(6px);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.14s ease, visibility 0s linear 0.14s;
     }
-    .busy-overlay.visible { display: flex; }
+    .busy-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity 0.14s ease;
+    }
     .busy-card {
       width: min(480px, 100%);
       background: rgba(255,255,255,0.95);
@@ -343,12 +352,21 @@ _HTML = r"""<!DOCTYPE html>
       z-index: 58;
       background: rgba(246, 247, 249, 0.72);
       backdrop-filter: blur(6px);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.14s ease, visibility 0s linear 0.14s;
     }
-    .dialog-overlay.visible { display: flex; }
+    .dialog-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity 0.14s ease;
+    }
     .dialog-card {
       width: min(420px, 100%);
       background: rgba(255,255,255,0.98);
@@ -399,8 +417,7 @@ _HTML = r"""<!DOCTYPE html>
       animation: spin 0.9s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .screen { animation: fadeIn 0.16s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+    .screen { animation: none; }
     @media (max-width: 1200px) {
       .shell { grid-template-columns: 1fr; }
       .sidebar { border-right: 0; border-bottom: 1px solid rgba(214, 223, 233, 0.8); }
@@ -493,6 +510,7 @@ _HTML = r"""<!DOCTYPE html>
       dialog: null,
       loanEditMachinePrefix: "",
       loanEditMachineSuffix: "",
+      shellRendered: false,
       __started: false,
     };
 
@@ -545,69 +563,86 @@ _HTML = r"""<!DOCTYPE html>
 
     function renderApp() {
       const title = state.screenTitles[state.currentScreen];
-      document.getElementById("app").innerHTML = `
-        <div class="shell">
-          <aside class="sidebar">
-            <div class="brand">
-              <h1>${escapeHtml(state.appName)}</h1>
-            </div>
-            <div class="nav-group">
-              <button class="nav-btn ${state.currentScreen === "lending" ? "active" : ""}" data-action="navigate" data-screen="lending">貸出</button>
-              <button class="nav-btn ${state.currentScreen === "return" ? "active" : ""}" data-action="navigate" data-screen="return">返却</button>
-              <button class="nav-btn ${state.currentScreen === "confirmation" ? "active" : ""}" data-action="navigate" data-screen="confirmation">確認</button>
-            </div>
-            <button class="nav-group-btn ${state.currentScreen === "pg_master" || state.currentScreen === "staff_master" ? "active" : ""}" data-action="toggle-master">マスタ管理</button>
-            <div class="nav-sub-list" style="display:${state.currentScreen === "pg_master" || state.currentScreen === "staff_master" ? "grid" : "none"}">
-              <button class="nav-sub-btn ${state.currentScreen === "pg_master" ? "active" : ""}" data-action="navigate" data-screen="pg_master">PGマスタ</button>
-              <button class="nav-sub-btn ${state.currentScreen === "staff_master" ? "active" : ""}" data-action="navigate" data-screen="staff_master">担当者マスタ</button>
-            </div>
-            <div class="sidebar-footer">
-              <div>DB: ${escapeHtml(state.databaseBackend || "")}</div>
-              <div>起動日: ${escapeHtml(state.currentDate || "")}</div>
-            </div>
-          </aside>
-          <main class="main">
-            <div class="header">
-              <div>
-                <h2>${escapeHtml(title.title)}</h2>
-                <p>${escapeHtml(title.subtitle)}</p>
+      const app = document.getElementById("app");
+      if (!state.shellRendered || !app.firstElementChild) {
+        app.innerHTML = `
+          <div class="shell">
+            <aside class="sidebar">
+              <div class="brand">
+                <h1>${escapeHtml(state.appName)}</h1>
               </div>
-            </div>
-            <div class="screen">${renderCurrentScreen()}</div>
-          </main>
-        </div>
-      `;
+              <div class="nav-group">
+                <button class="nav-btn ${state.currentScreen === "lending" ? "active" : ""}" data-action="navigate" data-screen="lending">貸出</button>
+                <button class="nav-btn ${state.currentScreen === "return" ? "active" : ""}" data-action="navigate" data-screen="return">返却</button>
+                <button class="nav-btn ${state.currentScreen === "confirmation" ? "active" : ""}" data-action="navigate" data-screen="confirmation">確認</button>
+              </div>
+              <button class="nav-group-btn ${state.currentScreen === "pg_master" || state.currentScreen === "staff_master" ? "active" : ""}" data-action="toggle-master">マスタ管理</button>
+              <div class="nav-sub-list" style="display:${state.currentScreen === "pg_master" || state.currentScreen === "staff_master" ? "grid" : "none"}">
+                <button class="nav-sub-btn ${state.currentScreen === "pg_master" ? "active" : ""}" data-action="navigate" data-screen="pg_master">PGマスタ</button>
+                <button class="nav-sub-btn ${state.currentScreen === "staff_master" ? "active" : ""}" data-action="navigate" data-screen="staff_master">担当者マスタ</button>
+              </div>
+              <div class="sidebar-footer">
+                <div>DB: ${escapeHtml(state.databaseBackend || "")}</div>
+                <div>起動日: ${escapeHtml(state.currentDate || "")}</div>
+              </div>
+            </aside>
+            <main class="main">
+              <div class="header">
+                <div>
+                  <h2 id="screen-title">${escapeHtml(title.title)}</h2>
+                  <p id="screen-subtitle">${escapeHtml(title.subtitle)}</p>
+                </div>
+              </div>
+              <div class="screen" id="screen-root">${renderCurrentScreen()}</div>
+            </main>
+          </div>
+        `;
+        state.shellRendered = true;
+      } else {
+        const titleNode = document.getElementById("screen-title");
+        const subtitleNode = document.getElementById("screen-subtitle");
+        const screenRoot = document.getElementById("screen-root");
+        const navButtons = Array.from(document.querySelectorAll("[data-action=\"navigate\"]"));
+        const masterButton = document.querySelector("[data-action=\"toggle-master\"]");
+        const subList = document.querySelector(".nav-sub-list");
+        if (titleNode) titleNode.textContent = title.title;
+        if (subtitleNode) subtitleNode.textContent = title.subtitle;
+        if (screenRoot) screenRoot.innerHTML = renderCurrentScreen();
+        for (const button of navButtons) {
+          const screen = button.dataset.screen;
+          button.classList.toggle("active", screen === state.currentScreen);
+        }
+        if (masterButton) {
+          masterButton.classList.toggle("active", state.currentScreen === "pg_master" || state.currentScreen === "staff_master");
+        }
+        if (subList) {
+          subList.style.display = state.currentScreen === "pg_master" || state.currentScreen === "staff_master" ? "grid" : "none";
+        }
+      }
       renderModal();
       renderBusy();
     }
 
     function renderBusy() {
       const root = document.getElementById("busy-root");
-      if (!state.busy) {
-        root.innerHTML = "";
-        return;
+      if (!root) return;
+      if (!root.firstElementChild) {
+        root.innerHTML = `
+          <div class="busy-overlay">
+            <div class="busy-card">
+              <div class="spinner"></div>
+              <div class="busy-title" style="font-size:16px;font-weight:800;"></div>
+              <div class="busy-message" style="font-size:13px;color:var(--muted);line-height:1.6;"></div>
+            </div>
+          </div>
+        `;
       }
-      root.innerHTML = `
-        <div class="busy-overlay visible">
-          <div class="busy-card">
-            <div class="spinner"></div>
-            <div style="font-size:16px;font-weight:800;">${escapeHtml(state.busy.title)}</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.6;">${escapeHtml(state.busy.message)}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderStartupBusy() {
-      return `
-        <div class="busy-overlay visible">
-          <div class="busy-card">
-            <div class="spinner"></div>
-            <div style="font-size:16px;font-weight:800;">起動中</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.6;">アプリを準備しています...</div>
-          </div>
-        </div>
-      `;
+      const overlay = root.firstElementChild;
+      const title = overlay.querySelector(".busy-title");
+      const message = overlay.querySelector(".busy-message");
+      if (title) title.textContent = state.busy ? state.busy.title : "";
+      if (message) message.textContent = state.busy ? state.busy.message : "";
+      overlay.classList.toggle("visible", !!state.busy);
     }
 
     function renderModal() {
@@ -618,7 +653,47 @@ _HTML = r"""<!DOCTYPE html>
     function renderDialog() {
       const root = document.getElementById("dialog-root");
       if (!root) return;
-      root.innerHTML = activeDialog ? buildDialogHtml(activeDialog) : "";
+      if (!root.firstElementChild) {
+        root.innerHTML = `
+          <div class="dialog-overlay">
+            <div class="dialog-card" data-modal-stop>
+              <div class="dialog-head">
+                <div class="dialog-mark notice">i</div>
+                <div>
+                  <div class="dialog-title"></div>
+                  <div class="dialog-subtitle"></div>
+                </div>
+              </div>
+              <div class="dialog-message"></div>
+              <div class="dialog-actions">
+                <button class="btn cancel" data-dialog-action="cancel">キャンセル</button>
+                <button class="btn primary" data-dialog-action="confirm">OK</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      const overlay = root.firstElementChild;
+      const mark = overlay.querySelector(".dialog-mark");
+      const title = overlay.querySelector(".dialog-title");
+      const subtitle = overlay.querySelector(".dialog-subtitle");
+      const message = overlay.querySelector(".dialog-message");
+      const cancelButton = overlay.querySelector('[data-dialog-action="cancel"]');
+      if (!activeDialog) {
+        overlay.classList.remove("visible");
+        return;
+      }
+      const dialog = activeDialog;
+      const isConfirm = dialog.kind === "confirm";
+      if (mark) {
+        mark.className = `dialog-mark ${escapeHtml(dialog.kind || "notice")}`;
+        mark.textContent = dialog.kind === "confirm" ? "?" : dialog.kind === "error" ? "!" : "i";
+      }
+      if (title) title.textContent = dialog.title || "";
+      if (subtitle) subtitle.textContent = dialog.kind === "confirm" ? "確認" : dialog.kind === "error" ? "エラー" : "お知らせ";
+      if (message) message.innerHTML = escapeHtml(dialog.message || "").replaceAll("\n", "<br>");
+      if (cancelButton) cancelButton.style.display = isConfirm ? "" : "none";
+      overlay.classList.add("visible");
     }
 
     function setBusy(title, message) {
@@ -676,31 +751,6 @@ _HTML = r"""<!DOCTYPE html>
         dialog.resolve(result);
       }
       pumpDialogQueue();
-    }
-
-    function buildDialogHtml(dialog) {
-      const isConfirm = dialog.kind === "confirm";
-      const icon = dialog.kind === "confirm" ? "?" : dialog.kind === "error" ? "!" : "i";
-      const label = dialog.kind === "confirm" ? "確認" : dialog.kind === "error" ? "エラー" : "お知らせ";
-      const message = escapeHtml(dialog.message || "").replaceAll("\n", "<br>");
-      return `
-        <div class="dialog-overlay visible" data-dialog-backdrop="true">
-          <div class="dialog-card" data-modal-stop>
-            <div class="dialog-head">
-              <div class="dialog-mark ${escapeHtml(dialog.kind || "notice")}">${icon}</div>
-              <div>
-                <div class="dialog-title">${escapeHtml(dialog.title || "")}</div>
-                <div class="dialog-subtitle">${label}</div>
-              </div>
-            </div>
-            <div class="dialog-message">${message}</div>
-            <div class="dialog-actions">
-              ${isConfirm ? '<button class="btn cancel" data-dialog-action="cancel">キャンセル</button>' : ""}
-              <button class="btn primary" data-dialog-action="confirm">OK</button>
-            </div>
-          </div>
-        </div>
-      `;
     }
 
     function renderCurrentScreen() {
@@ -1304,6 +1354,8 @@ _HTML = r"""<!DOCTYPE html>
       state.pgMaster.rows = payload.pg_master.rows || [];
       state.staffMaster.rows = payload.staff_master.rows || [];
       renderApp();
+      state.busy = null;
+      renderBusy();
       if (state.initialErrors.length) {
         for (const message of state.initialErrors) {
           await toast("起動時エラー", message);
@@ -1960,10 +2012,8 @@ _HTML = r"""<!DOCTYPE html>
 
     window.addEventListener("pywebviewready", startApp);
     document.addEventListener("DOMContentLoaded", () => {
-      const app = document.getElementById("app");
-      if (app && !app.innerHTML) {
-        app.innerHTML = renderStartupBusy();
-      }
+      state.busy = { title: "起動中", message: "アプリを準備しています..." };
+      renderBusy();
       startApp();
       const timer = window.setInterval(() => {
         if (state.__started) {

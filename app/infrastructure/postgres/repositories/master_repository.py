@@ -136,22 +136,25 @@ class PostgresMasterRepository:
     def normalize_staff_departments(self) -> int:
         updated = 0
         try:
-            rows = self.fetch_staff_master(None)
-            for staff in rows:
-                current_department = staff.department.strip()
-                replacement = STAFF_DEPARTMENT_REPLACEMENTS.get(current_department)
-                if not replacement or replacement == current_department:
-                    continue
-                self.update_staff_member(
-                    StaffMember(
-                        staff_id=staff.staff_id,
-                        name=staff.name,
-                        department=replacement,
-                        kana=staff.kana,
-                        visible=staff.visible,
+            departments = tuple(STAFF_DEPARTMENT_REPLACEMENTS.keys())
+            placeholders = ", ".join(["%s"] * len(departments))
+            update_sql = f'''
+                UPDATE {self._table("t_担当者マスタ")}
+                SET "部署" = CASE "部署"
+                    WHEN %s THEN %s
+                    WHEN %s THEN %s
+                    ELSE "部署"
+                END
+                WHERE "部署" IN ({placeholders})
+            '''
+            with open_postgres_connection(self._settings) as connection:
+                with open_postgres_cursor(connection) as cursor:
+                    cursor.execute(
+                        update_sql,
+                        ("総務", "製造", "検査", "数値", *departments),
                     )
-                )
-                updated += 1
+                    updated = cursor.rowcount if cursor.rowcount and cursor.rowcount > 0 else 0
+                connection.commit()  # type: ignore[attr-defined]
         except RepositoryError:
             raise
         except Exception as exc:

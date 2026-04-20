@@ -1,52 +1,65 @@
 # ピンゲージ管理
 
-Windows 業務 PC 向けの `Python + PySide6` デスクトップアプリです。  
-既存の Access データベース `ピンゲージ管理.accdb` を利用し、ピンゲージの `貸出`、`返却`、`確認`、`PGマスタ管理`、`担当者マスタ管理` を行います。
+ピンゲージ管理は、貸出、返却、確認、PGマスタ、担当者マスタを扱う Windows 向けの業務アプリです。
 
-内部構成は `presentation / application / domain / infrastructure / shared` に分離し、将来的な PostgreSQL 移行を前提にしています。  
-現在は `DB_BACKEND=access` を既定にして、既存の Access 運用を維持したまま PostgreSQL へ切り替えやすい形に整えています。
+現在の GUI は `pywebview` ベースで実装しており、処理本体は既存の service / usecase / repository 構成をそのまま利用しています。
 
 ## 主な機能
 
 - 貸出登録
-  - 日付、機番、担当者、サイズ 1〜20 件をまとめて登録
-  - 貸出一覧検索
-  - 貸出データの修正・削除
+- 貸出一覧の検索、編集、削除
 - 返却処理
-  - 機番ごとの返却対象検索
-  - 個別返却
-  - 一括返却
-- 確認処理
-  - 返却ケース No による確認対象検索
-  - 個別確認
-  - 一括確認
-  - 確認待ち一覧からの対象呼び出し
-- マスタ管理
-  - PGマスタの検索、登録、更新、削除
-  - 担当者マスタの検索、更新
-- 共通 UI
-  - 入力確認ダイアログ
-  - DB 処理中のスピナー表示
+- 返却済みデータの確認処理
+- PGマスタの検索、編集、削除
+- 担当者マスタの検索、編集
 
-## 前提環境
+## 動作環境
 
 - Windows
 - Python 3.12 系
-- Access を参照できる `pyodbc` 実行環境
-- 接続対象の Access ファイル
-  - ファイル名は `ピンゲージ管理.accdb`
-- PostgreSQL に切り替える場合は `psycopg` 系ドライバを追加
+- `pyodbc` が利用できる環境
+- Access バックエンドを使う場合は Microsoft Access Database Engine または Access ODBC ドライバが必要
+- PostgreSQL バックエンドを使う場合は `psycopg` と接続先が必要
 
-## セットアップ
+## 現在の構成
 
-依存関係をインストールします。
-
-```powershell
-pip install -r requirements.txt
+```text
+Gauge_Management/
+  app/
+    bootstrap.py                 アプリ起動と pywebview ウィンドウ生成
+    config/                      環境変数と DB 設定
+    application/                 usecase と repository port
+    domain/                      ドメインモデル
+    infrastructure/              Access / PostgreSQL 実装
+    repositories/                接続補助と共通 repository 層
+    services/                    画面向けサービス層
+    shared/                      共通 Result / Error
+    utils/                       環境変数読込、バリデーション
+    webview/                     HTML / CSS / JavaScript の GUI 実装
+  docs/
+    精密計測具のアイコン.png     元のアイコン画像
+    pingauge.ico                 PyInstaller 用のアイコン
+    SETUP.md                     初期設定メモ
+    DESIGN.md                    画面・見た目の整理メモ
+  tests/
+    README.md
+  main.py                        ルート起動ファイル
+  PinGaugeMgmt.spec              PyInstaller onefile 用定義
+  requirements.txt               実行時依存
 ```
 
-プロジェクトルートに `.env` を作成し、Access ファイルの保存先を設定します。  
-`ACCESS_DB_DIRECTORY` には `フォルダ` でも `accdb のフルパス` でも指定できます。
+## 起動
+
+`.env` がある場合は、それを優先して読み込みます。
+`.env` がなくてもアプリ自体は起動し、DB 未設定の場合は操作時にエラーを表示します。
+
+```powershell
+python main.py
+```
+
+## 設定
+
+### Access を使う場合
 
 ```env
 APP_ENV=local
@@ -55,104 +68,38 @@ DB_BACKEND=access
 ACCESS_DB_DIRECTORY=C:\Path\To\AccessFolder
 ```
 
-または:
+`ACCESS_DB_DIRECTORY` には Access の `.accdb` が入っているフォルダ、または `.accdb` ファイルのフルパスを指定できます。
+
+### PostgreSQL を使う場合
 
 ```env
 APP_ENV=local
 APP_NAME=ピンゲージ管理
-DB_BACKEND=access
-ACCESS_DB_DIRECTORY=C:\Path\To\AccessFolder\ピンゲージ管理.accdb
-```
-
-PostgreSQL に切り替える場合は以下を追加します。
-
-```env
 DB_BACKEND=postgres
 POSTGRES_CONNECTION_URL=postgresql://user:password@localhost:5432/pingauge
 POSTGRES_SCHEMA=public
 ```
 
-補足は [docs/SETUP.md](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/docs/SETUP.md) を参照してください。
+## onefile ビルド
 
-## 起動方法
+PyInstaller で 1 ファイル版の exe を作成します。
 
-推奨の起動入口はルートの `main.py` です。
-
-```powershell
-python main.py
-```
-
-## 配布ビルド
-
-配布用 exe は `PinGaugeMgmt.spec` を使って生成します。  
-アイコンは `docs/精密計測具のアイコン.png` を使用します。
+ビルド環境には `pyinstaller` と `Pillow` が必要です。
 
 ```powershell
 pyinstaller PinGaugeMgmt.spec
 ```
 
-生成物は `dist/ピンゲージ管理.exe` です。
+成果物は `dist/ピンゲージ管理.exe` です。
 
-## フォルダ構成
+## アイコン
 
-```text
-Gauge_Management/
-├─ app/
-│  ├─ bootstrap.py            アプリ起動初期化
-│  ├─ config/                 設定読込、DB 接続設定
-│  ├─ models/                 既存の業務データモデル
-│  ├─ shared/                 共通例外、共通ユーティリティ
-│  ├─ domain/                 業務概念モデル、値オブジェクト
-│  ├─ application/            DTO、Repository port、usecase
-│  ├─ infrastructure/         Access 実装、PostgreSQL 実装、接続、mapper
-│  ├─ services/               UI 向けファサード
-│  ├─ ui/
-│  │  ├─ main_window.py       メインウィンドウ、サイドバー
-│  │  ├─ screens/             貸出、返却、確認、マスタ画面
-│  │  ├─ dialogs/             貸出修正ダイアログ
-│  │  ├─ widgets/             共通部品、確認ダイアログ、日付入力、スピナー
-│  │  └─ styles/              スタイル定義、SVG アセット
-│  └─ utils/                  入力検証、例外、.env 読込
-├─ docs/                      業務仕様、デザイン案、セットアップ資料
-├─ tests/                     テスト用補助ファイル
-├─ .env.example               環境変数サンプル
-├─ PinGaugeMgmt.spec          PyInstaller 配布定義
-├─ requirements.txt           依存関係
-└─ main.py                    推奨起動入口
-```
+- アプリの元画像は `docs/精密計測具のアイコン.png`
+- ビルド用の Windows アイコンは `docs/pingauge.ico`
+- タスクバーや exe のアイコンは PyInstaller の `icon` 指定で反映します
 
-## 主なファイル
+## 補足
 
-- [main.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/main.py)
-  - 推奨のアプリ起動入口
-- [app/bootstrap.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/bootstrap.py)
-  - `QApplication` 初期化とメインウィンドウ起動
-- [app/config/app_settings.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/config/app_settings.py)
-  - アプリ設定読込
-- [app/config/db_settings.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/config/db_settings.py)
-  - Access / PostgreSQL の接続設定
-- [app/infrastructure/repository_factory.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/infrastructure/repository_factory.py)
-  - `DB_BACKEND` に応じた repository 切替
-- [app/ui/main_window.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/ui/main_window.py)
-  - サイドバーと各画面の切替
-- [app/ui/widgets/busy_indicator.py](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/app/ui/widgets/busy_indicator.py)
-  - 処理待ちスピナー
-
-## 画面一覧
-
-- 貸出
-- 返却
-- 確認
-- マスタ管理
-  - PGマスタ
-  - 担当者マスタ
-
-## 開発メモ
-
-- 画面イベントに SQL を直接書かず、`ui -> services -> application/usecases -> infrastructure` を通す構成です。
-- Access の実データを使うため、DB スキーマ変更は慎重に扱ってください。
-- Access 固有の実装は `app/infrastructure/access/` に寄せ、PostgreSQL 実装は `app/infrastructure/postgres/` に置く前提です。
-- `app/infrastructure/repository_factory.py` が `DB_BACKEND` を見て Access / PostgreSQL を切り替えます。
-- PostgreSQL 側はまだ骨格段階なので、`DB_BACKEND=postgres` に切り替える前に依存パッケージと接続先を用意してください。
-- 生成物は `.gitignore` で除外していますが、`__pycache__` などはローカルで再生成されます。
-- 既存の業務仕様は [docs/Gauge_Management.txt](/c:/Users/SEIZOU-20/PycharmProjects/Gauge_Management/docs/Gauge_Management.txt) を基準にしています。
+- 旧 PySide6 GUI は廃止し、現在は `app/webview` が GUI 本体です
+- UI 更新時のチラつきを抑えるため、画面の全面再描画を減らしています
+- DB 処理は `application -> services -> infrastructure` の流れで実行しています
