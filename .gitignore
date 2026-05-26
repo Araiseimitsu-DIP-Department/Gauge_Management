@@ -63,3 +63,11 @@ runtime/
 # SQLite and local scratch databases
 *.db
 *.sqlite3
+
+# PostgreSQL migration local data
+database/postgresql/export/
+database/postgresql/import/
+database/postgresql/tmp/
+database/postgresql/*.dump
+database/postgresql/*.backup
+database/postgresql/*.sql.gz

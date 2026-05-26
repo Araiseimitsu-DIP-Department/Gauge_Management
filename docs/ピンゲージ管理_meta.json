@@ -1,0 +1,489 @@
+{
+  "database_path": "\\\\192.168.1.200\\共有\\製造課\\ピンゲージ管理.accdb",
+  "driver_used": "Microsoft Access Driver (*.mdb, *.accdb)",
+  "tables": [
+    {
+      "name": "t_PGマスタ",
+      "table_type": "SYNONYM",
+      "row_count": 2026,
+      "row_count_error": null,
+      "primary_key": [],
+      "columns": [
+        {
+          "name": "サイズ",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 20,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(20)"
+        },
+        {
+          "name": "保有数",
+          "access_type": "INTEGER",
+          "sql_data_type": 4,
+          "column_size": 10,
+          "decimal_digits": 0,
+          "nullable": true,
+          "postgres_type_hint": "INTEGER"
+        },
+        {
+          "name": "ケースNo",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 5,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(5)"
+        }
+      ],
+      "indexes": [],
+      "sample_headers": [
+        "サイズ",
+        "保有数",
+        "ケースNo"
+      ],
+      "sample_rows": [
+        [
+          "0.130",
+          1,
+          "C01"
+        ],
+        [
+          "0.150",
+          1,
+          "C01"
+        ],
+        [
+          "0.170",
+          1,
+          "C01"
+        ],
+        [
+          "0.180",
+          1,
+          "C01"
+        ],
+        [
+          "0.190",
+          1,
+          "C01"
+        ]
+      ],
+      "column_stats": [
+        {
+          "column": "サイズ",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "保有数",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "ケースNo",
+          "null_count": 7,
+          "null_rate_pct": 0.3,
+          "unique_count": null,
+          "unique_rate_pct": null
+        }
+      ]
+    },
+    {
+      "name": "t_担当者マスタ",
+      "table_type": "SYNONYM",
+      "row_count": 29,
+      "row_count_error": null,
+      "primary_key": [],
+      "columns": [
+        {
+          "name": "担当者ID",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 2,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(2)"
+        },
+        {
+          "name": "担当者名",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 5,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(5)"
+        },
+        {
+          "name": "部署",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 2,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(2)"
+        },
+        {
+          "name": "かな",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 1,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(1)"
+        },
+        {
+          "name": "表示",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 1,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(1)"
+        }
+      ],
+      "indexes": [],
+      "sample_headers": [
+        "担当者ID",
+        "担当者名",
+        "部署",
+        "かな",
+        "表示"
+      ],
+      "sample_rows": [
+        [
+          "01",
+          "高田",
+          "製造",
+          "た",
+          "Y"
+        ],
+        [
+          "02",
+          "斉藤",
+          "製造",
+          "さ",
+          "Y"
+        ],
+        [
+          "03",
+          "加隝",
+          "製造",
+          "か",
+          "Y"
+        ],
+        [
+          "04",
+          "今井",
+          "製造",
+          "い",
+          "Y"
+        ],
+        [
+          "05",
+          "高橋拓",
+          "製造",
+          "た",
+          "Y"
+        ]
+      ],
+      "column_stats": [
+        {
+          "column": "担当者ID",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "担当者名",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "部署",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "かな",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "表示",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        }
+      ]
+    },
+    {
+      "name": "t_貸出",
+      "table_type": "SYNONYM",
+      "row_count": 31753,
+      "row_count_error": null,
+      "primary_key": [],
+      "columns": [
+        {
+          "name": "ID",
+          "access_type": "COUNTER",
+          "sql_data_type": 4,
+          "column_size": 10,
+          "decimal_digits": 0,
+          "nullable": false,
+          "postgres_type_hint": "BIGSERIAL"
+        },
+        {
+          "name": "サイズ",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 20,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(20)"
+        },
+        {
+          "name": "担当者ID",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 2,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(2)"
+        },
+        {
+          "name": "機番",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 4,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(4)"
+        },
+        {
+          "name": "貸出日",
+          "access_type": "DATETIME",
+          "sql_data_type": 9,
+          "column_size": 19,
+          "decimal_digits": 0,
+          "nullable": true,
+          "postgres_type_hint": "TIMESTAMP"
+        },
+        {
+          "name": "返却日",
+          "access_type": "DATETIME",
+          "sql_data_type": 9,
+          "column_size": 19,
+          "decimal_digits": 0,
+          "nullable": true,
+          "postgres_type_hint": "TIMESTAMP"
+        },
+        {
+          "name": "完了フラグ",
+          "access_type": "VARCHAR",
+          "sql_data_type": -9,
+          "column_size": 1,
+          "decimal_digits": null,
+          "nullable": true,
+          "postgres_type_hint": "VARCHAR(1)"
+        }
+      ],
+      "indexes": [],
+      "sample_headers": [
+        "ID",
+        "サイズ",
+        "担当者ID",
+        "機番",
+        "貸出日",
+        "返却日",
+        "完了フラグ"
+      ],
+      "sample_rows": [
+        [
+          58,
+          "6.25",
+          "05",
+          "返-7",
+          "2021-06-11T00:00:00",
+          "2021-11-15T00:00:00",
+          "Y"
+        ],
+        [
+          59,
+          "3.11",
+          "05",
+          "返-7",
+          "2021-06-11T00:00:00",
+          "2021-11-15T00:00:00",
+          "Y"
+        ],
+        [
+          60,
+          "4.21",
+          "05",
+          "返-7",
+          "2021-06-11T00:00:00",
+          "2021-11-15T00:00:00",
+          "Y"
+        ],
+        [
+          80,
+          "1.0",
+          "10",
+          "返-1",
+          "2021-06-30T00:00:00",
+          "2021-07-09T00:00:00",
+          "Y"
+        ],
+        [
+          81,
+          "1.3",
+          "10",
+          "返-1",
+          "2021-06-30T00:00:00",
+          "2021-07-09T00:00:00",
+          "Y"
+        ]
+      ],
+      "column_stats": [
+        {
+          "column": "ID",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "サイズ",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "担当者ID",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "機番",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "貸出日",
+          "null_count": 0,
+          "null_rate_pct": 0.0,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "返却日",
+          "null_count": 405,
+          "null_rate_pct": 1.3,
+          "unique_count": null,
+          "unique_rate_pct": null
+        },
+        {
+          "column": "完了フラグ",
+          "null_count": 338,
+          "null_rate_pct": 1.1,
+          "unique_count": null,
+          "unique_rate_pct": null
+        }
+      ]
+    }
+  ],
+  "views_and_queries": [],
+  "relationships": [],
+  "vba_modules": [
+    {
+      "name": "Module1",
+      "type": "標準モジュール",
+      "line_count": 20,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\nPrivate Type Gauge\r\n    ID As Long\r\n    Hizuke As Variant\r\n    Kiban As String\r\n    TantouCD As String\r\n    GaugeSize As String\r\nEnd Type\r\n\r\nPublic GaugeData As Gauge\r\n\r\nPrivate Type Mast\r\n    sSize As String\r\n    iSuu As Integer\r\n    sCaseNo As String\r\nEnd Type\r\n\r\nPublic MastData As Mast"
+    },
+    {
+      "name": "Form_f_Main",
+      "type": "レポートモジュール",
+      "line_count": 302,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'中止ボタン\r\nPrivate Sub btnCancel_Click()\r\n    If MsgBox(\"入力を中止しますか？\", vbQuestion + vbYesNo, \"確認\") = vbYes Then DispInit\r\n    Me.cboKibanA.SetFocus\r\nEnd Sub\r\n\r\n'サブフォームクリアボタン\r\nPrivate Sub btnClear_Click()\r\n    SubFrmInit\r\n    Me.cboKibanA.SetFocus\r\nEnd Sub\r\n\r\n'返却（画面）ボタン\r\nPrivate Sub btnHenkyakuOpen_Click()\r\n    DoCmd.OpenForm \"f_返却\", acNormal\r\n    Me.cboKibanA.SetFocus\r\nEnd Sub\r\n\r\n'確認（画面）ボタン\r\nPrivate Sub btnKakuninOpen_Click()\r\n    DoCmd.OpenForm \"f_確認\", acNormal\r\n    Me.cboKibanA.SetFocus\r\nEnd Sub\r\n\r\n'検索ボタン\r\nPrivate Sub btnKensaku_Click()\r\n    Dim strSQL As String\r\n    \r\n    strSQL = \"SELECT t_貸出.ID, t_貸出.サイズ, t_貸出.担当者ID, t_担当者マスタ.担当者名, t_貸出.機番, t_貸出.貸出日, t_PGマスタ.保有数 \"\r\n    strSQL = strSQL & \"FROM (t_貸出 LEFT JOIN t_担当者マスタ ON t_貸出.担当者ID = t_担当者マスタ.担当者ID) \"\r\n    strSQL = strSQL & \"LEFT JOIN t_PGマスタ ON t_貸出.サイズ = t_PGマスタ.サイズ \"\r\n    If Me.fraKoumoku = 1 Then       'サイズで検索\r\n        If IsNull(Me.txtKensakuSize) Then\r\n            MsgBox \"サイズの指定がありません\", vbCritical + vbOKOnly, \"確認\"\r\n            Me.txtKensakuSize.SetFocus\r\n            Exit Sub\r\n        End If\r\n        If Me.chkLike Then          'から始まる\r\n            strSQL = strSQL & \"WHERE t_貸出.サイズ LIKE '\" & Me.txtKensakuSize & \"*' \"\r\n        Else\r\n            strSQL = strSQL & \"WHERE t_貸出.サイズ = '\" & Me.txtKensakuSize & \"' \"\r\n        End If\r\n    Else\r\n        If IsNull(Me.txtKiban) Then\r\n            MsgBox \"機番の指定がありません\", vbCritical + vbOKOnly, \"確認\"\r\n            Me.cboKibanA.SetFocus\r\n            Exit Sub\r\n        End If\r\n        strSQL = strSQL & \"WHERE t_貸出.機番 = '\" & Me.txtKiban & \"' \"\r\n    End If\r\n    strSQL = strSQL & \"AND t_貸出.完了フラグ IS NULL \"\r\n    strSQL = strSQL & \"ORDER BY t_貸出.サイズ;\"\r\n    Me.f_Mainのサブフォーム.Form.RecordSource = strSQL\r\n    \r\n    Me.Refresh\r\nEnd Sub\r\n\r\n'メンテナンスボタン\r\nPrivate Sub btnMainte_Click()\r\n    DoCmd.OpenTable \"t_貸出\", acViewNormal\r\n    Me.cboKibanA.SetFocus\r\nEnd Sub\r\n\r\n'マスタ検索ボタン\r\nPrivate Sub btnMastKensaku_Click()\r\n    Dim sCrt As String\r\n    \r\n    If IsNull(Me.txtMastSize) Then\r\n        Me.txtMastSize.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    sCrt = \"サイズ = '\" & Me.txtMastSize & \"'\"\r\n    If Not IsNull(DLookup(\"サイズ\", \"t_PGマスタ\", sCrt)) Then\r\n        Me.f_Mainのサブフォーム2.Form.Recordset.FindFirst sCrt\r\n    Else\r\n        MsgBox \"該当するサイズはありません\", vbCritical + vbOKOnly, \"確認\"\r\n    End If\r\nEnd Sub\r\n\r\n'マスタ新規ボタン\r\nPrivate Sub btnMastNew_Click()\r\n    DoCmd.OpenForm \"f_マスタメンテ\", , , , , acDialog, \"New\"\r\nEnd Sub\r\n\r\n'終了ボタン\r\nPrivate Sub btnQuit_Click()\r\n    DoCmd.Quit\r\nEnd Sub\r\n\r\n'整形ボタン\r\nPrivate Sub btnSeikei_Click()\r\n    Dim cnn As ADODB.Connection\r\n    Dim rst As ADODB.Recordset\r\n    Dim iPos As Integer\r\n    Dim i As Integer\r\n    Dim sTmp As String\r\n    \r\n    If MsgBox(\"旧貸出済みゲージの整形を行います。  実行しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then Exit Sub\r\n    \r\n    Set cnn = CurrentProject.Connection\r\n    Set rst = New ADODB.Recordset\r\n    rst.Open \"t_貸出\", cnn, adOpenStatic, adLockOptimistic\r\n    \r\n    With rst\r\n        .MoveFirst\r\n        Do While Not .EOF\r\n            If IsNull(.Fields(\"完了フラグ\")) And Len(.Fields(\"サイズ\")) <= 6 Then\r\n                iPos = InStr(.Fields(\"サイズ\"), \".\")\r\n                If iPos > 0 Then\r\n                    sTmp = .Fields(\"サイズ\")\r\n                    sTmp = Left(sTmp & \"000\", iPos + 3)\r\n                    .Fields(\"サイズ\") = sTmp\r\n                    .Update\r\n                    i = i + 1\r\n                End If\r\n            End If\r\n            .MoveNext\r\n        Loop\r\n    End With\r\n    \r\n    rst.Close\r\n    Set rst = Nothing\r\n    Set cnn = Nothing\r\n    \r\n    MsgBox \"終了しました：\" & CStr(i), vbInformation + vbOKOnly, \"確認\"\r\n    \r\nEnd Sub\r\n\r\n'担当者マスタボタン\r\nPrivate Sub btnTantouM_Click()\r\n    DoCmd.OpenForm \"f_担当者マスタ\", acNormal, , , , acDialog\r\nEnd Sub\r\n\r\n'登録ボタン\r\nPrivate Sub btnTouroku_Click()\r\n    Dim strSQL As String\r\n    Dim i As Integer\r\n    Dim ErrFlg As Boolean\r\n    Dim CtrlName As String\r\n    Dim iCnt As Integer\r\n    Dim sMsg As String\r\n    \r\n    'エラーチェック\r\n    ErrFlg = False\r\n    If IsNull(Me.txtHizuke) Then ErrFlg = True\r\n    If IsNull(Me.cboKibanA) Then ErrFlg = True\r\n    If Me.cboKibanA <> \"数値\" And IsNull(Me.cboKibanN) Then ErrFlg = True\r\n    If IsNull(Me.cboTantou) Then ErrFlg = True\r\n    \r\n    iCnt = 0\r\n    For i = 1 To 20\r\n        CtrlName = \"txtGauge\" & CStr(i)\r\n        If Not IsNull(Controls(CtrlName)) Then iCnt = iCnt + 1\r\n    Next\r\n    If iCnt = 0 Then ErrFlg = True\r\n    \r\n    If ErrFlg Then\r\n        MsgBox \"必要項目が入力されていません\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.cboKibanA.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    '登録\r\n    If MsgBox(\"登録しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.cboKibanA.SetFocus\r\n        Exit Sub\r\n    End If\r\n    For i = 1 To 20\r\n        CtrlName = \"txtGauge\" & CStr(i)\r\n        If Not IsNull(Controls(CtrlName)) Then Call InsData(CtrlName)\r\n    Next\r\n    \r\n    strSQL = \"SELECT t_貸出.ID, t_貸出.サイズ, t_貸出.担当者ID, t_担当者マスタ.担当者名, t_貸出.機番, t_貸出.貸出日, t_PGマスタ.保有数 \"\r\n    strSQL = strSQL & \"FROM (t_貸出 LEFT JOIN t_担当者マスタ ON t_貸出.担当者ID = t_担当者マスタ.担当者ID) \"\r\n    strSQL = strSQL & \"LEFT JOIN t_PGマスタ ON t_貸出.サイズ = t_PGマスタ.サイズ \"\r\n    strSQL = strSQL & \"WHERE t_貸出.貸出日 = #\" & Me.txtHizuke & \"# \"\r\n    strSQL = strSQL & \"AND t_貸出.機番 = '\" & Me.txtKiban & \"' \"\r\n    strSQL = strSQL & \"AND t_貸出.担当者ID = '\" & Me.cboTantou & \"' \"\r\n    strSQL = strSQL & \"ORDER BY t_貸出.サイズ;\"\r\n    Me.f_Mainのサブフォーム.Form.RecordSource = strSQL\r\n    \r\n    DispInit\r\n    Me.Refresh\r\n    Me.cboKibanA.SetFocus\r\n    \r\n    MsgBox \"登録しました。内容を確認してください\" & vbCrLf & _\r\n           \"確認が終わったら「一覧クリア」ボタンをクリックしてください\", vbInformation + vbOKOnly, \"確認\"\r\nEnd Sub\r\n\r\n'機番アルファベットが更新された\r\nPrivate Sub cboKibanA_AfterUpdate()\r\n    SetKiban\r\n    If Me.cboKibanN.Enabled Then\r\n        Me.cboKibanN.SetFocus\r\n    Else\r\n        Me.cboTantou.SetFocus\r\n    End If\r\n    Me.txtHizuke = Format(Now(), \"yyyy/mm/dd\")\r\nEnd Sub\r\n\r\n'機番数字が更新された\r\nPrivate Sub cboKibanN_AfterUpdate()\r\n    SetKiban\r\n    Me.cboTantou.SetFocus\r\nEnd Sub\r\n\r\n'機番をセット\r\nPrivate Sub SetKiban()\r\n    Dim strSQL As String\r\n    \r\n    strSQL = \"SELECT t_担当者マスタ.担当者ID, t_担当者マスタ.担当者名 \"\r\n    strSQL = strSQL & \"FROM t_担当者マスタ \"\r\n    strSQL = strSQL & \"WHERE t_担当者マスタ.表示 = 'Y' \"\r\n    \r\n    If Me.cboKibanA = \"数値\" Then\r\n        Me.txtKiban = \"数値\"\r\n        Me.cboKibanN = Null\r\n        Me.cboKibanN.Enabled = False\r\n        strSQL = strSQL & \" And t_担当者マスタ.部署 = '数値' \"\r\n    Else\r\n        Me.cboKibanN.Enabled = True\r\n        Me.txtKiban = Me.cboKibanA & \"-\" & Me.cboKibanN\r\n        If Me.txtKiban = \"-\" Then Me.txtKiban = Null        '両方なければNull(消された場合に対応)\r\n        strSQL = strSQL & \" And t_担当者マスタ.部署 = '製造' \"\r\n    End If\r\n    strSQL = strSQL & \"ORDER BY t_担当者マスタ.かな;\"\r\n    Me.cboTantou.RowSource = strSQL\r\nEnd Sub\r\n\r\n'担当者が更新された\r\nPrivate Sub cboTantou_AfterUpdate()\r\n    Me.txtGauge1.SetFocus\r\nEnd Sub\r\n\r\n'貸出データ作成\r\nPrivate Sub InsData(pCtrl As String)\r\n    Dim strSQL As String\r\n    \r\n    DoCmd.SetWarnings False\r\n    \r\n    strSQL = \"INSERT INTO t_貸出 ( サイズ, 担当者ID, 機番, 貸出日 \"\r\n    strSQL = strSQL & \") VALUES ( \"\r\n    strSQL = strSQL & \"'\" & Controls(pCtrl) & \"', \"\r\n    strSQL = strSQL & \"'\" & Me.cboTantou & \"', \"\r\n    strSQL = strSQL & \"'\" & Me.txtKiban & \"', \"\r\n    strSQL = strSQL & \"#\" & Me.txtHizuke & \"# );\"\r\n    DoCmd.RunSQL strSQL\r\n    \r\n    DoCmd.SetWarnings True\r\nEnd Sub\r\n\r\n'画面初期化\r\nPrivate Sub DispInit()\r\n    Dim i As Integer\r\n    Dim CtrlName As String\r\n    \r\n    Me.txtHizuke = Null\r\n    Me.cboKibanA = Null\r\n    Me.cboKibanN = Null\r\n    Me.txtKiban = Null\r\n    Me.cboTantou = Null\r\n    \r\n    For i = 1 To 20\r\n        CtrlName = \"txtGauge\" & CStr(i)\r\n        Controls(CtrlName) = Null\r\n    Next\r\nEnd Sub\r\n\r\n'サブフォーム初期化\r\nPrivate Sub SubFrmInit()\r\n    Dim strSQL As String\r\n\r\n    strSQL = \"SELECT t_貸出.ID, t_貸出.サイズ, t_貸出.担当者ID, t_担当者マスタ.担当者名, t_貸出.機番, t_貸出.貸出日, t_PGマスタ.保有数 \"\r\n    strSQL = strSQL & \"FROM  (t_貸出 LEFT JOIN t_担当者マスタ ON t_貸出.担当者ID = t_担当者マスタ.担当者ID) \"\r\n    strSQL = strSQL & \"LEFT JOIN t_PGマスタ ON t_貸出.サイズ = t_PGマスタ.サイズ  \"\r\n    strSQL = strSQL & \"WHERE t_貸出.サイズ = 'ZZZZZ';\"\r\n    Me.f_Mainのサブフォーム.Form.RecordSource = strSQL\r\nEnd Sub\r\n\r\n'フォームを開く時\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    Me.f_Mainのサブフォーム.Form.貸出日.ColumnWidth = 567 * 2.4\r\n    Me.f_Mainのサブフォーム.Form.機番.ColumnWidth = 567 * 1.5\r\n    Me.f_Mainのサブフォーム.Form.サイズ.ColumnWidth = 567 * 4\r\n    Me.f_Mainのサブフォーム.Form.担当者名.ColumnWidth = 567 * 2.7\r\n    Me.f_Mainのサブフォーム.Form.ID.ColumnHidden = True\r\n    Me.f_Mainのサブフォーム.Form.担当者ID.ColumnHidden = True\r\n    Me.f_Mainのサブフォーム.Form.保有数.ColumnWidth = 567 * 1.5\r\n    \r\n    SubFrmInit\r\n\r\n    Me.f_Mainのサブフォーム2.Form.サイズ.ColumnWidth = 567 * 4\r\n    Me.f_Mainのサブフォーム2.Form.保有数.ColumnWidth = 567 * 1.8\r\n    Me.f_Mainのサブフォーム2.Form.ケースNo.ColumnWidth = 567 * 1.6\r\n\r\n\r\nEnd Sub\r\n"
+    },
+    {
+      "name": "Form_f_Mainのサブフォーム",
+      "type": "レポートモジュール",
+      "line_count": 14,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\nPrivate Sub サイズ_Click()\r\n    With GaugeData\r\n        .ID = Me.ID\r\n        .Hizuke = Me.貸出日\r\n        .Kiban = Me.機番\r\n        .TantouCD = Me.担当者ID\r\n        .GaugeSize = Me.サイズ\r\n    End With\r\n    \r\n    DoCmd.OpenForm \"f_修正\", acNormal, , , , acDialog\r\nEnd Sub"
+    },
+    {
+      "name": "Form_f_Mainのサブフォーム2",
+      "type": "レポートモジュール",
+      "line_count": 12,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'サイズがクリックされた\r\nPrivate Sub サイズ_Click()\r\n    With MastData\r\n        .sSize = Me.サイズ\r\n        .iSuu = Me.保有数\r\n        .sCaseNo = Nz(Me.ケースNo, \"\")\r\n    End With\r\n    DoCmd.OpenForm \"f_マスタメンテ\", , , , , acDialog\r\nEnd Sub"
+    },
+    {
+      "name": "Form_f_マスタメンテ",
+      "type": "レポートモジュール",
+      "line_count": 94,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'閉じるボタン\r\nPrivate Sub btnClose_Click()\r\n    DoCmd.Close acForm, \"f_マスタメンテ\"\r\nEnd Sub\r\n\r\n'削除ボタン\r\nPrivate Sub btnDelete_Click()\r\n    Dim strSQL As String\r\n    \r\n    If MsgBox(\"このサイズを削除しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then Exit Sub\r\n\r\n    strSQL = \"DELETE FROM t_PGマスタ \"\r\n    strSQL = strSQL & \"WHERE サイズ = '\" & Me.txtSize & \"';\"\r\n    \r\n    DoCmd.SetWarnings False\r\n    DoCmd.RunSQL strSQL\r\n    DoCmd.SetWarnings True\r\n    \r\n    MsgBox \"削除しました\", vbInformation + vbOKOnly, \"確認\"\r\n    Forms(\"f_Main\").Refresh\r\n    \r\n    DoCmd.Close acForm, \"f_マスタメンテ\"\r\nEnd Sub\r\n\r\n'登録ボタン\r\nPrivate Sub btnTouroku_Click()\r\n    Dim strSQL As String\r\n    \r\n    If IsNull(Me.txtSize) Or IsNull(Me.txtHoyuusuu) Or IsNull(Me.txtCaseNo) Then\r\n        MsgBox \"サイズ・保有数・ケースNo は必ず入力してください\", vbCritical + vbOKOnly, \"確認\"\r\n        Exit Sub\r\n    ElseIf IsNumeric(Me.txtSize) And Len(Mid(Me.txtSize, InStr(Me.txtSize, \".\") + 1)) <> 3 Then\r\n        If MsgBox(\"サイズは小数点以下３桁で指定してください。\" & _\r\n            vbCrLf & \"このまま登録を続けますか\", vbCritical + vbYesNo, \"確認\") <> vbYes Then\r\n            Exit Sub\r\n        End If\r\n    Else\r\n        If MsgBox(\"登録しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then Exit Sub\r\n    End If\r\n    \r\n    If Me.txtSize.Enabled Then      '新規登録\r\n        If Not IsNull(DLookup(\"サイズ\", \"t_PGマスタ\", \"サイズ = '\" & Me.txtSize & \"'\")) Then\r\n            MsgBox \"このサイズはマスタに登録済みです\", vbCritical + vbOKOnly, \"確認\"\r\n            Exit Sub\r\n        End If\r\n        strSQL = \"INSERT INTO t_PGマスタ ( サイズ, 保有数, ケースNo ) VALUES ( \"\r\n        strSQL = strSQL & \"'\" & Me.txtSize & \"', \"\r\n        strSQL = strSQL & Me.txtHoyuusuu & \", \"\r\n        strSQL = strSQL & \"'\" & Me.txtCaseNo & \"');\"\r\n    Else\r\n        strSQL = \"UPDATE t_PGマスタ SET \"\r\n        strSQL = strSQL & \"保有数 = \" & Me.txtHoyuusuu & \", \"\r\n        strSQL = strSQL & \"ケースNo = '\" & Me.txtCaseNo & \"' \"\r\n        strSQL = strSQL & \"WHERE サイズ = '\" & Me.txtSize & \"';\"\r\n    End If\r\n    \r\n    DoCmd.SetWarnings False\r\n    DoCmd.RunSQL strSQL\r\n    DoCmd.SetWarnings True\r\n    \r\n    MsgBox \"登録しました\", vbInformation + vbOKOnly, \"確認\"\r\n    Forms(\"f_Main\").Refresh\r\n    \r\n    DoCmd.Close acForm, \"f_マスタメンテ\"\r\nEnd Sub\r\n\r\n'フォームを開く時\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    If Me.OpenArgs = \"New\" Then\r\n        Me.btnDelete.Enabled = False\r\n        Me.txtSize.Enabled = True\r\n    Else\r\n        Me.btnDelete.Enabled = True\r\n        Me.txtSize.Enabled = False\r\n        With MastData\r\n            Me.txtSize = .sSize\r\n            Me.txtHoyuusuu = .iSuu\r\n            Me.txtCaseNo = .sCaseNo\r\n        End With\r\n    End If\r\nEnd Sub\r\n\r\n'ケースNoが更新された\r\nPrivate Sub txtCaseNo_AfterUpdate()\r\n    Me.txtCaseNo = UCase(Me.txtCaseNo)\r\nEnd Sub\r\n\r\n'サイズが更新された\r\nPrivate Sub txtSize_AfterUpdate()\r\n    Me.txtSize = UCase(Me.txtSize)\r\nEnd Sub"
+    },
+    {
+      "name": "Form_f_確認",
+      "type": "レポートモジュール",
+      "line_count": 152,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'中止ボタン\r\nPrivate Sub btnCancel_Click()\r\n    If MsgBox(\"中止しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.txtCaseNo.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    Me.txtCaseNo = Null\r\n    SubFrmInit\r\n    Me.txtID = Null\r\n    Me.txtSize = Null\r\n    Me.txtCaseNo.SetFocus\r\n    Me.Refresh\r\nEnd Sub\r\n\r\n'チェックボタン\r\nPrivate Sub btnCheck_Click()\r\n    Dim strSQL As String\r\n\r\n    strSQL = \"SELECT DISTINCT t_貸出.返却日, t_貸出.機番 FROM t_貸出 \"\r\n    strSQL = strSQL & \"WHERE (t_貸出.完了フラグ Is Null) AND (Not t_貸出.返却日 Is Null);\"\r\n    Me.f_確認のサブフォーム2.Form.RecordSource = strSQL\r\n    Me.Refresh\r\n    Me.txtCaseNo.SetFocus\r\nEnd Sub\r\n\r\n'全て確認ボタン\r\nPrivate Sub btnKakunin_Click()\r\n    Dim strSQL As String\r\n\r\n    If MsgBox(\"確認処理を行いますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.txtCaseNo.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    DoCmd.Echo False\r\n    DoCmd.SetWarnings False\r\n    \r\n    With Me.f_確認のサブフォーム.Form.Recordset\r\n        .MoveFirst\r\n        Do While Not .EOF\r\n            strSQL = \"UPDATE t_貸出 SET 完了フラグ = 'Y' \"\r\n            strSQL = strSQL & \"WHERE ID = \" & .Fields(\"ID\") & \";\"\r\n            DoCmd.RunSQL strSQL\r\n            .MoveNext\r\n        Loop\r\n        .MoveFirst\r\n    End With\r\n    \r\n    DoCmd.SetWarnings True\r\n    DoCmd.Echo True\r\n    \r\n    SubFrmInit\r\n    Me.txtCaseNo = Null\r\n    Me.txtID = Null\r\n    Me.txtSize = Null\r\n    Me.txtCaseNo.SetFocus\r\n    Me.Refresh\r\n    \r\n    MsgBox \"確認しました。\", vbInformation + vbOKOnly, \"確認\"\r\nEnd Sub\r\n\r\n'個別確認ボタン\r\nPrivate Sub btnKakuninOne_Click()\r\n    Dim strSQL As String\r\n\r\n    If IsNull(Me.txtSize) Then\r\n        MsgBox \"個別確認サイズの指定がありません\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.txtCaseNo.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    If MsgBox(\"個別確認処理を行いますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.txtCaseNo.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    DoCmd.SetWarnings False\r\n    \r\n    strSQL = \"UPDATE t_貸出 SET 完了フラグ = 'Y' \"\r\n    strSQL = strSQL & \"WHERE ID = \" & Me.txtID & \";\"\r\n    DoCmd.RunSQL strSQL\r\n    \r\n    DoCmd.SetWarnings True\r\n    \r\n    Me.txtID = Null\r\n    Me.txtSize = Null\r\n    Me.txtCaseNo.SetFocus\r\n    Me.Refresh\r\n    \r\n    MsgBox \"個別確認しました。\", vbInformation + vbOKOnly, \"確認\"\r\nEnd Sub\r\n\r\n'検索ボタン\r\nPrivate Sub btnKensaku_Click()\r\n    Dim strSQL As String\r\n    \r\n    strSQL = \"SELECT t_貸出.ID, t_貸出.サイズ, t_貸出.担当者ID, t_担当者マスタ.担当者名, t_貸出.機番, t_貸出.貸出日, t_貸出.返却日, \"\r\n    strSQL = strSQL & \"t_PGマスタ.ケースNo \"\r\n    strSQL = strSQL & \"FROM (t_貸出 LEFT JOIN t_担当者マスタ ON t_貸出.担当者ID = t_担当者マスタ.担当者ID) \"\r\n    strSQL = strSQL & \"LEFT JOIN t_PGマスタ ON t_貸出.サイズ = t_PGマスタ.サイズ \"\r\n    strSQL = strSQL & \"WHERE t_貸出.機番 = '返-\" & Me.txtCaseNo & \"' \"\r\n    strSQL = strSQL & \"AND t_貸出.完了フラグ IS NULL;\"\r\n    Me.f_確認のサブフォーム.Form.RecordSource = strSQL\r\n    \r\n    Me.txtCaseNo.SetFocus\r\n    Me.Refresh\r\n\r\nEnd Sub\r\n\r\n'フォーム開く時\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    Dim strSQL As String\r\n    \r\n    Me.f_確認のサブフォーム.Form.サイズ.ColumnWidth = 567 * 4\r\n    Me.f_確認のサブフォーム.Form.担当者名.ColumnWidth = 567 * 2.5\r\n    Me.f_確認のサブフォーム.Form.機番.ColumnWidth = 567 * 2\r\n    Me.f_確認のサブフォーム.Form.返却日.ColumnWidth = 567 * 2.4\r\n    Me.f_確認のサブフォーム.Form.ケースNo.ColumnWidth = 567 * 1.7\r\n    \r\n    Me.f_確認のサブフォーム.Form.ID.ColumnHidden = True\r\n    Me.f_確認のサブフォーム.Form.担当者ID.ColumnHidden = True\r\n    Me.f_確認のサブフォーム.Form.貸出日.ColumnHidden = True\r\n    Me.f_確認のサブフォーム.Form.完了フラグ.ColumnHidden = True\r\n\r\n    SubFrmInit\r\n    \r\n    Me.f_確認のサブフォーム2.Form.機番.ColumnWidth = 567 * 2\r\n    Me.f_確認のサブフォーム2.Form.返却日.ColumnWidth = 567 * 2.4\r\n    Me.f_確認のサブフォーム2.Form.完了フラグ.ColumnHidden = True\r\n    strSQL = \"SELECT DISTINCT t_貸出.返却日, t_貸出.機番 FROM t_貸出 \"\r\n    strSQL = strSQL & \"WHERE t_貸出.完了フラグ = 'N';\"\r\n    Me.f_確認のサブフォーム2.Form.RecordSource = strSQL\r\n\r\nEnd Sub\r\n\r\n'サブフォーム初期化\r\nPrivate Sub SubFrmInit()\r\n    Dim strSQL As String\r\n\r\n    strSQL = \"SELECT t_貸出.ID, t_貸出.サイズ, t_貸出.担当者ID, t_担当者マスタ.担当者名, t_貸出.機番, t_貸出.貸出日, t_貸出.返却日, \"\r\n    strSQL = strSQL & \"t_PGマスタ.ケースNo \"\r\n    strSQL = strSQL & \"FROM (t_貸出 LEFT JOIN t_担当者マスタ ON t_貸出.担当者ID = t_担当者マスタ.担当者ID) \"\r\n    strSQL = strSQL & \"LEFT JOIN t_PGマスタ ON t_貸出.サイズ = t_PGマスタ.サイズ \"\r\n    strSQL = strSQL & \"WHERE t_貸出.サイズ = 'ZZZZZ';\"\r\n    Me.f_確認のサブフォーム.Form.RecordSource = strSQL\r\n    Me.Refresh\r\nEnd Sub\r\n"
+    },
+    {
+      "name": "Form_f_確認のサブフォーム",
+      "type": "レポートモジュール",
+      "line_count": 8,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'サイズがクリックされた\r\nPrivate Sub サイズ_Click()\r\n    Forms(\"f_確認\").txtID = Me.ID\r\n    Forms(\"f_確認\").txtSize = Me.サイズ\r\nEnd Sub"
+    },
+    {
+      "name": "Form_f_修正",
+      "type": "レポートモジュール",
+      "line_count": 71,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'閉じるボタン\r\nPrivate Sub btnClose_Click()\r\n    DoCmd.Close acForm, \"f_修正\"\r\nEnd Sub\r\n\r\n'削除ボタン\r\nPrivate Sub btnSakujo_Click()\r\n    Dim strSQL As String\r\n\r\n    If MsgBox(\"削除しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.txtHizuke.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    DoCmd.SetWarnings False\r\n    strSQL = \"DELETE FROM t_貸出 \"\r\n    strSQL = strSQL & \"WHERE ID =\" & GaugeData.ID & \";\"\r\n    DoCmd.RunSQL strSQL\r\n    DoCmd.SetWarnings True\r\n    \r\n    DoCmd.Close acForm, \"f_修正\"\r\n    Forms(\"f_Main\").Refresh\r\nEnd Sub\r\n\r\n'修正ボタン\r\nPrivate Sub btnShuusei_Click()\r\n    Dim strSQL As String\r\n    Dim ErrFlg As Boolean\r\n    \r\n    ErrFlg = False\r\n    If IsNull(Me.txtHizuke) Then ErrFlg = True\r\n    If IsNull(Me.txtKiban) Then ErrFlg = True\r\n    If IsNull(Me.cboTantou) Then ErrFlg = True\r\n    If IsNull(Me.txtSize) Then ErrFlg = True\r\n    If ErrFlg Then\r\n        MsgBox \"未入力の項目があります。確認してください\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.txtHizuke.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    If MsgBox(\"修正しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.txtHizuke.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    DoCmd.SetWarnings False\r\n    strSQL = \"UPDATE t_貸出 SET \"\r\n    strSQL = strSQL & \"貸出日 = #\" & Me.txtHizuke & \"#, \"\r\n    strSQL = strSQL & \"機番 = '\" & Me.txtKiban & \"', \"\r\n    strSQL = strSQL & \"担当者ID = '\" & Me.cboTantou & \"', \"\r\n    strSQL = strSQL & \"サイズ = '\" & Me.txtSize & \"' \"\r\n    strSQL = strSQL & \"WHERE ID =\" & GaugeData.ID & \";\"\r\n    DoCmd.RunSQL strSQL\r\n    DoCmd.SetWarnings True\r\n    \r\n    DoCmd.Close acForm, \"f_修正\"\r\n    Forms(\"f_Main\").Refresh\r\nEnd Sub\r\n\r\n'フォームを開く時\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    With GaugeData\r\n        Me.txtHizuke = .Hizuke\r\n        Me.txtKiban = .Kiban\r\n        Me.cboTantou = .TantouCD\r\n        Me.txtSize = .GaugeSize\r\n    End With\r\nEnd Sub"
+    },
+    {
+      "name": "Form_f_担当者マスタ",
+      "type": "レポートモジュール",
+      "line_count": 22,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'閉じるボタン\r\nPrivate Sub btnClose_Click()\r\n    DoCmd.Close acForm, \"f_担当者マスタ\"\r\nEnd Sub\r\n\r\n'フォームを閉じる時\r\nPrivate Sub Form_Close()\r\n    Forms(\"f_Main\").Refresh\r\n    Forms(\"f_Main\").cboKibanA.SetFocus\r\nEnd Sub\r\n\r\n'フォームを開く時\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    Me.f_担当者マスタのサブフォーム.Form.担当者ID.ColumnWidth = 567 * 2.2\r\n    Me.f_担当者マスタのサブフォーム.Form.担当者名.ColumnWidth = 567 * 3\r\n    Me.f_担当者マスタのサブフォーム.Form.部署.ColumnWidth = 567 * 1.8\r\n    Me.f_担当者マスタのサブフォーム.Form.かな.ColumnWidth = 567 * 1.8\r\n    Me.f_担当者マスタのサブフォーム.Form.表示.ColumnWidth = 567 * 1.8\r\nEnd Sub"
+    },
+    {
+      "name": "Form_f_返却",
+      "type": "レポートモジュール",
+      "line_count": 186,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\n'中止ボタン\r\nPrivate Sub btnCancel_Click()\r\n    Call DispInit(True)\r\n    SubFrmInit\r\n    Me.cboKibanA.SetFocus\r\n    Me.Refresh\r\nEnd Sub\r\n\r\n'全て返却ボタン\r\nPrivate Sub btnHenkyakuAll_Click()\r\n    Dim strSQL As String\r\n    \r\n    If IsNull(Me.txtCaseNo) Then\r\n        MsgBox \"返却ケースNoが入力されていません\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.txtCaseNo.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    If Me.f_返却のサブフォーム.Form.Recordset.RecordCount = 0 Then\r\n        MsgBox \"返却の対象品がありません\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.cboKibanA.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    If MsgBox(\"全て返却しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.cboKibanA.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    DoCmd.SetWarnings False\r\n    \r\n    strSQL = \"UPDATE t_貸出 SET \"\r\n    strSQL = strSQL & \"返却日 = #\" & Me.txtHizuke & \"#, \"\r\n    strSQL = strSQL & \"機番 = '返-\" & Me.txtCaseNo & \"' \"\r\n    strSQL = strSQL & \"WHERE 機番 = '\" & Me.txtKiban & \"' \"\r\n    strSQL = strSQL & \"AND 返却日 IS NULL;\"\r\n    DoCmd.RunSQL strSQL\r\n    \r\n    DoCmd.SetWarnings True\r\n    \r\n    Call DispInit(True)\r\n    SubFrmInit\r\n    Me.Refresh\r\n    MsgBox \"返却処理しました\", vbInformation + vbOKOnly, \"確認\"\r\nEnd Sub\r\n\r\n'個別返却ボタン\r\nPrivate Sub btnHenkyakuOne_Click()\r\n    Dim strSQL As String\r\n\r\n    If IsNull(Me.txtSize) Then\r\n        MsgBox \"返却品の指定がありません\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.cboKibanA.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    If IsNull(Me.txtCaseNo) Then\r\n        MsgBox \"返却ケースNoが入力されていません\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.txtCaseNo.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    If MsgBox(\"個別返却しますか？\", vbQuestion + vbYesNo, \"確認\") <> vbYes Then\r\n        Me.cboKibanA.SetFocus\r\n        Exit Sub\r\n    End If\r\n    \r\n    DoCmd.SetWarnings False\r\n    \r\n    strSQL = \"UPDATE t_貸出 SET \"\r\n    strSQL = strSQL & \"返却日 = #\" & Me.txtHizuke & \"#, \"\r\n    strSQL = strSQL & \"機番 = '返-\" & Me.txtCaseNo & \"' \"\r\n    strSQL = strSQL & \"WHERE ID = \" & Me.txtID & \";\"\r\n    DoCmd.RunSQL strSQL\r\n    \r\n    DoCmd.SetWarnings True\r\n    \r\n    Call DispInit(False)\r\n    Me.Refresh\r\n    Me.cboKibanA.SetFocus\r\n    MsgBox \"返却処理しました\", vbInformation + vbOKOnly, \"確認\"\r\nEnd Sub\r\n\r\n'検索ボタン\r\nPrivate Sub btnKensaku_Click()\r\n    Dim strSQL As String\r\n    \r\n    strSQL = \"SELECT t_貸出.ID, t_貸出.サイズ, t_貸出.担当者ID, t_担当者マスタ.担当者名, t_貸出.機番, \"\r\n    strSQL = strSQL & \"t_貸出.貸出日, t_貸出.返却日, t_PGマスタ.ケースNo \"\r\n    strSQL = strSQL & \"FROM (t_貸出 LEFT JOIN t_担当者マスタ ON t_貸出.担当者ID = t_担当者マスタ.担当者ID) \"\r\n    strSQL = strSQL & \"LEFT JOIN t_PGマスタ ON t_貸出.サイズ = t_PGマスタ.サイズ \"\r\n    strSQL = strSQL & \"WHERE t_貸出.機番 = '\" & Me.txtKiban & \"' \"\r\n    strSQL = strSQL & \"AND t_貸出.完了フラグ IS NULL AND t_貸出.返却日 IS NULL \"\r\n    strSQL = strSQL & \"ORDER BY t_貸出.サイズ;\"\r\n    Me.f_返却のサブフォーム.Form.RecordSource = strSQL\r\n    \r\n    Call DispInit(False)\r\n    Me.txtCaseNo.SetFocus\r\n    Me.Refresh\r\nEnd Sub\r\n\r\n'画面初期化\r\nPrivate Sub DispInit(pMode As Boolean)\r\n    Me.txtSize = Null\r\n    Me.txtID = Null\r\n    If pMode Then\r\n        Me.cboKibanA = Null\r\n        Me.cboKibanN = Null\r\n        Me.txtKiban = Null\r\n        Me.txtHizuke = Null\r\n    End If\r\nEnd Sub\r\n\r\n'機番アルファベットが更新された\r\nPrivate Sub cboKibanA_AfterUpdate()\r\n    SetKiban\r\n    If Me.cboKibanA = \"数値\" Then\r\n        Me.btnKensaku.SetFocus\r\n    Else\r\n        Me.cboKibanN.SetFocus\r\n    End If\r\n    Me.txtHizuke = Format(Now(), \"yyyy/mm/dd\")\r\nEnd Sub\r\n\r\n'機番数字が更新された\r\nPrivate Sub cboKibanN_AfterUpdate()\r\n    SetKiban\r\n    Me.btnKensaku.SetFocus\r\nEnd Sub\r\n\r\n'機番をセット\r\nPrivate Sub SetKiban()\r\n    If Me.cboKibanA = \"数値\" Then\r\n        Me.cboKibanN = Null\r\n        Me.cboKibanN.Enabled = False\r\n        Me.txtKiban = \"数値\"\r\n        Me.btnHenkyakuAll.Enabled = False\r\n    Else\r\n        Me.txtKiban = Me.cboKibanA & \"-\" & Me.cboKibanN\r\n        Me.cboKibanN.Enabled = True\r\n        Me.btnHenkyakuAll.Enabled = True\r\n    End If\r\nEnd Sub\r\n\r\n'フォームを開く時\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    Me.f_返却のサブフォーム.Form.サイズ.ColumnWidth = 567 * 4\r\n    Me.f_返却のサブフォーム.Form.担当者名.ColumnWidth = 567 * 2.5\r\n    Me.f_返却のサブフォーム.Form.機番.ColumnWidth = 567 * 2\r\n    Me.f_返却のサブフォーム.Form.貸出日.ColumnWidth = 567 * 2.4\r\n    Me.f_返却のサブフォーム.Form.ケースNo.ColumnWidth = 567 * 1.7\r\n    Me.f_返却のサブフォーム.Form.ID.ColumnHidden = True\r\n    Me.f_返却のサブフォーム.Form.担当者ID.ColumnHidden = True\r\n    Me.f_返却のサブフォーム.Form.返却日.ColumnHidden = True\r\n\r\n    SubFrmInit\r\nEnd Sub\r\n\r\n'サブフォーム初期化\r\nPrivate Sub SubFrmInit()\r\n    Dim strSQL As String\r\n\r\n    strSQL = \"SELECT t_貸出.ID, t_貸出.サイズ, t_貸出.担当者ID, t_担当者マスタ.担当者名, t_貸出.機番, \"\r\n    strSQL = strSQL & \"t_貸出.貸出日, t_貸出.返却日, t_PGマスタ.ケースNo \"\r\n    strSQL = strSQL & \"FROM (t_貸出 LEFT JOIN t_担当者マスタ ON t_貸出.担当者ID = t_担当者マスタ.担当者ID) \"\r\n    strSQL = strSQL & \" LEFT JOIN t_PGマスタ ON t_貸出.サイズ = t_PGマスタ.サイズ \"\r\n    strSQL = strSQL & \"WHERE t_貸出.サイズ = 'ZZZZZ';\"\r\n    Me.f_返却のサブフォーム.Form.RecordSource = strSQL\r\n    Me.Refresh\r\nEnd Sub\r\n\r\n'返却ケースNoが更新された\r\nPrivate Sub txtCaseNo_AfterUpdate()\r\n    If Len(Me.txtCaseNo) > 2 Then\r\n        MsgBox \"返却ケースNoは2桁以内にしてください\", vbCritical + vbOKOnly, \"確認\"\r\n        Me.cboKibanN.SetFocus\r\n        Me.txtCaseNo.SetFocus\r\n        Exit Sub\r\n    End If\r\n        \r\n    If Me.txtKiban <> \"数値\" Then Me.btnHenkyakuAll.SetFocus\r\nEnd Sub\r\n"
+    },
+    {
+      "name": "Form_f_返却のサブフォーム",
+      "type": "レポートモジュール",
+      "line_count": 7,
+      "code": "Option Compare Database\r\nOption Explicit\r\n\r\nPrivate Sub サイズ_Click()\r\n    Forms(\"f_返却\").txtID = Me.ID\r\n    Forms(\"f_返却\").txtSize = Me.サイズ\r\nEnd Sub"
+    }
+  ],
+  "warnings": [
+    "FK 取得スキップ: t_PGマスタ — ('IM001', '[IM001] [Microsoft][ODBC Driver Manager] ドライバーはこの関数をサポートしていません。 (0) (SQLForeignKeys)')",
+    "FK 取得スキップ: t_担当者マスタ — ('IM001', '[IM001] [Microsoft][ODBC Driver Manager] ドライバーはこの関数をサポートしていません。 (0) (SQLForeignKeys)')",
+    "FK 取得スキップ: t_貸出 — ('IM001', '[IM001] [Microsoft][ODBC Driver Manager] ドライバーはこの関数をサポートしていません。 (0) (SQLForeignKeys)')"
+  ]
+}
