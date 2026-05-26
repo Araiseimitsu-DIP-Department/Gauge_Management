@@ -25,25 +25,25 @@ class PostgresOperationRepository:
     def search_returnable_loans(self, machine_code: str) -> list[LoanRecord]:
         sql = f'''
             SELECT
-                l."ID",
-                l."サイズ",
-                l."担当者ID",
-                s."担当者名",
-                l."機番",
-                l."貸出日",
-                l."返却日",
-                p."保有数",
-                p."ケースNo",
-                l."完了フラグ"
-            FROM {self._table("t_貸出")} AS l
-            LEFT JOIN {self._table("t_担当者マスタ")} AS s
-                ON l."担当者ID" = s."担当者ID"
-            LEFT JOIN {self._table("t_PGマスタ")} AS p
-                ON l."サイズ" = p."サイズ"
-            WHERE l."機番" = %s
-              AND l."完了フラグ" IS NULL
-              AND l."返却日" IS NULL
-            ORDER BY l."サイズ"
+                l."id",
+                l."size",
+                l."staff_id",
+                s."staff_name",
+                l."machine_code",
+                l."lent_on",
+                l."returned_on",
+                p."holding_count",
+                p."case_no",
+                l."completion_flag"
+            FROM {self._table("loans")} AS l
+            LEFT JOIN {self._table("staff_master")} AS s
+                ON l."staff_id" = s."staff_id"
+            LEFT JOIN {self._table("pg_master")} AS p
+                ON l."size" = p."size"
+            WHERE l."machine_code" = %s
+              AND l."completion_flag" IS NULL
+              AND l."returned_on" IS NULL
+            ORDER BY l."size"
         '''
 
         try:
@@ -59,11 +59,11 @@ class PostgresOperationRepository:
 
     def return_all_loans(self, machine_code: str, returned_on: date, case_no: str) -> int:
         sql = f'''
-            UPDATE {self._table("t_貸出")}
-            SET "返却日" = %s, "機番" = %s, "完了フラグ" = 'N'
-            WHERE "機番" = %s AND "返却日" IS NULL
+            UPDATE {self._table("loans")}
+            SET "returned_on" = %s, "machine_code" = %s, "completion_flag" = 'N'
+            WHERE "machine_code" = %s AND "returned_on" IS NULL
         '''
-        returned_machine_code = f"返却{case_no}"
+        returned_machine_code = f"返-{case_no}"
 
         try:
             with open_postgres_connection(self._settings) as connection:
@@ -79,11 +79,11 @@ class PostgresOperationRepository:
 
     def return_one_loan(self, loan_id: int, returned_on: date, case_no: str) -> None:
         sql = f'''
-            UPDATE {self._table("t_貸出")}
-            SET "返却日" = %s, "機番" = %s, "完了フラグ" = 'N'
-            WHERE "ID" = %s
+            UPDATE {self._table("loans")}
+            SET "returned_on" = %s, "machine_code" = %s, "completion_flag" = 'N'
+            WHERE "id" = %s
         '''
-        returned_machine_code = f"返却{case_no}"
+        returned_machine_code = f"返-{case_no}"
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -96,30 +96,30 @@ class PostgresOperationRepository:
     def search_confirmation_loans(self, case_no: str) -> list[LoanRecord]:
         sql = f'''
             SELECT
-                l."ID",
-                l."サイズ",
-                l."担当者ID",
-                s."担当者名",
-                l."機番",
-                l."貸出日",
-                l."返却日",
-                p."保有数",
-                p."ケースNo",
-                l."完了フラグ"
-            FROM {self._table("t_貸出")} AS l
-            LEFT JOIN {self._table("t_担当者マスタ")} AS s
-                ON l."担当者ID" = s."担当者ID"
-            LEFT JOIN {self._table("t_PGマスタ")} AS p
-                ON l."サイズ" = p."サイズ"
-            WHERE l."機番" = %s
-              AND (l."完了フラグ" IS NULL OR l."完了フラグ" <> 'Y')
-            ORDER BY l."サイズ"
+                l."id",
+                l."size",
+                l."staff_id",
+                s."staff_name",
+                l."machine_code",
+                l."lent_on",
+                l."returned_on",
+                p."holding_count",
+                p."case_no",
+                l."completion_flag"
+            FROM {self._table("loans")} AS l
+            LEFT JOIN {self._table("staff_master")} AS s
+                ON l."staff_id" = s."staff_id"
+            LEFT JOIN {self._table("pg_master")} AS p
+                ON l."size" = p."size"
+            WHERE l."machine_code" = %s
+              AND (l."completion_flag" IS NULL OR l."completion_flag" <> 'Y')
+            ORDER BY l."size"
         '''
 
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
-                    cursor.execute(sql, (f"返却{case_no}",))
+                    cursor.execute(sql, (f"返-{case_no}",))
                     rows = cursor.fetchall()
         except Exception as exc:
             logger.exception("failed to search confirmation loans")
@@ -129,11 +129,11 @@ class PostgresOperationRepository:
 
     def fetch_confirmation_batches(self) -> list[tuple[str, date | None]]:
         sql = f'''
-            SELECT DISTINCT l."機番", l."返却日"
-            FROM {self._table("t_貸出")} AS l
-            WHERE l."完了フラグ" = 'N'
-               OR (l."完了フラグ" IS NULL AND l."返却日" IS NOT NULL)
-            ORDER BY l."返却日" DESC
+            SELECT DISTINCT l."machine_code", l."returned_on"
+            FROM {self._table("loans")} AS l
+            WHERE l."completion_flag" = 'N'
+               OR (l."completion_flag" IS NULL AND l."returned_on" IS NOT NULL)
+            ORDER BY l."returned_on" DESC
         '''
 
         try:
@@ -145,13 +145,13 @@ class PostgresOperationRepository:
             logger.exception("failed to fetch confirmation batches")
             raise RepositoryError("確認待ち一覧の読込に失敗しました。") from exc
 
-        return [(str(row["機番"]), row["返却日"]) for row in rows]
+        return [(str(row["machine_code"]), row["returned_on"]) for row in rows]
 
     def confirm_all(self, loan_ids: list[int]) -> int:
         if not loan_ids:
             return 0
 
-        sql = f'UPDATE {self._table("t_貸出")} SET "完了フラグ" = \'Y\' WHERE "ID" = %s'
+        sql = f'UPDATE {self._table("loans")} SET "completion_flag" = \'Y\' WHERE "id" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -165,7 +165,7 @@ class PostgresOperationRepository:
         return len(loan_ids)
 
     def confirm_one(self, loan_id: int) -> None:
-        sql = f'UPDATE {self._table("t_貸出")} SET "完了フラグ" = \'Y\' WHERE "ID" = %s'
+        sql = f'UPDATE {self._table("loans")} SET "completion_flag" = \'Y\' WHERE "id" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:

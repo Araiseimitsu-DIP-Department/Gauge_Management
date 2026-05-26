@@ -28,12 +28,12 @@ class PostgresMasterRepository:
         return f'"{name}"'
 
     def search_pg_master(self, size_query: str | None = None) -> list[PgMasterRecord]:
-        sql = f'SELECT "サイズ", "保有数", "ケースNo" FROM {self._table("t_PGマスタ")}'
+        sql = f'SELECT "size", "holding_count", "case_no" FROM {self._table("pg_master")}'
         parameters: list[object] = []
         if size_query:
-            sql += ' WHERE "サイズ" LIKE %s'
+            sql += ' WHERE "size" LIKE %s'
             parameters.append(f"{size_query}%")
-        sql += ' ORDER BY "サイズ"'
+        sql += ' ORDER BY "size"'
 
         try:
             with open_postgres_connection(self._settings) as connection:
@@ -47,7 +47,7 @@ class PostgresMasterRepository:
         return [MasterRowMapper.to_pg_master_record(row) for row in rows]
 
     def pg_master_exists(self, size: str) -> bool:
-        sql = f'SELECT 1 FROM {self._table("t_PGマスタ")} WHERE "サイズ" = %s'
+        sql = f'SELECT 1 FROM {self._table("pg_master")} WHERE "size" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -59,7 +59,7 @@ class PostgresMasterRepository:
         return row is not None
 
     def insert_pg_master(self, record: PgMasterRecord) -> None:
-        sql = f'INSERT INTO {self._table("t_PGマスタ")} ("サイズ", "保有数", "ケースNo") VALUES (%s, %s, %s)'
+        sql = f'INSERT INTO {self._table("pg_master")} ("size", "holding_count", "case_no") VALUES (%s, %s, %s)'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -71,9 +71,9 @@ class PostgresMasterRepository:
 
     def update_pg_master(self, record: PgMasterRecord) -> None:
         sql = f'''
-            UPDATE {self._table("t_PGマスタ")}
-            SET "保有数" = %s, "ケースNo" = %s
-            WHERE "サイズ" = %s
+            UPDATE {self._table("pg_master")}
+            SET "holding_count" = %s, "case_no" = %s
+            WHERE "size" = %s
         '''
         try:
             with open_postgres_connection(self._settings) as connection:
@@ -85,7 +85,7 @@ class PostgresMasterRepository:
             raise RepositoryError("PGマスタの更新に失敗しました。") from exc
 
     def delete_pg_master(self, size: str) -> None:
-        sql = f'DELETE FROM {self._table("t_PGマスタ")} WHERE "サイズ" = %s'
+        sql = f'DELETE FROM {self._table("pg_master")} WHERE "size" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -96,12 +96,12 @@ class PostgresMasterRepository:
             raise RepositoryError("PGマスタの削除に失敗しました。") from exc
 
     def fetch_staff_master(self, query: str | None = None) -> list[StaffMember]:
-        sql = f'SELECT "担当者ID", "担当者名", "部署", "かな", "表示" FROM {self._table("t_担当者マスタ")}'
+        sql = f'SELECT "staff_id", "staff_name", "department", "kana", "visible" FROM {self._table("staff_master")}'
         parameters: list[object] = []
         if query:
-            sql += ' WHERE "担当者ID" LIKE %s OR "担当者名" LIKE %s'
+            sql += ' WHERE "staff_id" LIKE %s OR "staff_name" LIKE %s'
             parameters.extend([f"{query}%", f"{query}%"])
-        sql += ' ORDER BY "担当者ID"'
+        sql += ' ORDER BY "staff_id"'
 
         try:
             with open_postgres_connection(self._settings) as connection:
@@ -116,9 +116,9 @@ class PostgresMasterRepository:
 
     def update_staff_member(self, staff: StaffMember) -> None:
         sql = f'''
-            UPDATE {self._table("t_担当者マスタ")}
-            SET "担当者名" = %s, "部署" = %s, "かな" = %s, "表示" = %s
-            WHERE "担当者ID" = %s
+            UPDATE {self._table("staff_master")}
+            SET "staff_name" = %s, "department" = %s, "kana" = %s, "visible" = %s
+            WHERE "staff_id" = %s
         '''
         visible_value = "Y" if staff.visible else "N"
         try:
@@ -139,13 +139,13 @@ class PostgresMasterRepository:
             departments = tuple(STAFF_DEPARTMENT_REPLACEMENTS.keys())
             placeholders = ", ".join(["%s"] * len(departments))
             update_sql = f'''
-                UPDATE {self._table("t_担当者マスタ")}
-                SET "部署" = CASE "部署"
+                UPDATE {self._table("staff_master")}
+                SET "department" = CASE "department"
                     WHEN %s THEN %s
                     WHEN %s THEN %s
-                    ELSE "部署"
+                    ELSE "department"
                 END
-                WHERE "部署" IN ({placeholders})
+                WHERE "department" IN ({placeholders})
             '''
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:

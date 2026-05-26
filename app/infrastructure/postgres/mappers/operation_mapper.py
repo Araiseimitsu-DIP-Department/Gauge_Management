@@ -17,16 +17,16 @@ class OperationRowMapper:
     @staticmethod
     def to_loan_record(row: Any) -> LoanRecord:
         return LoanRecord(
-            loan_id=int(_get(row, "ID", 0)),
-            size=str(_get(row, "サイズ", "")),
-            staff_id=str(_get(row, "担当者ID", "")),
-            staff_name=str(_get(row, "担当者名", "")),
-            machine_code=str(_get(row, "機番", "")),
-            lent_on=_normalize_datetime(_get(row, "貸出日")),
-            returned_on=_normalize_datetime(_get(row, "返却日")),
-            holding_count=_normalize_int(_get(row, "保有数")),
-            case_no=_normalize_text(_get(row, "ケースNo")),
-            completion_flag=_normalize_text(_get(row, "完了フラグ")),
+            loan_id=int(_get(row, "id", 0)),
+            size=str(_get(row, "size", "")),
+            staff_id=str(_get(row, "staff_id", "")),
+            staff_name=str(_get(row, "staff_name", "")),
+            machine_code=str(_get(row, "machine_code", "")),
+            lent_on=_normalize_datetime(_get(row, "lent_on")),
+            returned_on=_normalize_datetime(_get(row, "returned_on")),
+            holding_count=_normalize_int(_get(row, "holding_count")),
+            case_no=_normalize_text(_get(row, "case_no")),
+            completion_flag=_normalize_text(_get(row, "completion_flag")),
         )
 
 

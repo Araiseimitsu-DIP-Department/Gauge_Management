@@ -41,6 +41,11 @@ Gauge_Management/
     pingauge.ico                 PyInstaller 用のアイコン
     SETUP.md                     初期設定メモ
     DESIGN.md                    画面・見た目の整理メモ
+    postgresql-migration.md      Access -> PostgreSQL 移行手順書
+  database/
+    postgresql/                  PostgreSQL DDL、検証SQL、移行メモ
+  scripts/
+    migrate_access_to_postgres.py Access から PostgreSQL への移行スクリプト
   tests/
     README.md
   main.py                        ルート起動ファイル
@@ -54,7 +59,7 @@ Gauge_Management/
 `.env` がなくてもアプリ自体は起動し、DB 未設定の場合は操作時にエラーを表示します。
 
 ```powershell
-python main.py
+.\.venv\Scripts\python.exe main.py
 ```
 
 ## 設定
@@ -76,9 +81,35 @@ ACCESS_DB_DIRECTORY=C:\Path\To\AccessFolder
 APP_ENV=local
 APP_NAME=ピンゲージ管理
 DB_BACKEND=postgres
-POSTGRES_CONNECTION_URL=postgresql://user:password@localhost:5432/pingauge
+POSTGRES_CONNECTION_URL=postgresql://user:password@192.168.1.120:5432/pingauge_management
 POSTGRES_SCHEMA=public
 ```
+
+PostgreSQL 側の物理名は英語表記です。
+
+| Access | PostgreSQL |
+|---|---|
+| `t_PGマスタ` | `pg_master` |
+| `t_担当者マスタ` | `staff_master` |
+| `t_貸出` | `loans` |
+
+## PostgreSQL 移行
+
+移行手順は `docs/postgresql-migration.md` にまとめています。
+
+事前確認のみ:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\migrate_access_to_postgres.py --dry-run
+```
+
+本投入:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\migrate_access_to_postgres.py --apply-schema --truncate
+```
+
+投入後は `database/postgresql/020_validation.sql` で検証します。制約は `database/postgresql/003_constraints.sql` で管理しています。
 
 ## onefile ビルド
 

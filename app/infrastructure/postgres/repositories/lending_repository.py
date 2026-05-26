@@ -26,15 +26,15 @@ class PostgresLendingRepository:
 
     def fetch_staff_members(self, department: str | None = None) -> list[StaffMember]:
         sql = f'''
-            SELECT "担当者ID", "担当者名", "部署", "かな", "表示"
-            FROM {self._table("t_担当者マスタ")}
-            WHERE "表示" = %s
+            SELECT "staff_id", "staff_name", "department", "kana", "visible"
+            FROM {self._table("staff_master")}
+            WHERE "visible" = %s
         '''
         parameters: list[object] = ["Y"]
         if department:
-            sql += ' AND "部署" = %s'
+            sql += ' AND "department" = %s'
             parameters.append(department)
-        sql += ' ORDER BY "かな"'
+        sql += ' ORDER BY "kana"'
 
         try:
             with open_postgres_connection(self._settings) as connection:
@@ -50,35 +50,35 @@ class PostgresLendingRepository:
     def search_active_loans(self, criteria: LendingSearchCriteria) -> list[LoanRecord]:
         sql = f'''
             SELECT
-                l."ID",
-                l."サイズ",
-                l."担当者ID",
-                s."担当者名",
-                l."機番",
-                l."貸出日",
-                l."返却日",
-                p."保有数",
-                p."ケースNo",
-                l."完了フラグ"
-            FROM {self._table("t_貸出")} AS l
-            LEFT JOIN {self._table("t_担当者マスタ")} AS s
-                ON l."担当者ID" = s."担当者ID"
-            LEFT JOIN {self._table("t_PGマスタ")} AS p
-                ON l."サイズ" = p."サイズ"
-            WHERE l."完了フラグ" IS NULL
+                l."id",
+                l."size",
+                l."staff_id",
+                s."staff_name",
+                l."machine_code",
+                l."lent_on",
+                l."returned_on",
+                p."holding_count",
+                p."case_no",
+                l."completion_flag"
+            FROM {self._table("loans")} AS l
+            LEFT JOIN {self._table("staff_master")} AS s
+                ON l."staff_id" = s."staff_id"
+            LEFT JOIN {self._table("pg_master")} AS p
+                ON l."size" = p."size"
+            WHERE l."completion_flag" IS NULL
         '''
         parameters: list[object] = []
         if criteria.size_value:
             if criteria.use_size_prefix_match:
-                sql += ' AND l."サイズ" LIKE %s'
+                sql += ' AND l."size" LIKE %s'
                 parameters.append(f"{criteria.size_value}%")
             else:
-                sql += ' AND l."サイズ" = %s'
+                sql += ' AND l."size" = %s'
                 parameters.append(criteria.size_value)
         elif criteria.machine_code:
-            sql += ' AND l."機番" = %s'
+            sql += ' AND l."machine_code" = %s'
             parameters.append(criteria.machine_code)
-        sql += ' ORDER BY l."サイズ"'
+        sql += ' ORDER BY l."size"'
 
         try:
             with open_postgres_connection(self._settings) as connection:
@@ -93,7 +93,7 @@ class PostgresLendingRepository:
 
     def insert_loans(self, request: LendingRegistrationRequest) -> int:
         sql = f'''
-            INSERT INTO {self._table("t_貸出")} ("サイズ", "担当者ID", "機番", "貸出日")
+            INSERT INTO {self._table("loans")} ("size", "staff_id", "machine_code", "lent_on")
             VALUES (%s, %s, %s, %s)
         '''
         parameters = [
@@ -122,25 +122,25 @@ class PostgresLendingRepository:
     ) -> list[LoanRecord]:
         sql = f'''
             SELECT
-                l."ID",
-                l."サイズ",
-                l."担当者ID",
-                s."担当者名",
-                l."機番",
-                l."貸出日",
-                l."返却日",
-                p."保有数",
-                p."ケースNo",
-                l."完了フラグ"
-            FROM {self._table("t_貸出")} AS l
-            LEFT JOIN {self._table("t_担当者マスタ")} AS s
-                ON l."担当者ID" = s."担当者ID"
-            LEFT JOIN {self._table("t_PGマスタ")} AS p
-                ON l."サイズ" = p."サイズ"
-            WHERE l."貸出日" = %s
-              AND l."機番" = %s
-              AND l."担当者ID" = %s
-            ORDER BY l."サイズ"
+                l."id",
+                l."size",
+                l."staff_id",
+                s."staff_name",
+                l."machine_code",
+                l."lent_on",
+                l."returned_on",
+                p."holding_count",
+                p."case_no",
+                l."completion_flag"
+            FROM {self._table("loans")} AS l
+            LEFT JOIN {self._table("staff_master")} AS s
+                ON l."staff_id" = s."staff_id"
+            LEFT JOIN {self._table("pg_master")} AS p
+                ON l."size" = p."size"
+            WHERE l."lent_on" = %s
+              AND l."machine_code" = %s
+              AND l."staff_id" = %s
+            ORDER BY l."size"
         '''
 
         try:
@@ -156,9 +156,9 @@ class PostgresLendingRepository:
 
     def update_loan(self, request: LendingUpdateRequest) -> None:
         sql = f'''
-            UPDATE {self._table("t_貸出")}
-            SET "貸出日" = %s, "機番" = %s, "担当者ID" = %s, "サイズ" = %s
-            WHERE "ID" = %s
+            UPDATE {self._table("loans")}
+            SET "lent_on" = %s, "machine_code" = %s, "staff_id" = %s, "size" = %s
+            WHERE "id" = %s
         '''
 
         try:
@@ -180,7 +180,7 @@ class PostgresLendingRepository:
             raise RepositoryError("貸出更新に失敗しました。") from exc
 
     def delete_loan(self, loan_id: int) -> None:
-        sql = f'DELETE FROM {self._table("t_貸出")} WHERE "ID" = %s'
+        sql = f'DELETE FROM {self._table("loans")} WHERE "id" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:

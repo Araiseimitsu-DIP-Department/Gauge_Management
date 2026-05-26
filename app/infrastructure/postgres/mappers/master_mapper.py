@@ -17,18 +17,18 @@ class MasterRowMapper:
     @staticmethod
     def to_pg_master_record(row: Any) -> PgMasterRecord:
         return PgMasterRecord(
-            size=str(_get(row, "サイズ", "")),
-            holding_count=int(_get(row, "保有数", 0) or 0),
-            case_no=str(_get(row, "ケースNo", "")),
+            size=str(_get(row, "size", "")),
+            holding_count=int(_get(row, "holding_count", 0) or 0),
+            case_no=str(_get(row, "case_no", "")),
         )
 
     @staticmethod
     def to_staff_member(row: Any) -> StaffMember:
-        visible_value = _get(row, "表示")
+        visible_value = _get(row, "visible")
         return StaffMember(
-            staff_id=str(_get(row, "担当者ID", "")),
-            name=str(_get(row, "担当者名", "")),
-            department=str(_get(row, "部署", "")),
-            kana=str(_get(row, "かな", "")),
+            staff_id=str(_get(row, "staff_id", "")),
+            name=str(_get(row, "staff_name", "")),
+            department=str(_get(row, "department", "")),
+            kana=str(_get(row, "kana", "")),
             visible=str(visible_value).upper() == "Y" if visible_value is not None else True,
         )

@@ -2,588 +2,247 @@
 
 ## 目的
 
-本書は、既存の Access データベース `ピンゲージ管理.accdb` を PostgreSQL へ移行するための作業メモです。
+既存の Access データベース `ピンゲージ管理.accdb` を PostgreSQL へ移行するための手順書です。
 
-初回移行では、業務停止リスクを下げるために **Access のテーブル名・カラム名をそのまま維持**します。英語名へのリネームや正規化は、PostgreSQL で安定稼働してから別フェーズで検討します。
+PostgreSQL 側の物理名は英語表記に統一します。Access 側の元テーブル・元カラムは日本語名のまま読み取り、移行スクリプトで PostgreSQL の英語名へマッピングします。
 
-## 根拠にした docs
+## 移行先
 
-| ファイル | 用途 |
-|---|---|
-| `docs/ピンゲージ管理_meta.md` | Access ODBC から抽出したスキーマ、行数、サンプル、NULL 統計 |
-| `docs/ピンゲージ管理_meta.json` | 機械可読なスキーマ定義 |
-| `docs/ピンゲージ管理_ddl.sql` | 自動生成された PostgreSQL DDL 草案 |
-| `docs/Gauge_Management.txt` | 旧 Access VBA 全体の SQL と業務処理 |
-| `docs/Form_f_Main.cls` | 貸出登録、貸出検索、担当者選択 |
-| `docs/Form_f_返却.cls` | 返却処理 |
-| `docs/Form_f_確認.cls` | 返却後の確認処理 |
-| `docs/Form_f_修正.cls` | 貸出データ修正、削除 |
-| `docs/Form_f_マスタメンテ.cls` | PG マスタ登録、更新、削除 |
-| `docs/Form_f_担当者マスタ.cls` | 担当者マスタ表示 |
-| `docs/SETUP.md` | Access 接続設定 |
-| `docs/DESIGN.md`, `docs/code.html`, 画像類 | UI 参考。DB 移行の直接対象外 |
+```text
+host     : 192.168.1.120
+database : pingauge_management
+schema   : public
+encoding : UTF8
+timezone : Asia/Tokyo
+```
 
-## 移行元と移行先
+`.env` は次の形式です。
 
-### 移行元 Access
+```env
+DB_BACKEND=postgres
+POSTGRES_CONNECTION_URL=postgresql://postgres:password@192.168.1.120:5432/pingauge_management
+POSTGRES_SCHEMA=public
+```
+
+## 移行元
 
 ```text
 \\192.168.1.200\共有\製造課\ピンゲージ管理.accdb
 ```
 
-注意:
+Access ファイルを読むには、共有フォルダへの読み取り権限が必要です。Access のロックファイル作成が絡む場合があるため、状況によってはフォルダへの書き込み権限も必要です。
 
-- Access ファイルを開ける Windows ユーザー権限が必要です。
-- Access は同じフォルダに `.laccdb` ロックファイルを作るため、読み取りだけでなくフォルダへの書き込み権限も必要になる場合があります。
-- ODBC メタデータ上では 3 テーブルすべてが `SYNONYM` として検出されています。リンクテーブルの可能性があるため、最終移行前に Access 側で実データの所在を確認してください。
+## 物理名マッピング
 
-### 移行先 PostgreSQL
+| Access テーブル | PostgreSQL テーブル |
+|---|---|
+| `t_PGマスタ` | `pg_master` |
+| `t_担当者マスタ` | `staff_master` |
+| `t_貸出` | `loans` |
 
-添付画像の TablePlus 接続先を前提にします。
+| Access カラム | PostgreSQL カラム | 対象 |
+|---|---|---|
+| `サイズ` | `size` | `pg_master`, `loans` |
+| `保有数` | `holding_count` | `pg_master` |
+| `ケースNo` | `case_no` | `pg_master` |
+| `担当者ID` | `staff_id` | `staff_master`, `loans` |
+| `担当者名` | `staff_name` | `staff_master` |
+| `部署` | `department` | `staff_master` |
+| `かな` | `kana` | `staff_master` |
+| `表示` | `visible` | `staff_master` |
+| `ID` | `id` | `loans` |
+| `機番` | `machine_code` | `loans` |
+| `貸出日` | `lent_on` | `loans` |
+| `返却日` | `returned_on` | `loans` |
+| `完了フラグ` | `completion_flag` | `loans` |
+
+## PostgreSQL テーブル
+
+### `pg_master`
+
+| カラム | 型 | 内容 |
+|---|---|---|
+| `size` | `varchar(20)` | サイズまたは特殊ゲージ名 |
+| `holding_count` | `integer` | 保有数 |
+| `case_no` | `varchar(5)` | ケースNo |
+
+### `staff_master`
+
+| カラム | 型 | 内容 |
+|---|---|---|
+| `staff_id` | `varchar(2)` | 担当者ID |
+| `staff_name` | `varchar(5)` | 担当者名 |
+| `department` | `varchar(2)` | 部署 |
+| `kana` | `varchar(1)` | 並び替え用かな |
+| `visible` | `varchar(1)` | `Y` / `N` |
+
+### `loans`
+
+| カラム | 型 | 内容 |
+|---|---|---|
+| `id` | `bigint identity` | 貸出ID |
+| `size` | `varchar(20)` | サイズまたは特殊ゲージ名 |
+| `staff_id` | `varchar(2)` | 担当者ID |
+| `machine_code` | `varchar(4)` | 機番。返却後は `返-7` など |
+| `lent_on` | `date` | 貸出日 |
+| `returned_on` | `date` | 返却日 |
+| `completion_flag` | `varchar(1)` | `NULL` / `N` / `Y` |
+
+## SQL ファイル
+
+| ファイル | 役割 |
+|---|---|
+| `database/postgresql/001_schema.sql` | 英語物理名のテーブル作成 |
+| `database/postgresql/002_indexes.sql` | 検索用インデックス |
+| `database/postgresql/003_constraints.sql` | PK / CHECK / FK 制約 |
+| `database/postgresql/004_rename_to_english.sql` | 既存の日本語物理名テーブルを英語名へ変更する一回限りのSQL |
+| `database/postgresql/005_reconcile_loan_sizes.sql` | `loans.size` と `pg_master.size` の参照欠損補正 |
+| `database/postgresql/010_import_from_csv.sql` | CSVインポート用テンプレート |
+| `database/postgresql/020_validation.sql` | 件数・NULL・重複・参照欠損検証 |
+| `database/postgresql/migration_notes.md` | 実行結果メモ |
+
+## サイズ補正方針
+
+Access の貸出履歴には、`1.03` のような小数桁違いのサイズと、`BM10-12` や `M4*P0.7` のような特殊ゲージ名が含まれます。
+
+移行時は次の方針で整合性を取ります。
+
+1. `1.03` -> `1.030` のように、既存 `pg_master.size` に一致する数値サイズは3桁表記へ補正する。
+2. それでも `pg_master` に存在しない履歴上のサイズ・特殊ゲージ名は、履歴を消さずに `pg_master` へ追加する。
+3. 追加時は `holding_count = 0`, `case_no = NULL` とする。
+4. 補正後に `loans.size -> pg_master.size` の FK を適用する。
+
+この処理は `scripts/migrate_access_to_postgres.py` に組み込み済みです。SQL単体で補正したい場合は `005_reconcile_loan_sizes.sql` を使用します。
+
+## 本番移行手順
+
+### 1. 事前停止
+
+Access アプリ利用者へ停止時間を連絡し、移行中は Access 側を更新しない状態にします。
+
+### 2. バックアップ
+
+Access ファイルと PostgreSQL の既存DBをバックアップします。
+
+### 3. dry-run
+
+PostgreSQL へ書き込まず、Access から読み取れるか確認します。
+
+```powershell
+.\.venv\Scripts\python.exe scripts\migrate_access_to_postgres.py --dry-run
+```
+
+期待例:
 
 ```text
-host: 192.168.1.120
-database: pingauge_management
-schema: public
-encoding: UTF8
-timezone: Asia/Tokyo
+pg_master: 2026 rows
+staff_master: 29 rows
+loans: 31795 rows
+pg_master placeholders added: 302
+Dry run complete. PostgreSQL was not modified.
 ```
 
-TablePlus 上では、既存 DB ではなく新規 DB を作成して移行します。推奨 DB 名:
+### 4. 本投入
+
+`--apply-schema --truncate` でテーブルを初期化して再投入します。
+
+```powershell
+.\.venv\Scripts\python.exe scripts\migrate_access_to_postgres.py --apply-schema --truncate
+```
+
+このスクリプトは次を行います。
+
+- Access 3テーブルを読み取り
+- PostgreSQL 英語物理名へ変換して投入
+- 数値サイズの3桁補正
+- 不足する履歴サイズを `pg_master` にプレースホルダ追加
+- `loans.id` の identity sequence 調整
+
+### 5. インデックス作成
 
 ```text
-pingauge_management
+database/postgresql/002_indexes.sql
 ```
 
-## 移行作業フォルダ
-
-リポジトリ内に、移行用 SQL と検証メモを置く専用フォルダを作ります。
+### 6. 制約適用
 
 ```text
-database/
-  postgresql/
-    001_schema.sql
-    002_indexes.sql
-    003_constraints.sql
-    010_import_from_csv.sql
-    020_validation.sql
-    migration_notes.md
+database/postgresql/003_constraints.sql
 ```
 
-役割:
+`003_constraints.sql` は、`020_validation.sql` で参照欠損が 0 であることを確認してから実行します。
 
-| ファイル | 内容 |
-|---|---|
-| `001_schema.sql` | 初回投入用の CREATE TABLE |
-| `002_indexes.sql` | 検索用インデックス |
-| `003_constraints.sql` | 移行後に追加する PK / CHECK / FK |
-| `010_import_from_csv.sql` | CSV 取り込み用 SQL |
-| `020_validation.sql` | 件数、NULL、未返却、未確認などの検証 SQL |
-| `migration_notes.md` | 作業日、担当、判断理由、未解決事項 |
-
-## 現行アプリの DB 切替
-
-`.env` で DB バックエンドを切り替えます。
-
-Access 利用時:
-
-```env
-APP_ENV=local
-APP_NAME=ピンゲージ管理
-DB_BACKEND=access
-ACCESS_DB_DIRECTORY=\\192.168.1.200\共有\製造課
-```
-
-PostgreSQL 利用時:
-
-```env
-APP_ENV=local
-APP_NAME=ピンゲージ管理
-DB_BACKEND=postgres
-POSTGRES_CONNECTION_URL=postgresql://user:password@192.168.1.120:5432/pingauge_management
-POSTGRES_SCHEMA=public
-```
-
-本番切替までは `DB_BACKEND=access` のままにして、PostgreSQL 側の作成・投入・検証を先に完了させます。
-
-## Access スキーマ概要
-
-`docs/ピンゲージ管理_meta.md` の 2026-05-26 抽出結果です。
-
-| テーブル | 行数 | 内容 |
-|---|---:|---|
-| `t_PGマスタ` | 2,026 | ピンゲージのサイズ、保有数、ケースNo |
-| `t_担当者マスタ` | 29 | 担当者ID、担当者名、部署、かな、表示 |
-| `t_貸出` | 31,753 | 貸出、返却、確認の履歴 |
-| 合計 | 33,808 | 取得できたテーブルのみ |
-
-検出された Access 側の明示 FK は 0 件です。PostgreSQL では列名と業務処理から FK を推定します。
-
-## テーブル設計方針
-
-### 初回移行の原則
-
-- テーブル名とカラム名は Access と同じ日本語名を維持します。
-- PostgreSQL では日本語識別子を必ずダブルクォートで囲みます。
-- 日付列は Access では `DATETIME` ですが、現行処理は日付単位なので PostgreSQL では `date` を優先します。
-- 既存データ投入を優先し、厳しい制約はデータ検証後に追加します。
-- `t_貸出.ID` は Access の COUNTER 値を保持して移行します。投入後に sequence を最大 ID + 1 へ合わせます。
-
-### 推奨 DDL
-
-初回作成用の DDL です。これは `docs/ピンゲージ管理_ddl.sql` の草案を、業務処理と NULL 統計に合わせて調整したものです。
-
-```sql
-CREATE TABLE "t_PGマスタ" (
-    "サイズ" varchar(20) NOT NULL,
-    "保有数" integer NOT NULL,
-    "ケースNo" varchar(5)
-);
-
-CREATE TABLE "t_担当者マスタ" (
-    "担当者ID" varchar(2) NOT NULL,
-    "担当者名" varchar(5) NOT NULL,
-    "部署" varchar(2) NOT NULL,
-    "かな" varchar(1) NOT NULL,
-    "表示" varchar(1) NOT NULL
-);
-
-CREATE TABLE "t_貸出" (
-    "ID" bigint GENERATED BY DEFAULT AS IDENTITY,
-    "サイズ" varchar(20) NOT NULL,
-    "担当者ID" varchar(2) NOT NULL,
-    "機番" varchar(4) NOT NULL,
-    "貸出日" date NOT NULL,
-    "返却日" date,
-    "完了フラグ" varchar(1)
-);
-```
-
-### 移行後に追加する制約
-
-データ投入と検証が完了してから追加します。
-
-```sql
-ALTER TABLE "t_PGマスタ"
-  ADD CONSTRAINT "pk_t_PGマスタ" PRIMARY KEY ("サイズ"),
-  ADD CONSTRAINT "ck_t_PGマスタ_保有数" CHECK ("保有数" >= 0);
-
-ALTER TABLE "t_担当者マスタ"
-  ADD CONSTRAINT "pk_t_担当者マスタ" PRIMARY KEY ("担当者ID"),
-  ADD CONSTRAINT "ck_t_担当者マスタ_表示" CHECK ("表示" IN ('Y', 'N'));
-
-ALTER TABLE "t_貸出"
-  ADD CONSTRAINT "pk_t_貸出" PRIMARY KEY ("ID"),
-  ADD CONSTRAINT "ck_t_貸出_完了フラグ" CHECK ("完了フラグ" IS NULL OR "完了フラグ" IN ('Y', 'N'));
-```
-
-FK は初回移行後に、欠損データがないことを確認してから追加します。
-
-```sql
-ALTER TABLE "t_貸出"
-  ADD CONSTRAINT "fk_t_貸出_担当者"
-  FOREIGN KEY ("担当者ID")
-  REFERENCES "t_担当者マスタ" ("担当者ID");
-
-ALTER TABLE "t_貸出"
-  ADD CONSTRAINT "fk_t_貸出_PGマスタ"
-  FOREIGN KEY ("サイズ")
-  REFERENCES "t_PGマスタ" ("サイズ");
-```
-
-## 推奨インデックス
-
-旧 Access VBA と現行画面の検索条件から、次を作成します。
-
-```sql
-CREATE INDEX "ix_t_PGマスタ_ケースNo"
-  ON "t_PGマスタ" ("ケースNo");
-
-CREATE INDEX "ix_t_担当者マスタ_表示_部署_かな"
-  ON "t_担当者マスタ" ("表示", "部署", "かな");
-
-CREATE INDEX "ix_t_貸出_サイズ"
-  ON "t_貸出" ("サイズ");
-
-CREATE INDEX "ix_t_貸出_機番_未返却"
-  ON "t_貸出" ("機番")
-  WHERE "返却日" IS NULL AND "完了フラグ" IS NULL;
-
-CREATE INDEX "ix_t_貸出_返却日_完了フラグ"
-  ON "t_貸出" ("返却日", "完了フラグ");
-
-CREATE INDEX "ix_t_貸出_貸出日_機番_担当者ID"
-  ON "t_貸出" ("貸出日", "機番", "担当者ID");
-```
-
-## 業務処理と SQL 変換ポイント
-
-### 貸出登録
-
-根拠: `Form_f_Main.cls`, `Gauge_Management.txt`
-
-Access では 1 回の画面入力で最大 20 件のサイズを `t_貸出` に INSERT します。
-
-PostgreSQL では 1 サイズ 1 レコードとして登録します。
-
-```sql
-INSERT INTO "t_貸出" ("サイズ", "担当者ID", "機番", "貸出日")
-VALUES (:size, :staff_id, :machine_code, :lent_on)
-RETURNING "ID";
-```
-
-### 貸出一覧検索
-
-根拠: `Form_f_Main.cls`
-
-検索条件:
-
-- サイズ前方一致
-- サイズ完全一致
-- 機番完全一致
-- 未完了のみ: `"完了フラグ" IS NULL`
-
-Access の `LIKE '0.1*'` は PostgreSQL では `LIKE '0.1%'` に置換します。
-
-### 返却
-
-根拠: `Form_f_返却.cls`
-
-機番単位返却:
-
-```sql
-UPDATE "t_貸出"
-SET
-  "返却日" = :returned_on,
-  "機番" = :return_case_code
-WHERE "機番" = :machine_code
-  AND "返却日" IS NULL;
-```
-
-個別返却:
-
-```sql
-UPDATE "t_貸出"
-SET
-  "返却日" = :returned_on,
-  "機番" = :return_case_code
-WHERE "ID" = :id;
-```
-
-返却時、機番は `返-` + ケースNo に更新されます。例: `返-7`
-
-### 確認
-
-根拠: `Form_f_確認.cls`
-
-確認待ち:
-
-- `"返却日" IS NOT NULL`
-- `"完了フラグ" IS NULL`
-
-確認済み更新:
-
-```sql
-UPDATE "t_貸出"
-SET "完了フラグ" = 'Y'
-WHERE "ID" = :id;
-```
-
-旧 Access 処理では、返却済み未確認の一部を `完了フラグ = 'N'` として扱う処理もあります。初回移行では次の意味として扱います。
-
-| 値 | 意味 |
-|---|---|
-| `NULL` | 未返却、または返却済み未確認 |
-| `N` | 返却済み未確認として明示された状態 |
-| `Y` | 確認済み |
-
-### 貸出修正・削除
-
-根拠: `Form_f_修正.cls`
-
-対象は `ID` で 1 行を指定します。
-
-```sql
-UPDATE "t_貸出"
-SET
-  "貸出日" = :lent_on,
-  "機番" = :machine_code,
-  "担当者ID" = :staff_id,
-  "サイズ" = :size
-WHERE "ID" = :id;
-```
-
-```sql
-DELETE FROM "t_貸出"
-WHERE "ID" = :id;
-```
-
-### PG マスタ
-
-根拠: `Form_f_マスタメンテ.cls`
-
-`サイズ` を主キー相当として扱います。
-
-```sql
-INSERT INTO "t_PGマスタ" ("サイズ", "保有数", "ケースNo")
-VALUES (:size, :stock_count, :case_no);
-```
-
-```sql
-UPDATE "t_PGマスタ"
-SET
-  "保有数" = :stock_count,
-  "ケースNo" = :case_no
-WHERE "サイズ" = :size;
-```
-
-```sql
-DELETE FROM "t_PGマスタ"
-WHERE "サイズ" = :size;
-```
-
-### 担当者マスタ
-
-根拠: `Form_f_Main.cls`, `Form_f_担当者マスタ.cls`
-
-担当者選択では `表示 = 'Y'` のみを対象にし、機番の前置きにより部署を絞り込みます。
-
-```sql
-SELECT "担当者ID", "担当者名"
-FROM "t_担当者マスタ"
-WHERE "表示" = 'Y'
-  AND (:department IS NULL OR "部署" = :department)
-ORDER BY "かな";
-```
-
-部署の例:
-
-| 条件 | 部署 |
-|---|---|
-| 数値系の機番 | `数値` |
-| それ以外 | `製造` |
-
-## Access SQL から PostgreSQL SQL への置換
-
-| Access | PostgreSQL |
-|---|---|
-| `#2026/05/26#` | `DATE '2026-05-26'` またはパラメータ |
-| `LIKE 'abc*'` | `LIKE 'abc%'` |
-| `Is Null` | `IS NULL` |
-| `Not ... Is Null` | `IS NOT NULL` |
-| `IIf(...)` | `CASE WHEN ... THEN ... ELSE ... END` |
-| `DLookup(...)` | `SELECT ... LIMIT 1` または `EXISTS` |
-| `DoCmd.RunSQL` | repository からパラメータ付き SQL 実行 |
-| `SELECT @@IDENTITY` | `INSERT ... RETURNING "ID"` |
-| `DELETE * FROM ...` | `DELETE FROM ...` |
-
-## データ移行手順
-
-### 1. 移行前準備
-
-1. Access ファイルを開けることを確認します。
-2. Access を使うユーザーがいない時間帯を決めます。
-3. `ピンゲージ管理.accdb` のバックアップを取得します。
-4. TablePlus で `192.168.1.120` に接続します。
-5. 新規 DB `pingauge_management` を作成します。
-6. リポジトリに `database/postgresql/` を作成します。
-
-### 2. PostgreSQL の器を作成
-
-1. `001_schema.sql` を作成します。
-2. TablePlus または `psql` で実行します。
-3. まだ PK / FK / CHECK は入れず、まず投入できる状態にします。
-
-### 3. Access からエクスポート
-
-推奨は CSV です。
+### 7. 検証
 
 ```text
-database/postgresql/export/
-  t_PGマスタ.csv
-  t_担当者マスタ.csv
-  t_貸出.csv
+database/postgresql/020_validation.sql
 ```
 
-CSV 作成時の注意:
+確認項目:
 
-- 文字コードは UTF-8 を推奨します。
-- ヘッダー行を付けます。
-- 日付は `YYYY-MM-DD` 形式にそろえます。
-- 空欄を `NULL` として扱う列を事前に決めます。
+- `pg_master`, `staff_master`, `loans` の件数
+- `case_no`, `returned_on`, `completion_flag` の NULL 件数
+- `size`, `staff_id`, `id` の重複
+- `loans.size -> pg_master.size` の欠損
+- `loans.staff_id -> staff_master.staff_id` の欠損
+- アプリ用の未完了・返却対象・確認待ち件数
 
-### 4. PostgreSQL へ取り込み
+最終確認済み例:
 
-取り込み順:
-
-1. `t_PGマスタ`
-2. `t_担当者マスタ`
-3. `t_貸出`
-
-例:
-
-```sql
-COPY "t_PGマスタ" ("サイズ", "保有数", "ケースNo")
-FROM 'C:/path/to/database/postgresql/export/t_PGマスタ.csv'
-WITH (FORMAT csv, HEADER true, ENCODING 'UTF8', NULL '');
-
-COPY "t_担当者マスタ" ("担当者ID", "担当者名", "部署", "かな", "表示")
-FROM 'C:/path/to/database/postgresql/export/t_担当者マスタ.csv'
-WITH (FORMAT csv, HEADER true, ENCODING 'UTF8', NULL '');
-
-COPY "t_貸出" ("ID", "サイズ", "担当者ID", "機番", "貸出日", "返却日", "完了フラグ")
-FROM 'C:/path/to/database/postgresql/export/t_貸出.csv'
-WITH (FORMAT csv, HEADER true, ENCODING 'UTF8', NULL '');
+```text
+pg_master: 2328
+staff_master: 29
+loans: 31795
+missing pg_master reference: 0
+missing staff reference: 0
 ```
 
-TablePlus から CSV インポートする場合も、列順と NULL の扱いは上記と同じにします。
+### 8. アプリ確認
 
-### 5. ID sequence を合わせる
+`.env` を `DB_BACKEND=postgres` にして `main.py` を起動します。
 
-`t_貸出.ID` を Access から持ち込んだ後、次回 INSERT の ID が重複しないようにします。
-
-```sql
-SELECT setval(
-  pg_get_serial_sequence('public."t_貸出"', 'ID'),
-  COALESCE((SELECT MAX("ID") FROM "t_貸出"), 1),
-  true
-);
+```powershell
+.\.venv\Scripts\python.exe main.py
 ```
 
-`GENERATED BY DEFAULT AS IDENTITY` を使う場合、環境によっては sequence 名を確認してから `setval` します。
+確認する操作:
 
-### 6. 件数検証
+- アプリ起動
+- 貸出一覧検索
+- 担当者一覧
+- PGマスタ一覧
+- 返却対象一覧
+- 確認待ち一覧
 
-```sql
-SELECT 't_PGマスタ' AS table_name, COUNT(*) FROM "t_PGマスタ"
-UNION ALL
-SELECT 't_担当者マスタ', COUNT(*) FROM "t_担当者マスタ"
-UNION ALL
-SELECT 't_貸出', COUNT(*) FROM "t_貸出";
+更新操作は、本番切替判断後に行います。
+
+## アプリ側の実装
+
+PostgreSQL 側は次の実装が英語物理名を参照します。
+
+```text
+app/infrastructure/postgres/repositories/
+app/infrastructure/postgres/mappers/
 ```
 
-期待値:
+Access 側の repository は日本語物理名の Access DB を扱うため、そのままです。
 
-| テーブル | 期待件数 |
-|---|---:|
-| `t_PGマスタ` | 2,026 |
-| `t_担当者マスタ` | 29 |
-| `t_貸出` | 31,753 |
+## 切り戻し
 
-### 7. データ品質検証
-
-NULL 状況:
-
-```sql
-SELECT
-  COUNT(*) FILTER (WHERE "返却日" IS NULL) AS null_返却日,
-  COUNT(*) FILTER (WHERE "完了フラグ" IS NULL) AS null_完了フラグ
-FROM "t_貸出";
-```
-
-期待値:
-
-| 項目 | 期待件数 |
-|---|---:|
-| `t_貸出.返却日 IS NULL` | 405 |
-| `t_貸出.完了フラグ IS NULL` | 338 |
-
-FK 候補の欠損確認:
-
-```sql
-SELECT COUNT(*) AS missing_pg_master
-FROM "t_貸出" l
-LEFT JOIN "t_PGマスタ" m ON l."サイズ" = m."サイズ"
-WHERE m."サイズ" IS NULL;
-
-SELECT COUNT(*) AS missing_staff
-FROM "t_貸出" l
-LEFT JOIN "t_担当者マスタ" s ON l."担当者ID" = s."担当者ID"
-WHERE s."担当者ID" IS NULL;
-```
-
-重複確認:
-
-```sql
-SELECT "サイズ", COUNT(*)
-FROM "t_PGマスタ"
-GROUP BY "サイズ"
-HAVING COUNT(*) > 1;
-
-SELECT "担当者ID", COUNT(*)
-FROM "t_担当者マスタ"
-GROUP BY "担当者ID"
-HAVING COUNT(*) > 1;
-
-SELECT "ID", COUNT(*)
-FROM "t_貸出"
-GROUP BY "ID"
-HAVING COUNT(*) > 1;
-```
-
-### 8. 制約とインデックス追加
-
-1. 欠損と重複がないことを確認します。
-2. `002_indexes.sql` を実行します。
-3. `003_constraints.sql` を実行します。
-4. 追加後にアプリで主要操作を確認します。
-
-## アプリ切替前の確認
-
-`.env` を切り替える前に、PostgreSQL 側で次を確認します。
-
-- 貸出一覧が取得できる。
-- サイズ前方一致検索ができる。
-- 機番検索ができる。
-- 未返却データが取得できる。
-- 返却済み未確認データが取得できる。
-- `t_PGマスタ` の登録済みサイズチェックができる。
-- `t_担当者マスタ` の `表示 = 'Y'` と `部署` 絞り込みができる。
-- `INSERT ... RETURNING "ID"` で新規貸出 ID を取得できる。
-- 更新系処理を 1 トランザクションで commit / rollback できる。
-
-## 本番切替手順
-
-1. Access アプリ利用者に停止時間を連絡します。
-2. Access DB の最終バックアップを取得します。
-3. Access から 3 テーブルを再エクスポートします。
-4. PostgreSQL の移行先テーブルを空にします。
-5. CSV を再投入します。
-6. 件数と品質チェックを実行します。
-7. sequence を合わせます。
-8. 制約とインデックスを確認します。
-9. `.env` を `DB_BACKEND=postgres` に変更します。
-10. アプリを起動し、貸出・返却・確認・マスタ操作を確認します。
-11. 問題があれば `.env` を `DB_BACKEND=access` に戻して切り戻します。
-
-## 切り戻し方針
-
-切替直後に問題が出た場合は、PostgreSQL のデータを修正しながら運用を続けるのではなく、まず Access に戻します。
+問題があれば `.env` を Access に戻します。
 
 ```env
 DB_BACKEND=access
 ACCESS_DB_DIRECTORY=\\192.168.1.200\共有\製造課
 ```
 
-切り戻し後、PostgreSQL 側の SQL、型、NULL、制約、アプリ repository 実装を修正して再移行します。
+切り戻し後、PostgreSQL 側のデータまたは repository 実装を修正して再移行します。
 
-## 未確定事項
+## 本番移行を依頼するときの指示例
 
-移行前に確認が必要です。
-
-- `t_PGマスタ.サイズ` が完全に一意か。
-- `t_担当者マスタ.担当者ID` が完全に一意か。
-- `t_貸出.サイズ` がすべて `t_PGマスタ.サイズ` に存在するか。
-- `t_貸出.担当者ID` がすべて `t_担当者マスタ.担当者ID` に存在するか。
-- `完了フラグ = 'N'` の正確な業務意味。
-- `機番` の最大長が本当に 4 文字で足りるか。サンプルでは `返-7` があり、返却ケースNo が 2 桁なら `返-99` で 4 文字です。
-- Access 側の 3 テーブルがリンクテーブルの場合、リンク先の実体がどこか。
-
-## 次にやること
-
-1. TablePlus で `pingauge_management` DB を作成する。
-2. `database/postgresql/` フォルダを作成する。
-3. `001_schema.sql` に本書の推奨 DDL を保存する。
-4. Access から CSV を出力する方法を決める。
-5. PostgreSQL に一度テスト投入して、件数と欠損を確認する。
-6. 検証結果に合わせて PK / FK / CHECK の追加可否を決める。
+```text
+PostgreSQL本番移行を実行してください。
+手順は docs/postgresql-migration.md と database/postgresql/migration_notes.md に従ってください。
+実行前に dry-run を行い、件数を確認してから --apply-schema --truncate で本投入してください。
+投入後、002_indexes.sql、003_constraints.sql、020_validation.sql を実行し、結果を migration_notes.md に記録してください。
+```

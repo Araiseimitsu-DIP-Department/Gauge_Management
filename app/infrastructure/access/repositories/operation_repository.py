@@ -59,7 +59,7 @@ class AccessOperationRepository:
             WHERE 機番 = ? AND 返却日 IS NULL
         """
 
-        returned_machine_code = f"返却{case_no}"
+        returned_machine_code = f"返-{case_no}"
         try:
             with open_access_connection(self._settings) as connection:
                 cursor = connection.cursor()
@@ -77,7 +77,7 @@ class AccessOperationRepository:
             WHERE ID = ?
         """
 
-        returned_machine_code = f"返却{case_no}"
+        returned_machine_code = f"返-{case_no}"
         try:
             with open_access_connection(self._settings) as connection:
                 connection.cursor().execute(sql, returned_on, returned_machine_code, loan_id)
@@ -112,7 +112,7 @@ class AccessOperationRepository:
 
         try:
             with open_access_connection(self._settings) as connection:
-                rows = connection.cursor().execute(sql, f"返却{case_no}").fetchall()
+                rows = connection.cursor().execute(sql, f"返-{case_no}").fetchall()
         except pyodbc.Error as exc:
             logger.exception("failed to search confirmation loans")
             raise RepositoryError("確認対象の検索に失敗しました。") from exc
@@ -168,4 +168,3 @@ class AccessOperationRepository:
 
 def build_access_operation_repository(settings: AccessDbSettings) -> AccessOperationRepository:
     return AccessOperationRepository(settings)
-

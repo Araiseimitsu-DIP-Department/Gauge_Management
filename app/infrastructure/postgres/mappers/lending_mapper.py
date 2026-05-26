@@ -17,28 +17,28 @@ def _get(row: Any, key: str, default: Any = None) -> Any:
 class LendingRowMapper:
     @staticmethod
     def to_staff_member(row: Any) -> StaffMember:
-        visible_value = _get(row, "表示")
+        visible_value = _get(row, "visible")
         return StaffMember(
-            staff_id=str(_get(row, "担当者ID", "")),
-            name=str(_get(row, "担当者名", "")),
-            department=str(_get(row, "部署", "")),
-            kana=str(_get(row, "かな", "")),
+            staff_id=str(_get(row, "staff_id", "")),
+            name=str(_get(row, "staff_name", "")),
+            department=str(_get(row, "department", "")),
+            kana=str(_get(row, "kana", "")),
             visible=str(visible_value).upper() == "Y" if visible_value is not None else True,
         )
 
     @staticmethod
     def to_loan_record(row: Any) -> LoanRecord:
         return LoanRecord(
-            loan_id=int(_get(row, "ID", 0)),
-            size=str(_get(row, "サイズ", "")),
-            staff_id=str(_get(row, "担当者ID", "")),
-            staff_name=str(_get(row, "担当者名", "")),
-            machine_code=str(_get(row, "機番", "")),
-            lent_on=_normalize_datetime(_get(row, "貸出日")),
-            returned_on=_normalize_datetime(_get(row, "返却日")),
-            holding_count=_normalize_int(_get(row, "保有数")),
-            case_no=_normalize_text(_get(row, "ケースNo")),
-            completion_flag=_normalize_text(_get(row, "完了フラグ")),
+            loan_id=int(_get(row, "id", 0)),
+            size=str(_get(row, "size", "")),
+            staff_id=str(_get(row, "staff_id", "")),
+            staff_name=str(_get(row, "staff_name", "")),
+            machine_code=str(_get(row, "machine_code", "")),
+            lent_on=_normalize_datetime(_get(row, "lent_on")),
+            returned_on=_normalize_datetime(_get(row, "returned_on")),
+            holding_count=_normalize_int(_get(row, "holding_count")),
+            case_no=_normalize_text(_get(row, "case_no")),
+            completion_flag=_normalize_text(_get(row, "completion_flag")),
         )
 
 
