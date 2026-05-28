@@ -42,6 +42,11 @@ Gauge_Management/
     SETUP.md                     初期設定メモ
     DESIGN.md                    画面・見た目の整理メモ
     postgresql-migration.md      Access -> PostgreSQL 移行手順書
+  DESIGN/
+    DESIGN.md                    現行 UI デザインガイド
+    arai_logo.png                サイドバー表示用ロゴ
+    arai_logo_wt.png             ロゴ白版
+    arai_site.jpg                参考イメージ
   database/
     postgresql/                  PostgreSQL DDL、検証SQL、移行メモ
   scripts/
@@ -123,6 +128,8 @@ pyinstaller PinGaugeMgmt.spec
 
 成果物は `dist/ピンゲージ管理.exe` です。
 
+`PinGaugeMgmt.spec` では `.env` に加えて `DESIGN/arai_logo.png` も同梱しており、ビルド後のサイドバーでもロゴ画像が表示されます。
+
 ## アイコン
 
 - アプリの元画像は `docs/精密計測具のアイコン.png`
@@ -132,5 +139,7 @@ pyinstaller PinGaugeMgmt.spec
 ## 補足
 
 - 旧 PySide6 GUI は廃止し、現在は `app/webview` が GUI 本体です
+- `DESIGN/DESIGN.md` を優先参照し、業務ロジックを変えずに UI デザインを調整する運用です
 - UI 更新時のチラつきを抑えるため、画面の全面再描画を減らしています
 - DB 処理は `application -> services -> infrastructure` の流れで実行しています
+- PGマスタは、貸出履歴で使用中のサイズを削除しようとした場合、参照件数を表示して削除を止めます

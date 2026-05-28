@@ -44,7 +44,13 @@ class MasterUseCase:
     def delete_pg_master(self, size: str) -> None:
         if not size.strip():
             raise ValidationError("削除対象のサイズを指定してください。")
-        self._repository.delete_pg_master(size.strip().upper())
+        normalized_size = size.strip().upper()
+        reference_count = self._repository.count_pg_master_references(normalized_size)
+        if reference_count > 0:
+            raise ValidationError(
+                f"{normalized_size} は貸出履歴 {reference_count} 件で使用中のため削除できません。"
+            )
+        self._repository.delete_pg_master(normalized_size)
 
     def search_staff_master(self, query: str = "") -> list[StaffMemberDto]:
         return self._repository.fetch_staff_master(query.strip() or None)

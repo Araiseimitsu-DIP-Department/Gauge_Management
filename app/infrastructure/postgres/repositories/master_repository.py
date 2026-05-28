@@ -84,6 +84,18 @@ class PostgresMasterRepository:
             logger.exception("failed to update pg master")
             raise RepositoryError("PGマスタの更新に失敗しました。") from exc
 
+    def count_pg_master_references(self, size: str) -> int:
+        sql = f'SELECT COUNT(*) AS "ref_count" FROM {self._table("loans")} WHERE "size" = %s'
+        try:
+            with open_postgres_connection(self._settings) as connection:
+                with open_postgres_cursor(connection) as cursor:
+                    cursor.execute(sql, (size,))
+                    row = cursor.fetchone()
+        except Exception as exc:
+            logger.exception("failed to count pg master references")
+            raise RepositoryError("PGマスタ参照件数の確認に失敗しました。") from exc
+        return int(row.get("ref_count", 0) or 0) if row else 0
+
     def delete_pg_master(self, size: str) -> None:
         sql = f'DELETE FROM {self._table("pg_master")} WHERE "size" = %s'
         try:

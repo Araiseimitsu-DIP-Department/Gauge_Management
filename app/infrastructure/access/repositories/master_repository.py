@@ -70,6 +70,16 @@ class AccessMasterRepository:
             logger.exception("failed to update pg master")
             raise RepositoryError("PGマスタの更新に失敗しました。") from exc
 
+    def count_pg_master_references(self, size: str) -> int:
+        sql = "SELECT COUNT(*) AS ref_count FROM t_貸出 WHERE サイズ = ?"
+        try:
+            with open_access_connection(self._settings) as connection:
+                row = connection.cursor().execute(sql, size).fetchone()
+        except pyodbc.Error as exc:
+            logger.exception("failed to count pg master references")
+            raise RepositoryError("PGマスタ参照件数の確認に失敗しました。") from exc
+        return int(row[0]) if row is not None and row[0] is not None else 0
+
     def delete_pg_master(self, size: str) -> None:
         try:
             with open_access_connection(self._settings) as connection:

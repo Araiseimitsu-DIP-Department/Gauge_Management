@@ -6,6 +6,9 @@ project_root = Path.cwd().resolve()
 icon_path = project_root / "docs" / "pingauge.ico"
 env_path = project_root / ".env"
 datas = [(str(env_path), ".")] if env_path.exists() else []
+logo_path = project_root / "DESIGN" / "arai_logo.png"
+if logo_path.exists():
+    datas.append((str(logo_path), "DESIGN"))
 
 
 a = Analysis(

@@ -18,6 +18,9 @@ class MasterRepositoryPort(Protocol):
     def update_pg_master(self, record: PgMasterDto) -> None:
         ...
 
+    def count_pg_master_references(self, size: str) -> int:
+        ...
+
     def delete_pg_master(self, size: str) -> None:
         ...
 
