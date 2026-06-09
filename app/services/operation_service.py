@@ -118,6 +118,16 @@ class OperationService:
         except RepositoryError as exc:
             raise AppDataAccessError(str(exc)) from exc
 
+    def delete_confirmation_batch(self, machine_code: str, returned_on: date | None) -> int:
+        try:
+            return self._usecase.delete_confirmation_batch(machine_code, returned_on)
+        except AppConfigurationError:
+            raise
+        except ValidationError as exc:
+            raise AppValidationError(str(exc)) from exc
+        except RepositoryError as exc:
+            raise AppDataAccessError(str(exc)) from exc
+
     def confirm_all(self, loan_ids: list[int]) -> int:
         try:
             return self._usecase.confirm_all(loan_ids)
@@ -137,4 +147,3 @@ class OperationService:
             raise AppValidationError(str(exc)) from exc
         except RepositoryError as exc:
             raise AppDataAccessError(str(exc)) from exc
-

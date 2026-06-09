@@ -85,3 +85,30 @@ Resolution:
 - missing `staff_master` reference from `loans.staff_id`: 0
 - `003_constraints.sql`: applied.
 - Repository smoke check after constraints: passed.
+
+## 2026-06-09 Latest Access Refresh
+
+- Source: current `\\192.168.1.200\共有\製造課\ピンゲージ管理.accdb`
+- `scripts/migrate_access_to_postgres.py --dry-run`: success.
+  - `pg_master`: 2,029 rows before reconciliation
+  - `staff_master`: 29 rows
+  - `loans`: 32,116 rows
+  - `pg_master` placeholders added: 303
+- `scripts/migrate_access_to_postgres.py --apply-schema --truncate`: success.
+- `002_indexes.sql`: applied.
+- Constraints: already present.
+- Validation:
+  - `pg_master`: 2,332
+  - `staff_master`: 29
+  - `loans`: 32,116
+  - `pg_master.case_no IS NULL`: 310
+  - `loans.returned_on IS NULL`: 452
+  - `loans.completion_flag IS NULL`: 379
+  - duplicate `pg_master.size`: 0
+  - duplicate `staff_master.staff_id`: 0
+  - duplicate `loans.id`: 0
+  - missing `pg_master` reference from `loans.size`: 0
+  - missing `staff_master` reference from `loans.staff_id`: 0
+  - active loans: 379
+  - returnable loans: 362
+  - confirmation waiting: 17

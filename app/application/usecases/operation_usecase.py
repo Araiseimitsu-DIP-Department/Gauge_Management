@@ -60,6 +60,12 @@ class OperationUseCase:
     def fetch_confirmation_batches(self) -> list[tuple[str, date | None]]:
         return self._repository.fetch_confirmation_batches()
 
+    def delete_confirmation_batch(self, machine_code: str, returned_on: date | None) -> int:
+        normalized_machine_code = machine_code.strip()
+        if not normalized_machine_code:
+            raise ValidationError("削除する確認済バッチを選択してください。")
+        return self._repository.delete_confirmation_batch(normalized_machine_code, returned_on)
+
     def confirm_all(self, loan_ids: list[int]) -> int:
         if not loan_ids:
             raise ValidationError("確認対象がありません。")
@@ -69,4 +75,3 @@ class OperationUseCase:
         if loan_id is None:
             raise ValidationError("確認対象を選択してください。")
         self._repository.confirm_one(loan_id)
-

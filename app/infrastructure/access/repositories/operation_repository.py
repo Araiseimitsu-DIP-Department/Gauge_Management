@@ -137,6 +137,40 @@ class AccessOperationRepository:
 
         return [(str(getattr(row, "機番")), getattr(row, "返却日")) for row in rows]
 
+    def delete_confirmation_batch(self, machine_code: str, returned_on: date | None) -> int:
+        if returned_on is None:
+            sql = """
+                DELETE FROM t_貸出
+                WHERE 機番 = ?
+                  AND 返却日 IS NULL
+                  AND (
+                    完了フラグ = 'N'
+                    OR (完了フラグ IS NULL AND 返却日 IS NOT NULL)
+                  )
+            """
+            params = (machine_code,)
+        else:
+            sql = """
+                DELETE FROM t_貸出
+                WHERE 機番 = ?
+                  AND 返却日 = ?
+                  AND (
+                    完了フラグ = 'N'
+                    OR (完了フラグ IS NULL AND 返却日 IS NOT NULL)
+                  )
+            """
+            params = (machine_code, returned_on)
+
+        try:
+            with open_access_connection(self._settings) as connection:
+                cursor = connection.cursor()
+                cursor.execute(sql, *params)
+                connection.commit()
+                return cursor.rowcount if cursor.rowcount != -1 else 0
+        except pyodbc.Error as exc:
+            logger.exception("failed to delete confirmation batch")
+            raise RepositoryError("確認済バッチの削除に失敗しました。") from exc
+
     def confirm_all(self, loan_ids: list[int]) -> int:
         if not loan_ids:
             return 0

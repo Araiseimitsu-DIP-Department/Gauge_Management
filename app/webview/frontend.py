@@ -464,6 +464,8 @@ _HTML = r"""<!DOCTYPE html>
       border: 1px solid var(--color-border);
       border-radius: var(--radius-xl);
       overflow: auto;
+      min-height: 260px;
+      height: clamp(260px, calc(100vh - 22rem), 570px);
       max-height: 570px;
       background: var(--color-surface);
     }
@@ -647,6 +649,80 @@ _HTML = r"""<!DOCTYPE html>
       .header { align-items: flex-start; flex-direction: column; }
       .size-grid { grid-template-columns: 1fr; gap: 0.75rem; }
     }
+    @media (max-height: 819px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow: auto;
+      }
+      #app { min-height: 100vh; }
+      .shell { min-height: 100vh; }
+      .sidebar {
+        gap: 0.625rem;
+        padding: 0.875rem 0.75rem 0.75rem;
+      }
+      .brand {
+        padding: 0.125rem 0.125rem 0.5rem;
+      }
+      .brand-main { gap: 0.375rem; }
+      .brand-logo { max-width: 9.25rem; }
+      .brand-caption { line-height: 1.35; }
+      .nav-group { gap: 0.25rem; }
+      .nav-btn, .nav-sub-btn, .nav-group-btn {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+      .nav-group-btn { margin-top: 0.25rem; }
+      .sidebar-footer {
+        padding: 0.625rem 0.75rem 0.125rem;
+        line-height: 1.4;
+      }
+      .main { padding: 1rem; }
+      .main-shell { min-height: calc(100vh - 2rem); }
+      .header {
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      .header h2 { font-size: 1.25rem; }
+      .header p { margin-top: 0.25rem; }
+      .screen { gap: 0.875rem; }
+      .card-inner { padding: 1rem; }
+      .card-head { margin-bottom: 0.625rem; }
+      .field-row {
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .field-group {
+        gap: 0.25rem;
+        margin-bottom: 0.625rem;
+      }
+      .stack { gap: 10px; }
+      .button-row { margin-top: 0.5rem; }
+      .toolbar {
+        gap: 0.5rem;
+        margin-bottom: 0.625rem;
+      }
+      .help {
+        margin-top: 6px;
+        padding: 0.625rem;
+        line-height: 1.45;
+      }
+      .table-wrap {
+        min-height: 240px;
+        height: clamp(240px, calc(100vh - 19rem), 420px);
+        max-height: 420px;
+      }
+      thead th { padding: 0.5rem 0.75rem; }
+      tbody td { padding: 0.625rem 0.75rem; }
+      .app-footer {
+        margin-top: 1rem;
+        padding-top: 0.625rem;
+      }
+      .modal-backdrop { padding: 12px; }
+      .modal { max-height: calc(100vh - 24px); }
+      .busy-overlay, .dialog-overlay { padding: 16px; }
+      .busy-card, .dialog-card { padding: 18px 20px; }
+    }
   </style>
 </head>
 <body>
@@ -667,6 +743,7 @@ _HTML = r"""<!DOCTYPE html>
       },
       currentScreen: "lending",
       initialErrors: [],
+      gaugeAutoAdvanceTimer: null,
       options: {
         lendingMachinePrefixes: [],
         returnMachinePrefixes: [],
@@ -679,7 +756,7 @@ _HTML = r"""<!DOCTYPE html>
         registerMachinePrefix: "",
         registerMachineSuffix: "",
         registerStaffId: "",
-        registerGaugeSizes: Array.from({ length: 20 }, () => ""),
+        registerGaugeSizes: Array.from({ length: 30 }, () => ""),
         searchMode: "size",
         searchSizePrefix: "",
         searchMachinePrefix: "",
@@ -703,6 +780,7 @@ _HTML = r"""<!DOCTYPE html>
         selectedLoanId: null,
         batches: [],
         selectedBatchMachineCode: "",
+        selectedBatchReturnedOn: "",
       },
       pgMaster: {
         searchQuery: "",
@@ -1079,7 +1157,7 @@ _HTML = r"""<!DOCTYPE html>
                 <button class="btn primary" data-action="lending-register">登録</button>
                 <button class="btn secondary" data-action="lending-clear">クリア</button>
               </div>
-              <div class="help">20 件分のサイズを入力できます。Enter キーで次の入力欄へ移動します。</div>
+              <div class="help">30 件分のサイズを入力できます。Enter キーで次の入力欄へ移動します。</div>
               <div style="margin-top:18px;">
                 <div class="card-head">
                   <h3>サイズ入力</h3>
@@ -1089,7 +1167,7 @@ _HTML = r"""<!DOCTYPE html>
                   ${s.registerGaugeSizes.map((value, index) => `
                     <div class="size-row">
                       <div class="size-index">${index + 1}</div>
-                      <input class="field-control compact" data-screen="lending" data-field="registerGaugeSizes" data-index="${index}" value="${escapeHtml(value)}" placeholder="サイズ" />
+                      <input class="field-control compact" inputmode="decimal" autocomplete="off" data-screen="lending" data-field="registerGaugeSizes" data-index="${index}" value="${escapeHtml(value)}" placeholder="サイズ" />
                     </div>
                   `).join("")}
                 </div>
@@ -1259,10 +1337,13 @@ _HTML = r"""<!DOCTYPE html>
             <div class="card-inner">
               <div class="card-head">
                 <h3>確認済みバッチ</h3>
-                <button class="btn secondary small" data-action="confirmation-refresh">再読込</button>
+                <div class="button-row" style="margin:0;">
+                  <button class="btn secondary small" data-action="confirmation-refresh">再読込</button>
+                  <button class="btn danger small" data-action="confirmation-delete-batch" ${s.selectedBatchMachineCode ? "" : "disabled"}>削除</button>
+                </div>
               </div>
               <div class="table-wrap">
-                ${renderBatchTable(s.batches, s.selectedBatchMachineCode)}
+                ${renderBatchTable(s.batches, s.selectedBatchMachineCode, s.selectedBatchReturnedOn)}
               </div>
             </div>
           </section>
@@ -1292,7 +1373,7 @@ _HTML = r"""<!DOCTYPE html>
                   </div>
                 </div>
               </div>
-              <div class="table-wrap">
+              <div class="table-wrap" data-scroll-key="pg-master-list">
                 ${renderTable(
                   s.rows,
                   ["サイズ", "数量", "ケースNo"],
@@ -1518,13 +1599,14 @@ _HTML = r"""<!DOCTYPE html>
       return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
     }
 
-    function renderBatchTable(rows, selectedMachineCode) {
+    function renderBatchTable(rows, selectedMachineCode, selectedReturnedOn) {
       if (!rows || !rows.length) {
         return '<div class="empty-state">確認済みバッチはありません。</div>';
       }
       const head = '<tr><th>機番</th><th>返却日</th></tr>';
       const body = rows.map((row, index) => {
-        const selected = String(selectedMachineCode ?? "") === String(row.machine_code ?? "");
+        const selected = String(selectedMachineCode ?? "") === String(row.machine_code ?? "")
+          && String(selectedReturnedOn ?? "") === String(row.returned_on ?? "");
         return `<tr data-action="select-batch" data-row-index="${index}" class="${rowClasses(selected)}"><td>${escapeHtml(row.machine_code ?? "")}</td><td>${escapeHtml(formatDate(row.returned_on))}</td></tr>`;
       }).join("");
       return `<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
@@ -1592,6 +1674,48 @@ _HTML = r"""<!DOCTYPE html>
       const note = document.getElementById("lending-gauge-count-note");
       if (count) count.textContent = text;
       if (note) note.textContent = `入力済み ${countEnteredGaugeSizes()} 件`;
+    }
+
+    function isLendingGaugeSizeInput(target) {
+      return target instanceof HTMLInputElement
+        && target.dataset.screen === "lending"
+        && target.dataset.field === "registerGaugeSizes";
+    }
+
+    function focusNextLendingGaugeSizeInput(current) {
+      if (!isLendingGaugeSizeInput(current)) return;
+      const currentIndex = Number(current.dataset.index);
+      const inputs = Array.from(
+        document.querySelectorAll('[data-screen="lending"][data-field="registerGaugeSizes"]')
+      ).filter((element) => element instanceof HTMLInputElement);
+      const next = inputs.find((element) => Number(element.dataset.index) > currentIndex);
+      if (next) {
+        next.focus();
+        next.select();
+      } else {
+        current.select();
+      }
+    }
+
+    function shouldAutoAdvanceLendingGaugeSize(value) {
+      const normalized = String(value || "").trim();
+      return /^\d+\.\d{3,}$/.test(normalized) || /^\d{4,}$/.test(normalized);
+    }
+
+    function scheduleLendingGaugeAutoAdvance(input) {
+      if (!isLendingGaugeSizeInput(input)) return;
+      if (state.gaugeAutoAdvanceTimer) {
+        window.clearTimeout(state.gaugeAutoAdvanceTimer);
+      }
+      const value = input.value.trim();
+      if (!shouldAutoAdvanceLendingGaugeSize(value)) return;
+      const index = input.dataset.index;
+      state.gaugeAutoAdvanceTimer = window.setTimeout(() => {
+        if (document.activeElement === input && input.dataset.index === index && shouldAutoAdvanceLendingGaugeSize(input.value)) {
+          focusNextLendingGaugeSizeInput(input);
+        }
+        state.gaugeAutoAdvanceTimer = null;
+      }, 120);
     }
 
     async function invokeApi(name, payload) {
@@ -1689,7 +1813,20 @@ _HTML = r"""<!DOCTYPE html>
       return fallback;
     }
 
+    function getScrollTopByKey(key) {
+      const element = document.querySelector(`[data-scroll-key="${key}"]`);
+      return element ? element.scrollTop : 0;
+    }
+
+    function restoreScrollTopByKey(key, value) {
+      const element = document.querySelector(`[data-scroll-key="${key}"]`);
+      if (element) {
+        element.scrollTop = value;
+      }
+    }
+
     function selectRowFromCurrentScreen(index) {
+      const pgMasterScrollTop = state.currentScreen === "pg_master" ? getScrollTopByKey("pg-master-list") : null;
       switch (state.currentScreen) {
         case "lending":
           state.lending.selectedLoanId = state.lending.loans[index] ? state.lending.loans[index].loan_id : null;
@@ -1708,6 +1845,9 @@ _HTML = r"""<!DOCTYPE html>
           break;
       }
       renderApp();
+      if (pgMasterScrollTop !== null) {
+        restoreScrollTopByKey("pg-master-list", pgMasterScrollTop);
+      }
     }
 
     function selectPgRow(index) {
@@ -1814,7 +1954,7 @@ _HTML = r"""<!DOCTYPE html>
       state.lending.registerMachinePrefix = "";
       state.lending.registerMachineSuffix = "";
       state.lending.registerStaffId = "";
-      state.lending.registerGaugeSizes = Array.from({ length: 20 }, () => "");
+      state.lending.registerGaugeSizes = Array.from({ length: 30 }, () => "");
       state.lending.staffMembers = [];
       state.lending.selectedLoanId = null;
       renderApp();
@@ -1845,6 +1985,7 @@ _HTML = r"""<!DOCTYPE html>
       state.confirmation.detailLoans = [];
       state.confirmation.selectedLoanId = null;
       state.confirmation.selectedBatchMachineCode = "";
+      state.confirmation.selectedBatchReturnedOn = "";
       renderApp();
     }
 
@@ -1927,7 +2068,7 @@ _HTML = r"""<!DOCTYPE html>
     function extractCaseNo(machineCode) {
       const normalized = String(machineCode || "").trim();
       if (!normalized.includes("-")) return "";
-      return normalized.split("-", 1)[1].trim();
+      return normalized.slice(normalized.indexOf("-") + 1).trim();
     }
 
     function formatCompletionFlag(value) {
@@ -1987,8 +2128,9 @@ _HTML = r"""<!DOCTYPE html>
         const row = state.confirmation.batches[Number(target.dataset.rowIndex)];
         if (!row) return;
         state.confirmation.selectedBatchMachineCode = row.machine_code || "";
+        state.confirmation.selectedBatchReturnedOn = row.returned_on || "";
         const caseNo = extractCaseNo(row.machine_code || "");
-        if (caseNo && await confirmDialog("確認対象の表示", `${row.machine_code} の確認対象を表示しますか？`)) {
+        if (caseNo) {
           state.confirmation.caseNo = caseNo;
           await refreshConfirmationSearch();
         } else {
@@ -2114,6 +2256,24 @@ _HTML = r"""<!DOCTYPE html>
           case "confirmation-refresh":
             setBusy("バッチ再読込", "確認済みバッチを更新しています...");
             await refreshConfirmationBatches();
+            break;
+          case "confirmation-delete-batch":
+            if (!state.confirmation.selectedBatchMachineCode) return;
+            if (!(await confirmDialog("確認済バッチ削除", `${state.confirmation.selectedBatchMachineCode} の確認待ちデータを削除しますか？`))) return;
+            setBusy("確認済バッチ削除", "確認待ちデータを削除しています...");
+            {
+              const data = await invokeApi("delete_confirmation_batch", {
+                machine_code: state.confirmation.selectedBatchMachineCode,
+                returned_on: state.confirmation.selectedBatchReturnedOn || null,
+              });
+              state.confirmation.caseNo = "";
+              state.confirmation.detailLoans = [];
+              state.confirmation.selectedLoanId = null;
+              state.confirmation.selectedBatchMachineCode = "";
+              state.confirmation.selectedBatchReturnedOn = "";
+              await refreshConfirmationBatches();
+              toast("完了", `${data.count || 0}件を削除しました。`);
+            }
             break;
           case "pg-search":
             if (!(await confirmDialog("PGマスタ検索", "PGマスタを検索しますか？"))) return;
@@ -2250,6 +2410,9 @@ _HTML = r"""<!DOCTYPE html>
         applyLendingPreview();
         if (field === "registerGaugeSizes") {
           updateLendingGaugeCountDisplay();
+          if (isLendingGaugeSizeInput(target)) {
+            scheduleLendingGaugeAutoAdvance(target);
+          }
         }
       }
       if (screen === "return") {
@@ -2317,6 +2480,18 @@ _HTML = r"""<!DOCTYPE html>
       if (modal) {
         event.stopPropagation();
       }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      if (!isLendingGaugeSizeInput(target)) return;
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      if (state.gaugeAutoAdvanceTimer) {
+        window.clearTimeout(state.gaugeAutoAdvanceTimer);
+        state.gaugeAutoAdvanceTimer = null;
+      }
+      focusNextLendingGaugeSizeInput(target);
     });
   </script>
 </body>

@@ -147,6 +147,29 @@ class PostgresOperationRepository:
 
         return [(str(row["machine_code"]), row["returned_on"]) for row in rows]
 
+    def delete_confirmation_batch(self, machine_code: str, returned_on: date | None) -> int:
+        sql = f'''
+            DELETE FROM {self._table("loans")}
+            WHERE "machine_code" = %s
+              AND "returned_on" IS NOT DISTINCT FROM %s
+              AND (
+                "completion_flag" = 'N'
+                OR ("completion_flag" IS NULL AND "returned_on" IS NOT NULL)
+              )
+        '''
+
+        try:
+            with open_postgres_connection(self._settings) as connection:
+                with open_postgres_cursor(connection) as cursor:
+                    cursor.execute(sql, (machine_code, returned_on))
+                    deleted_count = cursor.rowcount if cursor.rowcount and cursor.rowcount > 0 else 0
+                connection.commit()  # type: ignore[attr-defined]
+        except Exception as exc:
+            logger.exception("failed to delete confirmation batch")
+            raise RepositoryError("確認済バッチの削除に失敗しました。") from exc
+
+        return deleted_count
+
     def confirm_all(self, loan_ids: list[int]) -> int:
         if not loan_ids:
             return 0

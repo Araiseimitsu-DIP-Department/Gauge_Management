@@ -66,7 +66,7 @@ class WebviewBridge:
                 "register_machine_prefix": "",
                 "register_machine_suffix": "",
                 "register_staff_id": "",
-                "register_gauge_sizes": [""] * 20,
+                "register_gauge_sizes": [""] * 30,
                 "search_mode": "size",
                 "search_size_prefix": "",
                 "search_machine_prefix": "",
@@ -218,6 +218,16 @@ class WebviewBridge:
             batches = self._operation_service.fetch_confirmation_batches()
             return self._ok({"batches": self._serialize_rows(batches)})
         except (AppConfigurationError, AppValidationError, AppDataAccessError) as exc:
+            return self._fail(exc)
+
+    def delete_confirmation_batch(self, payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            count = self._operation_service.delete_confirmation_batch(
+                machine_code=str(payload.get("machine_code", "")),
+                returned_on=self._parse_date(payload.get("returned_on")),
+            )
+            return self._ok({"count": count})
+        except (AppConfigurationError, AppValidationError, AppDataAccessError, ValueError) as exc:
             return self._fail(exc)
 
     def confirm_one(self, payload: dict[str, Any]) -> dict[str, Any]:

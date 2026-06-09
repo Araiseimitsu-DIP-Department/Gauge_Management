@@ -34,7 +34,7 @@ def run() -> int:
         js_api=bridge,
         width=1440,
         height=900,
-        min_size=(1260, 780),
+        min_size=(1100, 680),
         maximized=True,
         background_color="#f5f7fa",
         confirm_close=True,
