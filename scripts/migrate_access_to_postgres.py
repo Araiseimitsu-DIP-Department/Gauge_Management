@@ -23,9 +23,9 @@ from app.config.app_settings import load_app_settings  # noqa: E402
 NUMERIC_SIZE_PATTERN = re.compile(r"^[0-9]+(\.[0-9]+)?$")
 
 TABLES = (
-    ("t_PGマスタ", "pg_master"),
+    ("t_PGマスタ", "pin_gauge_master"),
     ("t_担当者マスタ", "staff_master"),
-    ("t_貸出", "loans"),
+    ("t_貸出", "pin_gauge_lending"),
 )
 
 SOURCE_COLUMNS = {
@@ -35,9 +35,9 @@ SOURCE_COLUMNS = {
 }
 
 TARGET_COLUMNS = {
-    "pg_master": ("size", "holding_count", "case_no"),
-    "staff_master": ("staff_id", "staff_name", "department", "kana", "visible"),
-    "loans": ("id", "size", "staff_id", "machine_code", "lent_on", "returned_on", "completion_flag"),
+    "pin_gauge_master": ("size", "owned_quantity", "case_no"),
+    "staff_master": ("staff_id", "staff_name", "department", "kana", "display_flag"),
+    "pin_gauge_lending": ("id", "size", "staff_id", "machine_no", "lent_date", "returned_date", "completion_flag"),
 }
 
 
@@ -123,7 +123,7 @@ def migrate(config: MigrationConfig) -> None:
                 execute_sql_file(cursor, PROJECT_ROOT / "database" / "postgresql" / "001_schema.sql")
 
             if config.truncate:
-                cursor.execute('TRUNCATE TABLE "loans", "pg_master", "staff_master" RESTART IDENTITY')
+                cursor.execute('TRUNCATE TABLE "pin_gauge_lending", "pin_gauge_master", "staff_master" RESTART IDENTITY')
 
             for _, target_table in TABLES:
                 insert_rows(cursor, target_table, TARGET_COLUMNS[target_table], extracted[target_table])
@@ -162,8 +162,8 @@ def insert_rows(
 
 
 def reconcile_extracted_data(extracted: dict[str, list[tuple[Any, ...]]]) -> None:
-    pg_master_rows = extracted["pg_master"]
-    loan_rows = extracted["loans"]
+    pg_master_rows = extracted["pin_gauge_master"]
+    loan_rows = extracted["pin_gauge_lending"]
 
     master_sizes = {str(row[0]) for row in pg_master_rows if row[0] is not None}
     normalized_loans: list[tuple[Any, ...]] = []
@@ -186,10 +186,10 @@ def reconcile_extracted_data(extracted: dict[str, list[tuple[Any, ...]]]) -> Non
     )
 
     pg_master_rows.extend((size, 0, None) for size in missing_master_sizes)
-    extracted["loans"] = normalized_loans
+    extracted["pin_gauge_lending"] = normalized_loans
 
     if missing_master_sizes:
-        print(f"pg_master placeholders added: {len(missing_master_sizes)}")
+        print(f"pin_gauge_master placeholders added: {len(missing_master_sizes)}")
 
 
 def normalize_loan_size(size: Any, master_sizes: set[str]) -> Any:
@@ -214,8 +214,8 @@ def reset_loan_id_sequence(cursor: Any) -> None:
     cursor.execute(
         """
         SELECT setval(
-          pg_get_serial_sequence('"loans"', 'id'),
-          COALESCE((SELECT MAX("id") FROM "loans"), 1),
+          pg_get_serial_sequence('"pin_gauge_lending"', 'id'),
+          COALESCE((SELECT MAX("id") FROM "pin_gauge_lending"), 1),
           true
         )
         """
@@ -249,8 +249,8 @@ def load_psycopg() -> Any:
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Migrate ピンゲージ管理 data from Access to PostgreSQL.")
-    parser.add_argument("--access-path", help="Full path to ピンゲージ管理.accdb.")
+    parser = argparse.ArgumentParser(description="Migrate ピンゲージ管理DB data from Access to PostgreSQL.")
+    parser.add_argument("--access-path", help="Full path to ピンゲージ管理DB.accdb.")
     parser.add_argument("--postgres-url", help="PostgreSQL connection URL.")
     parser.add_argument("--schema", default=None, help="Target PostgreSQL schema. Defaults to .env POSTGRES_SCHEMA or public.")
     parser.add_argument("--apply-schema", action="store_true", help="Run database/postgresql/001_schema.sql before import.")

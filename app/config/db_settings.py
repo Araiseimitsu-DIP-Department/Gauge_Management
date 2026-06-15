@@ -5,10 +5,11 @@ from pathlib import Path
 from typing import Mapping
 
 
-ACCESS_DB_FILENAME = "ピンゲージ管理.accdb"
+ACCESS_DB_FILENAME = "ピンゲージ管理DB.accdb"
 ACCESS_DB_DIRECTORY_KEY = "ACCESS_DB_DIRECTORY"
 DATABASE_BACKEND_KEY = "DB_BACKEND"
 POSTGRES_CONNECTION_URL_KEY = "POSTGRES_CONNECTION_URL"
+DATABASE_URL_KEY = "DATABASE_URL"
 POSTGRES_SCHEMA_KEY = "POSTGRES_SCHEMA"
 
 
@@ -63,6 +64,10 @@ def load_access_db_settings(env_values: Mapping[str, str]) -> AccessDbSettings:
 
 
 def load_postgres_db_settings(env_values: Mapping[str, str]) -> PostgresDbSettings:
-    connection_url = env_values.get(POSTGRES_CONNECTION_URL_KEY, "").strip() or None
+    connection_url = (
+        env_values.get(POSTGRES_CONNECTION_URL_KEY, "").strip()
+        or env_values.get(DATABASE_URL_KEY, "").strip()
+        or None
+    )
     schema = env_values.get(POSTGRES_SCHEMA_KEY, "public").strip() or "public"
     return PostgresDbSettings(connection_url=connection_url, schema=schema)

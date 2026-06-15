@@ -13,6 +13,10 @@ from app.repositories.errors import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+PIN_GAUGE_MASTER_TABLE = "pin_gauge_master"
+STAFF_MASTER_TABLE = "staff_master"
+PIN_GAUGE_LENDING_TABLE = "pin_gauge_lending"
+
 
 class PostgresLendingRepository:
     def __init__(self, settings: PostgresDbSettings) -> None:
@@ -26,9 +30,9 @@ class PostgresLendingRepository:
 
     def fetch_staff_members(self, department: str | None = None) -> list[StaffMember]:
         sql = f'''
-            SELECT "staff_id", "staff_name", "department", "kana", "visible"
-            FROM {self._table("staff_master")}
-            WHERE "visible" = %s
+            SELECT "staff_id", "staff_name", "department", "kana", "display_flag" AS "visible"
+            FROM {self._table(STAFF_MASTER_TABLE)}
+            WHERE "display_flag" = %s
         '''
         parameters: list[object] = ["Y"]
         if department:
@@ -54,16 +58,16 @@ class PostgresLendingRepository:
                 l."size",
                 l."staff_id",
                 s."staff_name",
-                l."machine_code",
-                l."lent_on",
-                l."returned_on",
-                p."holding_count",
+                l."machine_no" AS "machine_code",
+                l."lent_date" AS "lent_on",
+                l."returned_date" AS "returned_on",
+                p."owned_quantity" AS "holding_count",
                 p."case_no",
                 l."completion_flag"
-            FROM {self._table("loans")} AS l
-            LEFT JOIN {self._table("staff_master")} AS s
+            FROM {self._table(PIN_GAUGE_LENDING_TABLE)} AS l
+            LEFT JOIN {self._table(STAFF_MASTER_TABLE)} AS s
                 ON l."staff_id" = s."staff_id"
-            LEFT JOIN {self._table("pg_master")} AS p
+            LEFT JOIN {self._table(PIN_GAUGE_MASTER_TABLE)} AS p
                 ON l."size" = p."size"
             WHERE l."completion_flag" IS NULL
         '''
@@ -76,7 +80,7 @@ class PostgresLendingRepository:
                 sql += ' AND l."size" = %s'
                 parameters.append(criteria.size_value)
         elif criteria.machine_code:
-            sql += ' AND l."machine_code" = %s'
+            sql += ' AND l."machine_no" = %s'
             parameters.append(criteria.machine_code)
         sql += ' ORDER BY l."size"'
 
@@ -93,8 +97,15 @@ class PostgresLendingRepository:
 
     def insert_loans(self, request: LendingRegistrationRequest) -> int:
         sql = f'''
-            INSERT INTO {self._table("loans")} ("size", "staff_id", "machine_code", "lent_on")
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO {self._table(PIN_GAUGE_LENDING_TABLE)}
+                ("id", "size", "staff_id", "machine_no", "lent_date")
+            VALUES (
+                (SELECT COALESCE(MAX(existing."id"), 0) + 1 FROM {self._table(PIN_GAUGE_LENDING_TABLE)} AS existing),
+                %s,
+                %s,
+                %s,
+                %s
+            )
         '''
         parameters = [
             (size, request.staff_id, request.machine_code, request.lent_on)
@@ -126,19 +137,19 @@ class PostgresLendingRepository:
                 l."size",
                 l."staff_id",
                 s."staff_name",
-                l."machine_code",
-                l."lent_on",
-                l."returned_on",
-                p."holding_count",
+                l."machine_no" AS "machine_code",
+                l."lent_date" AS "lent_on",
+                l."returned_date" AS "returned_on",
+                p."owned_quantity" AS "holding_count",
                 p."case_no",
                 l."completion_flag"
-            FROM {self._table("loans")} AS l
-            LEFT JOIN {self._table("staff_master")} AS s
+            FROM {self._table(PIN_GAUGE_LENDING_TABLE)} AS l
+            LEFT JOIN {self._table(STAFF_MASTER_TABLE)} AS s
                 ON l."staff_id" = s."staff_id"
-            LEFT JOIN {self._table("pg_master")} AS p
+            LEFT JOIN {self._table(PIN_GAUGE_MASTER_TABLE)} AS p
                 ON l."size" = p."size"
-            WHERE l."lent_on" = %s
-              AND l."machine_code" = %s
+            WHERE l."lent_date" = %s
+              AND l."machine_no" = %s
               AND l."staff_id" = %s
             ORDER BY l."size"
         '''
@@ -156,8 +167,8 @@ class PostgresLendingRepository:
 
     def update_loan(self, request: LendingUpdateRequest) -> None:
         sql = f'''
-            UPDATE {self._table("loans")}
-            SET "lent_on" = %s, "machine_code" = %s, "staff_id" = %s, "size" = %s
+            UPDATE {self._table(PIN_GAUGE_LENDING_TABLE)}
+            SET "lent_date" = %s, "machine_no" = %s, "staff_id" = %s, "size" = %s
             WHERE "id" = %s
         '''
 
@@ -180,7 +191,7 @@ class PostgresLendingRepository:
             raise RepositoryError("貸出更新に失敗しました。") from exc
 
     def delete_loan(self, loan_id: int) -> None:
-        sql = f'DELETE FROM {self._table("loans")} WHERE "id" = %s'
+        sql = f'DELETE FROM {self._table(PIN_GAUGE_LENDING_TABLE)} WHERE "id" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:

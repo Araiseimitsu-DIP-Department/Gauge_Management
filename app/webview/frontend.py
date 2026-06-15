@@ -2099,8 +2099,12 @@ _HTML = r"""<!DOCTYPE html>
       const action = target.dataset.action;
 
       if (action === "navigate") {
-        state.currentScreen = target.dataset.screen;
+        const nextScreen = target.dataset.screen;
+        state.currentScreen = nextScreen;
         renderApp();
+        if (nextScreen === "confirmation") {
+          await refreshConfirmationBatches();
+        }
         return;
       }
       if (action === "toggle-sidebar") {
@@ -2209,6 +2213,7 @@ _HTML = r"""<!DOCTYPE html>
               returned_on: state.return.date,
             });
             await refreshReturnSearch();
+            await refreshConfirmationBatches();
             clearReturnForm();
             toast("完了", "返却が完了しました。");
             break;
@@ -2224,6 +2229,7 @@ _HTML = r"""<!DOCTYPE html>
                 target_count: state.return.loans.length,
               });
               await refreshReturnSearch();
+              await refreshConfirmationBatches();
               clearReturnForm();
               toast("完了", `${data.count || 0}件の返却が完了しました。`);
             }

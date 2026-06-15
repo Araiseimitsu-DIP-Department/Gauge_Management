@@ -11,6 +11,10 @@ from app.repositories.errors import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+PIN_GAUGE_MASTER_TABLE = "pin_gauge_master"
+STAFF_MASTER_TABLE = "staff_master"
+PIN_GAUGE_LENDING_TABLE = "pin_gauge_lending"
+
 STAFF_DEPARTMENT_REPLACEMENTS = {
     "総務": "製造",
     "検査": "数値",
@@ -28,7 +32,7 @@ class PostgresMasterRepository:
         return f'"{name}"'
 
     def search_pg_master(self, size_query: str | None = None) -> list[PgMasterRecord]:
-        sql = f'SELECT "size", "holding_count", "case_no" FROM {self._table("pg_master")}'
+        sql = f'SELECT "size", "owned_quantity" AS "holding_count", "case_no" FROM {self._table(PIN_GAUGE_MASTER_TABLE)}'
         parameters: list[object] = []
         if size_query:
             sql += ' WHERE "size" LIKE %s'
@@ -47,7 +51,7 @@ class PostgresMasterRepository:
         return [MasterRowMapper.to_pg_master_record(row) for row in rows]
 
     def pg_master_exists(self, size: str) -> bool:
-        sql = f'SELECT 1 FROM {self._table("pg_master")} WHERE "size" = %s'
+        sql = f'SELECT 1 FROM {self._table(PIN_GAUGE_MASTER_TABLE)} WHERE "size" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -59,7 +63,7 @@ class PostgresMasterRepository:
         return row is not None
 
     def insert_pg_master(self, record: PgMasterRecord) -> None:
-        sql = f'INSERT INTO {self._table("pg_master")} ("size", "holding_count", "case_no") VALUES (%s, %s, %s)'
+        sql = f'INSERT INTO {self._table(PIN_GAUGE_MASTER_TABLE)} ("size", "owned_quantity", "case_no") VALUES (%s, %s, %s)'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -71,8 +75,8 @@ class PostgresMasterRepository:
 
     def update_pg_master(self, record: PgMasterRecord) -> None:
         sql = f'''
-            UPDATE {self._table("pg_master")}
-            SET "holding_count" = %s, "case_no" = %s
+            UPDATE {self._table(PIN_GAUGE_MASTER_TABLE)}
+            SET "owned_quantity" = %s, "case_no" = %s
             WHERE "size" = %s
         '''
         try:
@@ -85,7 +89,7 @@ class PostgresMasterRepository:
             raise RepositoryError("PGマスタの更新に失敗しました。") from exc
 
     def count_pg_master_references(self, size: str) -> int:
-        sql = f'SELECT COUNT(*) AS "ref_count" FROM {self._table("loans")} WHERE "size" = %s'
+        sql = f'SELECT COUNT(*) AS "ref_count" FROM {self._table(PIN_GAUGE_LENDING_TABLE)} WHERE "size" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -97,7 +101,7 @@ class PostgresMasterRepository:
         return int(row.get("ref_count", 0) or 0) if row else 0
 
     def delete_pg_master(self, size: str) -> None:
-        sql = f'DELETE FROM {self._table("pg_master")} WHERE "size" = %s'
+        sql = f'DELETE FROM {self._table(PIN_GAUGE_MASTER_TABLE)} WHERE "size" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -108,7 +112,7 @@ class PostgresMasterRepository:
             raise RepositoryError("PGマスタの削除に失敗しました。") from exc
 
     def fetch_staff_master(self, query: str | None = None) -> list[StaffMember]:
-        sql = f'SELECT "staff_id", "staff_name", "department", "kana", "visible" FROM {self._table("staff_master")}'
+        sql = f'SELECT "staff_id", "staff_name", "department", "kana", "display_flag" AS "visible" FROM {self._table(STAFF_MASTER_TABLE)}'
         parameters: list[object] = []
         if query:
             sql += ' WHERE "staff_id" LIKE %s OR "staff_name" LIKE %s'
@@ -128,8 +132,8 @@ class PostgresMasterRepository:
 
     def update_staff_member(self, staff: StaffMember) -> None:
         sql = f'''
-            UPDATE {self._table("staff_master")}
-            SET "staff_name" = %s, "department" = %s, "kana" = %s, "visible" = %s
+            UPDATE {self._table(STAFF_MASTER_TABLE)}
+            SET "staff_name" = %s, "department" = %s, "kana" = %s, "display_flag" = %s
             WHERE "staff_id" = %s
         '''
         visible_value = "Y" if staff.visible else "N"
@@ -151,7 +155,7 @@ class PostgresMasterRepository:
             departments = tuple(STAFF_DEPARTMENT_REPLACEMENTS.keys())
             placeholders = ", ".join(["%s"] * len(departments))
             update_sql = f'''
-                UPDATE {self._table("staff_master")}
+                UPDATE {self._table(STAFF_MASTER_TABLE)}
                 SET "department" = CASE "department"
                     WHEN %s THEN %s
                     WHEN %s THEN %s

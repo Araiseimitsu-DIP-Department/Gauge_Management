@@ -11,6 +11,10 @@ from app.repositories.errors import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+PIN_GAUGE_MASTER_TABLE = "pin_gauge_master"
+STAFF_MASTER_TABLE = "staff_master"
+PIN_GAUGE_LENDING_TABLE = "pin_gauge_lending"
+
 
 class PostgresOperationRepository:
     def __init__(self, settings: PostgresDbSettings) -> None:
@@ -29,20 +33,20 @@ class PostgresOperationRepository:
                 l."size",
                 l."staff_id",
                 s."staff_name",
-                l."machine_code",
-                l."lent_on",
-                l."returned_on",
-                p."holding_count",
+                l."machine_no" AS "machine_code",
+                l."lent_date" AS "lent_on",
+                l."returned_date" AS "returned_on",
+                p."owned_quantity" AS "holding_count",
                 p."case_no",
                 l."completion_flag"
-            FROM {self._table("loans")} AS l
-            LEFT JOIN {self._table("staff_master")} AS s
+            FROM {self._table(PIN_GAUGE_LENDING_TABLE)} AS l
+            LEFT JOIN {self._table(STAFF_MASTER_TABLE)} AS s
                 ON l."staff_id" = s."staff_id"
-            LEFT JOIN {self._table("pg_master")} AS p
+            LEFT JOIN {self._table(PIN_GAUGE_MASTER_TABLE)} AS p
                 ON l."size" = p."size"
-            WHERE l."machine_code" = %s
+            WHERE l."machine_no" = %s
               AND l."completion_flag" IS NULL
-              AND l."returned_on" IS NULL
+              AND l."returned_date" IS NULL
             ORDER BY l."size"
         '''
 
@@ -59,9 +63,9 @@ class PostgresOperationRepository:
 
     def return_all_loans(self, machine_code: str, returned_on: date, case_no: str) -> int:
         sql = f'''
-            UPDATE {self._table("loans")}
-            SET "returned_on" = %s, "machine_code" = %s, "completion_flag" = 'N'
-            WHERE "machine_code" = %s AND "returned_on" IS NULL
+            UPDATE {self._table(PIN_GAUGE_LENDING_TABLE)}
+            SET "returned_date" = %s, "machine_no" = %s, "completion_flag" = 'N'
+            WHERE "machine_no" = %s AND "returned_date" IS NULL
         '''
         returned_machine_code = f"返-{case_no}"
 
@@ -79,8 +83,8 @@ class PostgresOperationRepository:
 
     def return_one_loan(self, loan_id: int, returned_on: date, case_no: str) -> None:
         sql = f'''
-            UPDATE {self._table("loans")}
-            SET "returned_on" = %s, "machine_code" = %s, "completion_flag" = 'N'
+            UPDATE {self._table(PIN_GAUGE_LENDING_TABLE)}
+            SET "returned_date" = %s, "machine_no" = %s, "completion_flag" = 'N'
             WHERE "id" = %s
         '''
         returned_machine_code = f"返-{case_no}"
@@ -100,18 +104,18 @@ class PostgresOperationRepository:
                 l."size",
                 l."staff_id",
                 s."staff_name",
-                l."machine_code",
-                l."lent_on",
-                l."returned_on",
-                p."holding_count",
+                l."machine_no" AS "machine_code",
+                l."lent_date" AS "lent_on",
+                l."returned_date" AS "returned_on",
+                p."owned_quantity" AS "holding_count",
                 p."case_no",
                 l."completion_flag"
-            FROM {self._table("loans")} AS l
-            LEFT JOIN {self._table("staff_master")} AS s
+            FROM {self._table(PIN_GAUGE_LENDING_TABLE)} AS l
+            LEFT JOIN {self._table(STAFF_MASTER_TABLE)} AS s
                 ON l."staff_id" = s."staff_id"
-            LEFT JOIN {self._table("pg_master")} AS p
+            LEFT JOIN {self._table(PIN_GAUGE_MASTER_TABLE)} AS p
                 ON l."size" = p."size"
-            WHERE l."machine_code" = %s
+            WHERE l."machine_no" = %s
               AND (l."completion_flag" IS NULL OR l."completion_flag" <> 'Y')
             ORDER BY l."size"
         '''
@@ -129,11 +133,11 @@ class PostgresOperationRepository:
 
     def fetch_confirmation_batches(self) -> list[tuple[str, date | None]]:
         sql = f'''
-            SELECT DISTINCT l."machine_code", l."returned_on"
-            FROM {self._table("loans")} AS l
+            SELECT DISTINCT l."machine_no" AS "machine_code", l."returned_date" AS "returned_on"
+            FROM {self._table(PIN_GAUGE_LENDING_TABLE)} AS l
             WHERE l."completion_flag" = 'N'
-               OR (l."completion_flag" IS NULL AND l."returned_on" IS NOT NULL)
-            ORDER BY l."returned_on" DESC
+               OR (l."completion_flag" IS NULL AND l."returned_date" IS NOT NULL)
+            ORDER BY "returned_on" DESC
         '''
 
         try:
@@ -149,12 +153,12 @@ class PostgresOperationRepository:
 
     def delete_confirmation_batch(self, machine_code: str, returned_on: date | None) -> int:
         sql = f'''
-            DELETE FROM {self._table("loans")}
-            WHERE "machine_code" = %s
-              AND "returned_on" IS NOT DISTINCT FROM %s
+            DELETE FROM {self._table(PIN_GAUGE_LENDING_TABLE)}
+            WHERE "machine_no" = %s
+              AND "returned_date" IS NOT DISTINCT FROM %s
               AND (
                 "completion_flag" = 'N'
-                OR ("completion_flag" IS NULL AND "returned_on" IS NOT NULL)
+                OR ("completion_flag" IS NULL AND "returned_date" IS NOT NULL)
               )
         '''
 
@@ -174,7 +178,7 @@ class PostgresOperationRepository:
         if not loan_ids:
             return 0
 
-        sql = f'UPDATE {self._table("loans")} SET "completion_flag" = \'Y\' WHERE "id" = %s'
+        sql = f'UPDATE {self._table(PIN_GAUGE_LENDING_TABLE)} SET "completion_flag" = \'Y\' WHERE "id" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
@@ -188,7 +192,7 @@ class PostgresOperationRepository:
         return len(loan_ids)
 
     def confirm_one(self, loan_id: int) -> None:
-        sql = f'UPDATE {self._table("loans")} SET "completion_flag" = \'Y\' WHERE "id" = %s'
+        sql = f'UPDATE {self._table(PIN_GAUGE_LENDING_TABLE)} SET "completion_flag" = \'Y\' WHERE "id" = %s'
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:

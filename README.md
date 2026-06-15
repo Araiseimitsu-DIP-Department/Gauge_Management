@@ -86,17 +86,29 @@ ACCESS_DB_DIRECTORY=C:\Path\To\AccessFolder
 APP_ENV=local
 APP_NAME=ピンゲージ管理
 DB_BACKEND=postgres
-POSTGRES_CONNECTION_URL=postgresql://user:password@192.168.1.120:5432/pingauge_management
+POSTGRES_CONNECTION_URL=postgresql://user:password@192.168.1.120:5432/pingauge_management_db
+DATABASE_URL=postgresql://user:password@192.168.1.120:5432/pingauge_management_db
 POSTGRES_SCHEMA=public
 ```
 
-PostgreSQL 側の物理名は英語表記です。
+`DATABASE_URL` は `docs/pingauge_management_db` の移行ツール互換用です。アプリは `POSTGRES_CONNECTION_URL` を優先し、未設定の場合は `DATABASE_URL` も読み込みます。
+
+PostgreSQL 側の物理名は英語表記です。Access のクエリは PostgreSQL ビューにはせず、アプリの Python repository 層で JOIN / 条件処理します。
 
 | Access | PostgreSQL |
 |---|---|
-| `t_PGマスタ` | `pg_master` |
+| `t_PGマスタ` | `pin_gauge_master` |
 | `t_担当者マスタ` | `staff_master` |
-| `t_貸出` | `loans` |
+| `t_貸出` | `pin_gauge_lending` |
+
+主なカラム対応:
+
+| 用途 | PostgreSQL |
+|---|---|
+| 保有数 | `pin_gauge_master.owned_quantity` |
+| 表示フラグ | `staff_master.display_flag` |
+| 機番 | `pin_gauge_lending.machine_no` |
+| 貸出日 / 返却日 | `pin_gauge_lending.lent_date` / `pin_gauge_lending.returned_date` |
 
 ## PostgreSQL 移行
 
