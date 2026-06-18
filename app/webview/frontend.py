@@ -322,6 +322,50 @@ _HTML = r"""<!DOCTYPE html>
       align-items: start;
     }
     .two-col.equal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .lending-layout {
+      grid-template-columns: minmax(560px, 1.25fr) minmax(360px, 0.75fr);
+      gap: 1rem;
+    }
+    .lending-layout .card-inner { padding: 1rem 1.125rem; }
+    .lending-layout .field-group.inline {
+      grid-template-columns: 96px minmax(0, 1fr);
+      margin-bottom: 0.5rem;
+    }
+    .lending-layout .field-row { gap: 0.5rem; margin-bottom: 0.5rem; }
+    .lending-layout .button-row { margin-top: 0.25rem; }
+    .lending-layout .help {
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      line-height: 1.45;
+    }
+    .lending-size-section { margin-top: 0.75rem; }
+    .lending-layout .size-grid {
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px 12px;
+    }
+    .lending-layout .size-row {
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 6px;
+    }
+    .lending-layout .size-index { font-size: 0.8125rem; }
+    .lending-layout .field-control.compact {
+      min-height: 32px;
+      padding: 0.375rem 0.625rem;
+    }
+    .lending-layout .mini-readout {
+      min-width: 96px;
+      min-height: 32px;
+      padding: 0.375rem 0.625rem;
+    }
+    .lending-layout .btn {
+      min-height: 34px;
+      padding: 0.375rem 0.875rem;
+    }
+    .lending-layout .table-wrap {
+      min-height: 220px;
+      height: clamp(220px, calc(100vh - 24rem), 460px);
+      max-height: 460px;
+    }
     .card-head {
       display: flex;
       align-items: center;
@@ -485,8 +529,22 @@ _HTML = r"""<!DOCTYPE html>
       border-bottom: 1px solid var(--color-border-subtle);
       vertical-align: top;
     }
-    tbody tr:hover { background: var(--color-surface-secondary); }
-    tbody tr.selected { background: var(--color-accent-soft); }
+    tbody tr {
+      border-left: 4px solid transparent;
+    }
+    tbody tr:hover {
+      background: var(--color-surface-secondary);
+    }
+    tbody tr.selected {
+      background: rgba(30, 136, 229, 0.22);
+      border-left-color: var(--color-accent);
+      box-shadow: inset 0 0 0 1px rgba(30, 136, 229, 0.30);
+      color: #102235;
+      font-weight: 600;
+    }
+    tbody tr.selected:hover {
+      background: rgba(30, 136, 229, 0.28);
+    }
     .inline-note { font-size: 0.75rem; color: var(--color-text-secondary); }
     .empty-state {
       padding: 1.5rem 0.75rem;
@@ -640,8 +698,34 @@ _HTML = r"""<!DOCTYPE html>
       .shell { grid-template-columns: 1fr; }
       .sidebar { border-right: 0; border-bottom: 1px solid rgba(214, 223, 233, 0.8); }
       .two-col, .two-col.equal { grid-template-columns: 1fr; }
+      body.lending-active .shell { grid-template-columns: var(--sidebar-width) minmax(0, 1fr); }
+      body.lending-active .sidebar {
+        border-right: 1px solid var(--color-border);
+        border-bottom: 0;
+      }
+      body.lending-active .main { padding: 0.75rem; }
+      body.lending-active .main-shell { min-height: calc(100vh - 1.5rem); }
+      body.lending-active .header,
+      body.lending-active .app-footer {
+        display: none;
+      }
+      body.lending-active .lending-layout {
+        grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+        gap: 0.75rem;
+      }
+      body.lending-active .lending-layout .size-grid {
+        grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+      }
     }
     @media (max-width: 760px) {
+      body.lending-active .shell { grid-template-columns: 1fr; }
+      body.lending-active .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid rgba(214, 223, 233, 0.8);
+      }
+      body.lending-active .header { display: flex; }
+      body.lending-active .app-footer { display: block; }
+      body.lending-active .lending-layout { grid-template-columns: 1fr; }
       .main { padding: 1rem; }
       .main-shell { min-height: calc(100vh - 2rem); }
       .card-inner { padding: 1rem; }
@@ -679,6 +763,12 @@ _HTML = r"""<!DOCTYPE html>
       }
       .main { padding: 1rem; }
       .main-shell { min-height: calc(100vh - 2rem); }
+      body.lending-active .main { padding: 0.75rem; }
+      body.lending-active .main-shell { min-height: calc(100vh - 1.5rem); }
+      body.lending-active .header,
+      body.lending-active .app-footer {
+        display: none;
+      }
       .header {
         gap: 0.75rem;
         margin-bottom: 0.75rem;
@@ -717,6 +807,56 @@ _HTML = r"""<!DOCTYPE html>
       .app-footer {
         margin-top: 1rem;
         padding-top: 0.625rem;
+      }
+      .lending-layout {
+        gap: 0.75rem;
+      }
+      .lending-layout .card-inner {
+        padding: 0.75rem;
+      }
+      .lending-layout .card-head h3 {
+        font-size: 0.9375rem;
+      }
+      .lending-layout .field-group.inline {
+        grid-template-columns: 82px minmax(0, 1fr);
+        margin-bottom: 0.375rem;
+      }
+      .lending-layout .field-row {
+        gap: 0.375rem;
+        margin-bottom: 0.375rem;
+      }
+      .lending-layout .button-row {
+        margin-top: 0.25rem;
+      }
+      .lending-layout .help {
+        display: none;
+      }
+      .lending-size-section {
+        margin-top: 0.5rem;
+      }
+      .lending-layout .size-grid {
+        grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+        gap: 6px 10px;
+      }
+      .lending-layout .size-row {
+        grid-template-columns: 20px minmax(0, 1fr);
+      }
+      .lending-layout .field-control.compact {
+        min-height: 30px;
+        padding: 0.25rem 0.5rem;
+      }
+      .lending-layout .mini-readout {
+        min-height: 30px;
+        padding: 0.25rem 0.5rem;
+      }
+      .lending-layout .btn {
+        min-height: 32px;
+        padding: 0.25rem 0.75rem;
+      }
+      .lending-layout .table-wrap {
+        min-height: 200px;
+        height: clamp(200px, calc(100vh - 20rem), 390px);
+        max-height: 390px;
       }
       .modal-backdrop { padding: 12px; }
       .modal { max-height: calc(100vh - 24px); }
@@ -888,7 +1028,9 @@ _HTML = r"""<!DOCTYPE html>
 
     function renderApp() {
       const title = state.screenTitles[state.currentScreen];
+      const screenClass = `screen ${state.currentScreen}-screen`;
       const app = document.getElementById("app");
+      document.body.classList.toggle("lending-active", state.currentScreen === "lending");
       if (!state.shellRendered || !app.firstElementChild) {
         app.innerHTML = `
           <div class="shell">
@@ -937,7 +1079,7 @@ _HTML = r"""<!DOCTYPE html>
                     <p id="screen-subtitle">${escapeHtml(title.subtitle)}</p>
                   </div>
                 </div>
-                <div class="screen" id="screen-root">${renderCurrentScreen()}</div>
+                <div class="${screenClass}" id="screen-root">${renderCurrentScreen()}</div>
                 <footer class="app-footer">© ARAISEIMITSU 2026 - Created By DIP Department</footer>
               </div>
             </main>
@@ -955,7 +1097,10 @@ _HTML = r"""<!DOCTYPE html>
         const subList = document.querySelector(".nav-sub-list");
         if (titleNode) titleNode.textContent = title.title;
         if (subtitleNode) subtitleNode.textContent = title.subtitle;
-        if (screenRoot) screenRoot.innerHTML = renderCurrentScreen();
+        if (screenRoot) {
+          screenRoot.className = screenClass;
+          screenRoot.innerHTML = renderCurrentScreen();
+        }
         if (sidebar) sidebar.classList.toggle("collapsed", state.sidebarCollapsed);
         for (const button of navButtons) {
           const screen = button.dataset.screen;
@@ -1127,7 +1272,7 @@ _HTML = r"""<!DOCTYPE html>
     function renderLendingScreen() {
       const s = state.lending;
       return `
-        <div class="two-col">
+        <div class="two-col lending-layout">
           <section class="card">
             <div class="card-inner">
               <div class="card-head">
@@ -1158,7 +1303,7 @@ _HTML = r"""<!DOCTYPE html>
                 <button class="btn secondary" data-action="lending-clear">クリア</button>
               </div>
               <div class="help">30 件分のサイズを入力できます。Enter キーで次の入力欄へ移動します。</div>
-              <div style="margin-top:18px;">
+              <div class="lending-size-section">
                 <div class="card-head">
                   <h3>サイズ入力</h3>
                   <span class="inline-note" id="lending-gauge-count-note">入力済み ${countEnteredGaugeSizes()} 件</span>
@@ -2155,7 +2300,6 @@ _HTML = r"""<!DOCTYPE html>
       try {
         switch (action) {
           case "lending-search":
-            if (!(await confirmDialog("貸出一覧検索", "貸出一覧を検索しますか？"))) return;
             setBusy("貸出一覧検索", "貸出データを検索しています...");
             await refreshLendingSearch();
             break;
@@ -2197,7 +2341,6 @@ _HTML = r"""<!DOCTYPE html>
             await openLoanEditModal();
             break;
           case "return-search":
-            if (!(await confirmDialog("返却対象検索", "返却対象を検索しますか？"))) return;
             setBusy("返却検索", "返却対象を検索しています...");
             await refreshReturnSearch();
             break;
