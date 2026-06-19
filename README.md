@@ -37,8 +37,8 @@ Gauge_Management/
     utils/                       環境変数読込、バリデーション
     webview/                     HTML / CSS / JavaScript の GUI 実装
   docs/
-    精密計測具のアイコン.png     元のアイコン画像
-    pingauge.ico                 PyInstaller 用のアイコン
+    app_icon.png                 アプリ用アイコン（元画像）
+    app_icon.ico                 PyInstaller 用のアイコン
     SETUP.md                     初期設定メモ
     DESIGN.md                    画面・見た目の整理メモ
     postgresql-migration.md      Access -> PostgreSQL 移行手順書
@@ -144,8 +144,8 @@ pyinstaller PinGaugeMgmt.spec
 
 ## アイコン
 
-- アプリの元画像は `docs/精密計測具のアイコン.png`
-- ビルド用の Windows アイコンは `docs/pingauge.ico`
+- アプリの元画像は `docs/app_icon.png`
+- ビルド用の Windows アイコンは `docs/app_icon.ico`
 - タスクバーや exe のアイコンは PyInstaller の `icon` 指定で反映します
 
 ## 補足
