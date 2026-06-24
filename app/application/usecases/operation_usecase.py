@@ -5,7 +5,7 @@ from datetime import date
 from app.application.dto.loan import LoanSummaryDto
 from app.application.ports.operation_repository import OperationRepositoryPort
 from app.shared.errors import ValidationError
-from app.utils.validators import build_machine_code, validate_return_case_no
+from app.utils.validators import build_machine_code, validate_confirmation_case_no, validate_return_case_no
 
 
 class OperationUseCase:
@@ -54,7 +54,7 @@ class OperationUseCase:
         self._repository.return_one_loan(loan_id, returned_on, normalized_case_no)
 
     def search_confirmation_loans(self, case_no: str) -> list[LoanSummaryDto]:
-        normalized_case_no = validate_return_case_no(case_no)
+        normalized_case_no = validate_confirmation_case_no(case_no)
         return self._repository.search_confirmation_loans(normalized_case_no)
 
     def fetch_confirmation_batches(self) -> list[tuple[str, date | None]]:

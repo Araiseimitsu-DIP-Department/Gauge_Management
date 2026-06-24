@@ -13,6 +13,16 @@
 - PGマスタの検索、編集、削除
 - 担当者マスタの検索、編集
 
+## 画面運用メモ
+
+- 貸出登録のサイズ入力は 1～10、11～20、21～30 の縦3列表示です。自動フォーカス移動は番号順に進みます。
+- 貸出登録では、機番左、機番右、担当者、サイズ1の順に自動フォーカス移動します。
+- 返却画面では、返却日、返却ケースNo、選択中サイズ、個別返却、一括返却を返却対象一覧側に集約しています。
+- 返却ケースNo未入力時は、個別返却と一括返却を実行できません。
+- 個別返却後は返却ケースNoを保持し、クリアボタンと一括返却後は返却ケースNoをクリアします。
+- 確認画面では、確認対象を選択すると選択中サイズを表示し、個別確認を実行できます。
+- 確認済みバッチ一覧は返却ケースNoと返却日を表示します。Access版に合わせ、確認済みバッチの削除ボタンは表示していません。
+
 ## 動作環境
 
 - Windows
@@ -126,7 +136,21 @@ PostgreSQL 側の物理名は英語表記です。Access のクエリは Postgre
 .\.venv\Scripts\python.exe scripts\migrate_access_to_postgres.py --apply-schema --truncate
 ```
 
+`--truncate` を付けると、PostgreSQL の `pin_gauge_lending`、`pin_gauge_master`、`staff_master` を全削除してから Access のデータを投入します。テストデータを含む既存データを置き換える場合に使用します。
+
 投入後は `database/postgresql/020_validation.sql` で検証します。制約は `database/postgresql/003_constraints.sql` で管理しています。
+
+### 直近の移行結果
+
+2026-06-24 に Access から PostgreSQL へ再取込を実施しました。
+
+| テーブル | 件数 |
+|---|---:|
+| `pin_gauge_master` | 2333 |
+| `staff_master` | 29 |
+| `pin_gauge_lending` | 32478 |
+
+`pin_gauge_master` は Access 元データ 2030 件に加え、貸出履歴に存在してマスタにないサイズ 303 件をプレースホルダとして補完しています。
 
 ## onefile ビルド
 

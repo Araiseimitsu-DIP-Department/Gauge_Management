@@ -105,14 +105,14 @@ class AccessOperationRepository:
                 LEFT JOIN t_PGマスタ
                     ON t_貸出.サイズ = t_PGマスタ.サイズ
             WHERE
-                t_貸出.機番 = ?
+                t_貸出.機番 IN (?, ?)
                 AND (t_貸出.完了フラグ IS NULL OR t_貸出.完了フラグ <> 'Y')
             ORDER BY t_貸出.サイズ
         """
 
         try:
             with open_access_connection(self._settings) as connection:
-                rows = connection.cursor().execute(sql, f"返-{case_no}").fetchall()
+                rows = connection.cursor().execute(sql, case_no, f"返-{case_no}").fetchall()
         except pyodbc.Error as exc:
             logger.exception("failed to search confirmation loans")
             raise RepositoryError("確認対象の検索に失敗しました。") from exc

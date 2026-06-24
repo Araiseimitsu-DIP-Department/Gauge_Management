@@ -115,7 +115,7 @@ class PostgresOperationRepository:
                 ON l."staff_id" = s."staff_id"
             LEFT JOIN {self._table(PIN_GAUGE_MASTER_TABLE)} AS p
                 ON l."size" = p."size"
-            WHERE l."machine_no" = %s
+            WHERE l."machine_no" IN (%s, %s)
               AND (l."completion_flag" IS NULL OR l."completion_flag" <> 'Y')
             ORDER BY l."size"
         '''
@@ -123,7 +123,7 @@ class PostgresOperationRepository:
         try:
             with open_postgres_connection(self._settings) as connection:
                 with open_postgres_cursor(connection) as cursor:
-                    cursor.execute(sql, (f"返-{case_no}",))
+                    cursor.execute(sql, (case_no, f"返-{case_no}"))
                     rows = cursor.fetchall()
         except Exception as exc:
             logger.exception("failed to search confirmation loans")

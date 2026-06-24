@@ -87,13 +87,13 @@ class OperationRepository:
                 LEFT JOIN t_PGマスタ
                     ON t_貸出.サイズ = t_PGマスタ.サイズ
             WHERE
-                t_貸出.機番 = ?
+                t_貸出.機番 IN (?, ?)
                 AND (t_貸出.完了フラグ IS NULL OR t_貸出.完了フラグ <> 'Y')
             ORDER BY t_貸出.サイズ
         """
 
         with open_access_connection(self._settings) as connection:
-            rows = connection.cursor().execute(sql, f"返-{case_no}").fetchall()
+            rows = connection.cursor().execute(sql, case_no, f"返-{case_no}").fetchall()
         return [_map_operation_row(row) for row in rows]
 
     def fetch_confirmation_batches(self) -> list[tuple[str, date | None]]:

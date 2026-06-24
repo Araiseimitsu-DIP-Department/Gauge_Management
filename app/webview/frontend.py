@@ -340,7 +340,9 @@ _HTML = r"""<!DOCTYPE html>
     }
     .lending-size-section { margin-top: 0.75rem; }
     .lending-layout .size-grid {
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      grid-auto-flow: column;
+      grid-template-columns: repeat(3, minmax(160px, 1fr));
+      grid-template-rows: repeat(10, minmax(0, auto));
       gap: 8px 12px;
     }
     .lending-layout .size-row {
@@ -365,6 +367,161 @@ _HTML = r"""<!DOCTYPE html>
       min-height: 220px;
       height: clamp(220px, calc(100vh - 24rem), 460px);
       max-height: 460px;
+    }
+    .return-layout {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 1rem;
+      min-height: 0;
+    }
+    .return-layout .card-inner { padding: 1.25rem 1.5rem; }
+    body.return-active {
+      overflow: hidden;
+    }
+    body.return-active .shell {
+      height: 100vh;
+      min-height: 0;
+      overflow: hidden;
+    }
+    body.return-active .main {
+      height: 100vh;
+      overflow: hidden;
+    }
+    body.return-active .main-shell {
+      height: calc(100vh - 3rem);
+      min-height: 0;
+    }
+    body.return-active .return-screen {
+      min-height: 0;
+    }
+    body.return-active .return-layout {
+      height: 100%;
+    }
+    body.return-active .return-layout > .card {
+      min-height: 0;
+    }
+    body.return-active .return-layout > .card:last-child,
+    body.return-active .return-layout > .card:last-child > .card-inner {
+      display: flex;
+      min-height: 0;
+      flex-direction: column;
+    }
+    body.return-active .return-layout .table-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      height: auto;
+      max-height: none;
+    }
+    .return-search-row {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      gap: 1rem;
+      align-items: end;
+    }
+    .return-list-toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 220px) 480px minmax(0, 1fr) minmax(150px, 200px) auto;
+      gap: 0.875rem;
+      align-items: end;
+      margin-bottom: 0.875rem;
+    }
+    .return-case-field {
+      min-width: 0;
+    }
+    .return-case-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      min-height: 1.125rem;
+    }
+    .return-case-note {
+      color: var(--color-danger);
+      font-size: 0.75rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .return-actions {
+      display: flex;
+      gap: 0.625rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: end;
+    }
+    .return-selected-size {
+      display: grid;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+    .return-selected-size .value {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-secondary);
+      color: var(--color-text);
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    .return-search-button:focus,
+    .return-search-button:focus-visible {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+      color: var(--color-accent-hover);
+      box-shadow: 0 0 0 4px var(--color-accent-ring), 0 0 0 1px var(--color-accent);
+    }
+    .btn.return-one-action {
+      background: var(--color-surface);
+      border-color: var(--color-border);
+      color: var(--color-text);
+    }
+    .btn.return-one-action:hover:not(:disabled) {
+      background: var(--color-surface-secondary);
+      border-color: var(--color-border);
+    }
+    .btn.return-one-action.ready {
+      background: var(--color-success);
+      border-color: var(--color-success);
+      color: #fff;
+    }
+    .btn.return-one-action.ready:hover:not(:disabled) {
+      background: #059669;
+      border-color: #059669;
+    }
+    .btn.return-all-action {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #fff;
+    }
+    .btn.return-all-action:hover:not(:disabled) {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+    }
+    .return-layout .table-wrap {
+      min-height: 320px;
+      height: clamp(320px, calc(100vh - 32rem), 540px);
+      max-height: 540px;
+    }
+    .confirmation-action-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 200px) minmax(0, 1fr) auto;
+      gap: 0.875rem;
+      align-items: end;
+      margin-bottom: 0.875rem;
+    }
+    .confirmation-search-row {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 120px;
+      gap: 0.875rem;
+      align-items: end;
+      margin-bottom: 0.875rem;
+    }
+    .confirmation-action-row .return-actions {
+      justify-content: flex-end;
     }
     .card-head {
       display: flex;
@@ -698,6 +855,13 @@ _HTML = r"""<!DOCTYPE html>
       .shell { grid-template-columns: 1fr; }
       .sidebar { border-right: 0; border-bottom: 1px solid rgba(214, 223, 233, 0.8); }
       .two-col, .two-col.equal { grid-template-columns: 1fr; }
+      .return-search-row,
+      .return-list-toolbar,
+      .confirmation-search-row,
+      .confirmation-action-row {
+        grid-template-columns: 1fr;
+      }
+      .return-actions { justify-content: flex-start; }
       body.lending-active .shell { grid-template-columns: var(--sidebar-width) minmax(0, 1fr); }
       body.lending-active .sidebar {
         border-right: 1px solid var(--color-border);
@@ -714,7 +878,8 @@ _HTML = r"""<!DOCTYPE html>
         gap: 0.75rem;
       }
       body.lending-active .lending-layout .size-grid {
-        grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+        grid-template-columns: repeat(3, minmax(88px, 1fr));
+        grid-template-rows: repeat(10, minmax(0, auto));
       }
     }
     @media (max-width: 760px) {
@@ -726,6 +891,11 @@ _HTML = r"""<!DOCTYPE html>
       body.lending-active .header { display: flex; }
       body.lending-active .app-footer { display: block; }
       body.lending-active .lending-layout { grid-template-columns: 1fr; }
+      body.lending-active .lending-layout .size-grid {
+        grid-auto-flow: row;
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+      }
       .main { padding: 1rem; }
       .main-shell { min-height: calc(100vh - 2rem); }
       .card-inner { padding: 1rem; }
@@ -763,6 +933,31 @@ _HTML = r"""<!DOCTYPE html>
       }
       .main { padding: 1rem; }
       .main-shell { min-height: calc(100vh - 2rem); }
+      body.return-active {
+        overflow: auto;
+      }
+      body.return-active .shell {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+      }
+      body.return-active .main {
+        height: auto;
+        overflow: visible;
+      }
+      body.return-active .main-shell {
+        height: auto;
+        min-height: calc(100vh - 2rem);
+      }
+      body.return-active .return-layout {
+        height: auto;
+      }
+      body.return-active .return-layout .table-wrap {
+        flex: initial;
+        min-height: 240px;
+        height: clamp(240px, calc(100vh - 19rem), 420px);
+        max-height: 420px;
+      }
       body.lending-active .main { padding: 0.75rem; }
       body.lending-active .main-shell { min-height: calc(100vh - 1.5rem); }
       body.lending-active .header,
@@ -835,7 +1030,8 @@ _HTML = r"""<!DOCTYPE html>
         margin-top: 0.5rem;
       }
       .lending-layout .size-grid {
-        grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+        grid-template-columns: repeat(3, minmax(112px, 1fr));
+        grid-template-rows: repeat(10, minmax(0, auto));
         gap: 6px 10px;
       }
       .lending-layout .size-row {
@@ -1031,6 +1227,7 @@ _HTML = r"""<!DOCTYPE html>
       const screenClass = `screen ${state.currentScreen}-screen`;
       const app = document.getElementById("app");
       document.body.classList.toggle("lending-active", state.currentScreen === "lending");
+      document.body.classList.toggle("return-active", state.currentScreen === "return");
       if (!state.shellRendered || !app.firstElementChild) {
         app.innerHTML = `
           <div class="shell">
@@ -1384,34 +1581,28 @@ _HTML = r"""<!DOCTYPE html>
 
     function renderReturnScreen() {
       const s = state.return;
+      const selectedLoan = selectedReturnLoan();
+      const selectedSize = selectedLoan ? selectedLoan.size || "" : "";
+      const hasReturnCaseNo = String(s.caseNo || "").trim() !== "";
+      const returnCaseNote = hasReturnCaseNo ? "" : "返却するには返却ケースNoを入力してください。";
       return `
-        <div class="two-col">
+        <div class="return-layout">
           <section class="card">
             <div class="card-inner">
-              <div class="card-head">
-                <h3>返却条件</h3>
-                <span class="metric-pill">${s.loans.length}件</span>
-              </div>
-              <div class="field-group inline">
-                <div class="field-label">返却日</div>
-                <input type="date" class="field-control compact" data-screen="return" data-field="date" value="${escapeHtml(s.date)}" />
-              </div>
-              <div class="field-group inline">
-                <div class="field-label">機番</div>
-                <div class="field-row" style="margin:0;">
-                  ${renderMachinePicker("return-prefix", s.machinePrefix, returnMachinePrefixOptions(), false)}
-                  <span class="inline-note">-</span>
-                  ${renderMachinePicker("return-suffix", s.machineSuffix, state.options.machineSuffixes || [], !s.machinePrefix || s.machinePrefix === state.numberMachinePrefix)}
-                  <span class="mini-readout" id="return-machine">${escapeHtml(machineCode(s.machinePrefix, s.machineSuffix))}</span>
+              <div class="return-search-row">
+                <div class="field-group" style="margin:0;">
+                  <div class="field-label">機番</div>
+                  <div class="field-row" style="margin:0;">
+                    ${renderMachinePicker("return-prefix", s.machinePrefix, returnMachinePrefixOptions(), false)}
+                    <span class="inline-note">-</span>
+                    ${renderMachinePicker("return-suffix", s.machineSuffix, state.options.machineSuffixes || [], !s.machinePrefix || s.machinePrefix === state.numberMachinePrefix)}
+                    <span class="mini-readout" id="return-machine">${escapeHtml(machineCode(s.machinePrefix, s.machineSuffix))}</span>
+                  </div>
                 </div>
-              </div>
-              <div class="field-group inline">
-                <div class="field-label">ケースNo</div>
-                <input class="field-control compact" maxlength="2" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="ケースNo" />
-              </div>
-              <div class="button-row">
-                <button class="btn secondary" data-action="return-search">検索</button>
-                <button class="btn ghost" data-action="return-clear">クリア</button>
+                <div class="return-actions">
+                  <button class="btn secondary return-search-button" data-action="return-search">検索</button>
+                  <button class="btn ghost" data-action="return-clear">クリア</button>
+                </div>
               </div>
             </div>
           </section>
@@ -1421,18 +1612,33 @@ _HTML = r"""<!DOCTYPE html>
                 <h3>返却対象一覧</h3>
                 <span class="metric-pill">${s.loans.length}件</span>
               </div>
-              <div class="field-row" style="justify-content:space-between;">
-                <div class="inline-note">選択した 1 件だけ返却、または一覧をまとめて返却できます。</div>
-                <div class="button-row" style="margin:0;">
-                  <button class="btn secondary small" data-action="return-one" ${s.selectedLoanId ? "" : "disabled"}>1件返却</button>
-                  <button class="btn primary small" data-action="return-all" ${s.loans.length ? "" : "disabled"}>一括返却</button>
+              <div class="return-list-toolbar">
+                <div class="field-group" style="margin:0;">
+                  <div class="field-label">返却日</div>
+                  <input type="date" class="field-control compact" data-screen="return" data-field="date" value="${escapeHtml(s.date)}" />
+                </div>
+                <div class="field-group return-case-field" style="margin:0;">
+                  <div class="return-case-label-row">
+                    <div class="field-label">返却ケースNo</div>
+                    <div class="return-case-note">${escapeHtml(returnCaseNote)}</div>
+                  </div>
+                  <input class="field-control compact" maxlength="2" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="返却ケースNoを入力　例：1、2、3" />
+                </div>
+                <div aria-hidden="true"></div>
+                <div class="return-selected-size">
+                  <div class="field-label">選択中のサイズ</div>
+                  <div class="value">${escapeHtml(selectedSize || "未選択")}</div>
+                </div>
+                <div class="return-actions">
+                  <button class="btn return-one-action small ${s.selectedLoanId ? "ready" : ""}" data-action="return-one" ${s.selectedLoanId && hasReturnCaseNo ? "" : "disabled"}>個別返却</button>
+                  <button class="btn return-all-action small" data-action="return-all" ${s.loans.length && hasReturnCaseNo ? "" : "disabled"}>一括返却</button>
                 </div>
               </div>
               <div class="table-wrap">
                 ${renderTable(
                   s.loans,
-                  ["ID", "サイズ", "担当者", "機番", "貸出日", "ケースNo"],
-                  (row) => [row.loan_id, row.size || "", row.staff_name || "", row.machine_code || "", formatDate(row.lent_on), row.case_no || ""],
+                  ["サイズ", "担当者", "機番", "貸出日", "ケースNo"],
+                  (row) => [row.size || "", row.staff_name || "", row.machine_code || "", formatDate(row.lent_on), row.case_no || ""],
                   s.selectedLoanId,
                   (row) => row.loan_id
                 )}
@@ -1445,6 +1651,8 @@ _HTML = r"""<!DOCTYPE html>
 
     function renderConfirmationScreen() {
       const s = state.confirmation;
+      const selectedLoan = selectedConfirmationLoan();
+      const selectedSize = selectedLoan ? selectedLoan.size || "" : "";
       return `
         <div class="two-col equal">
           <section class="card">
@@ -1453,25 +1661,29 @@ _HTML = r"""<!DOCTYPE html>
                 <h3>確認対象</h3>
                 <span class="metric-pill">${s.detailLoans.length}件</span>
               </div>
-              <div class="field-row">
-                <div class="field-group search-box" style="flex:1 1 240px;">
-                  <div class="field-label">ケースNo</div>
-                  <input class="field-control compact" maxlength="2" data-screen="confirmation" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="ケースNo" />
+              <div class="confirmation-search-row">
+                <div class="field-group" style="margin:0;">
+                  <div class="field-label">返却ケースNo</div>
+                  <input class="field-control compact" maxlength="20" data-screen="confirmation" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="返却ケースNo" />
                 </div>
                 <button class="btn secondary" data-action="confirmation-search">検索</button>
               </div>
-              <div class="field-row" style="justify-content:space-between;">
-                <div class="inline-note">一覧から 1 件を確認、または表示中をまとめて確認できます。</div>
-                <div class="button-row" style="margin:0;">
-                  <button class="btn secondary small" data-action="confirmation-one" ${s.selectedLoanId ? "" : "disabled"}>1件確認</button>
-                  <button class="btn primary small" data-action="confirmation-all" ${s.detailLoans.length ? "" : "disabled"}>一括確認</button>
+              <div class="confirmation-action-row">
+                <div class="return-selected-size">
+                  <div class="field-label">選択中のサイズ</div>
+                  <div class="value">${escapeHtml(selectedSize || "未選択")}</div>
+                </div>
+                <div aria-hidden="true"></div>
+                <div class="return-actions">
+                  <button class="btn return-one-action small ${s.selectedLoanId ? "ready" : ""}" data-action="confirmation-one" ${s.selectedLoanId ? "" : "disabled"}>個別確認</button>
+                  <button class="btn return-all-action small" data-action="confirmation-all" ${s.detailLoans.length ? "" : "disabled"}>一括確認</button>
                 </div>
               </div>
               <div class="table-wrap" style="margin-top:12px;">
                 ${renderTable(
                   s.detailLoans,
-                  ["ID", "サイズ", "担当者", "返却日", "ケースNo", "状態"],
-                  (row) => [row.loan_id, row.size || "", row.staff_name || "", formatDate(row.returned_on), row.case_no || "", formatCompletionFlag(row.completion_flag)],
+                  ["サイズ", "担当者", "返却日", "ケースNo", "状態"],
+                  (row) => [row.size || "", row.staff_name || "", formatDate(row.returned_on), row.case_no || "", formatCompletionFlag(row.completion_flag)],
                   s.selectedLoanId,
                   (row) => row.loan_id
                 )}
@@ -1484,7 +1696,6 @@ _HTML = r"""<!DOCTYPE html>
                 <h3>確認済みバッチ</h3>
                 <div class="button-row" style="margin:0;">
                   <button class="btn secondary small" data-action="confirmation-refresh">再読込</button>
-                  <button class="btn danger small" data-action="confirmation-delete-batch" ${s.selectedBatchMachineCode ? "" : "disabled"}>削除</button>
                 </div>
               </div>
               <div class="table-wrap">
@@ -1748,11 +1959,11 @@ _HTML = r"""<!DOCTYPE html>
       if (!rows || !rows.length) {
         return '<div class="empty-state">確認済みバッチはありません。</div>';
       }
-      const head = '<tr><th>機番</th><th>返却日</th></tr>';
+      const head = '<tr><th>返却ケースNo</th><th>返却日</th></tr>';
       const body = rows.map((row, index) => {
         const selected = String(selectedMachineCode ?? "") === String(row.machine_code ?? "")
           && String(selectedReturnedOn ?? "") === String(row.returned_on ?? "");
-        return `<tr data-action="select-batch" data-row-index="${index}" class="${rowClasses(selected)}"><td>${escapeHtml(row.machine_code ?? "")}</td><td>${escapeHtml(formatDate(row.returned_on))}</td></tr>`;
+        return `<tr data-action="select-batch" data-row-index="${index}" class="${rowClasses(selected)}"><td>${escapeHtml(displayConfirmationCaseNo(row.machine_code))}</td><td>${escapeHtml(formatDate(row.returned_on))}</td></tr>`;
       }).join("");
       return `<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
     }
@@ -1800,6 +2011,48 @@ _HTML = r"""<!DOCTYPE html>
       }
       if (display) display.textContent = machineCode(state.return.machinePrefix, state.return.machineSuffix);
       if (suffix) suffix.disabled = !state.return.machinePrefix || isNumber;
+    }
+
+    function focusReturnMachineNext(field) {
+      window.setTimeout(() => {
+        if (field === "machinePrefix") {
+          const isNumber = state.return.machinePrefix === state.numberMachinePrefix;
+          const next = isNumber
+            ? document.querySelector('[data-action="return-search"]')
+            : document.getElementById("return-machine-suffix");
+          if (next && !next.disabled) next.focus();
+          return;
+        }
+        if (field === "machineSuffix") {
+          const searchButton = document.querySelector('[data-action="return-search"]');
+          if (searchButton) searchButton.focus();
+        }
+      }, 0);
+    }
+
+    function focusLendingRegisterNext(field) {
+      window.setTimeout(() => {
+        if (field === "registerMachinePrefix") {
+          const isNumber = state.lending.registerMachinePrefix === state.numberMachinePrefix;
+          const next = isNumber
+            ? document.querySelector('[data-screen="lending"][data-field="registerStaffId"]')
+            : document.getElementById("lending-register-machine-suffix");
+          if (next && !next.disabled) next.focus();
+          return;
+        }
+        if (field === "registerMachineSuffix") {
+          const staff = document.querySelector('[data-screen="lending"][data-field="registerStaffId"]');
+          if (staff && !staff.disabled) staff.focus();
+          return;
+        }
+        if (field === "registerStaffId") {
+          const firstSize = document.querySelector('[data-screen="lending"][data-field="registerGaugeSizes"][data-index="0"]');
+          if (firstSize) {
+            firstSize.focus();
+            firstSize.select();
+          }
+        }
+      }, 0);
     }
 
     function updateLoanEditMachinePreview() {
@@ -2016,7 +2269,37 @@ _HTML = r"""<!DOCTYPE html>
       state.staffMaster.editVisible = !!row.visible;
     }
 
-    async function refreshLendingStaffMembers() {
+    function selectedReturnLoan() {
+      return state.return.loans.find((row) => String(row.loan_id) === String(state.return.selectedLoanId)) || null;
+    }
+
+    function hasReturnCaseNo() {
+      return String(state.return.caseNo || "").trim() !== "";
+    }
+
+    function selectedConfirmationLoan() {
+      return state.confirmation.detailLoans.find((row) => String(row.loan_id) === String(state.confirmation.selectedLoanId)) || null;
+    }
+
+    function updateReturnCaseNoControls() {
+      const hasCaseNo = hasReturnCaseNo();
+      const note = document.querySelector(".return-case-note");
+      const oneButton = document.querySelector('[data-action="return-one"]');
+      const allButton = document.querySelector('[data-action="return-all"]');
+
+      if (note) {
+        note.textContent = hasCaseNo ? "" : "返却するには返却ケースNoを入力してください。";
+      }
+      if (oneButton) {
+        oneButton.disabled = !state.return.selectedLoanId || !hasCaseNo;
+        oneButton.classList.toggle("ready", !!state.return.selectedLoanId);
+      }
+      if (allButton) {
+        allButton.disabled = !state.return.loans.length || !hasCaseNo;
+      }
+    }
+
+    async function refreshLendingStaffMembers(focusNext = false) {
       const prefix = state.lending.registerMachinePrefix || "";
       if (!prefix) {
         state.lending.staffMembers = [];
@@ -2030,6 +2313,9 @@ _HTML = r"""<!DOCTYPE html>
         state.lending.registerStaffId = "";
       }
       renderApp();
+      if (focusNext) {
+        focusLendingRegisterNext("registerMachinePrefix");
+      }
     }
 
     async function refreshLendingSearch() {
@@ -2125,6 +2411,14 @@ _HTML = r"""<!DOCTYPE html>
       renderApp();
     }
 
+    function clearReturnSelectionAfterOne() {
+      state.return.date = state.currentDate || state.return.date;
+      state.return.machinePrefix = "";
+      state.return.machineSuffix = "";
+      state.return.selectedLoanId = null;
+      renderApp();
+    }
+
     function clearConfirmationForm() {
       state.confirmation.caseNo = "";
       state.confirmation.detailLoans = [];
@@ -2210,10 +2504,13 @@ _HTML = r"""<!DOCTYPE html>
       renderModal();
     }
 
-    function extractCaseNo(machineCode) {
+    function displayConfirmationCaseNo(machineCode) {
       const normalized = String(machineCode || "").trim();
-      if (!normalized.includes("-")) return "";
-      return normalized.slice(normalized.indexOf("-") + 1).trim();
+      const returnPrefix = "返-";
+      if (normalized.startsWith(returnPrefix)) {
+        return normalized.slice(returnPrefix.length).trim();
+      }
+      return normalized;
     }
 
     function formatCompletionFlag(value) {
@@ -2278,7 +2575,7 @@ _HTML = r"""<!DOCTYPE html>
         if (!row) return;
         state.confirmation.selectedBatchMachineCode = row.machine_code || "";
         state.confirmation.selectedBatchReturnedOn = row.returned_on || "";
-        const caseNo = extractCaseNo(row.machine_code || "");
+        const caseNo = displayConfirmationCaseNo(row.machine_code || "");
         if (caseNo) {
           state.confirmation.caseNo = caseNo;
           await refreshConfirmationSearch();
@@ -2348,6 +2645,10 @@ _HTML = r"""<!DOCTYPE html>
             clearReturnForm();
             break;
           case "return-one":
+            if (!hasReturnCaseNo()) {
+              await showNotice("返却ケースNo未入力", "返却ケースNoを入力してから返却してください。");
+              return;
+            }
             if (!(await confirmDialog("単票返却", "選択した 1 件を返却しますか？"))) return;
             setBusy("単票返却", "返却処理を実行しています...");
             await invokeApi("return_one_loan", {
@@ -2357,10 +2658,14 @@ _HTML = r"""<!DOCTYPE html>
             });
             await refreshReturnSearch();
             await refreshConfirmationBatches();
-            clearReturnForm();
+            clearReturnSelectionAfterOne();
             toast("完了", "返却が完了しました。");
             break;
           case "return-all":
+            if (!hasReturnCaseNo()) {
+              await showNotice("返却ケースNo未入力", "返却ケースNoを入力してから返却してください。");
+              return;
+            }
             if (!(await confirmDialog("一括返却", "表示中の返却対象をすべて返却しますか？"))) return;
             setBusy("一括返却", "返却処理を実行しています...");
             {
@@ -2383,12 +2688,11 @@ _HTML = r"""<!DOCTYPE html>
             await refreshConfirmationSearch();
             break;
           case "confirmation-one":
-            if (!(await confirmDialog("確認", "選択した 1 件を確認済みにしますか？"))) return;
-            setBusy("確認", "確認処理を実行しています...");
+            if (!(await confirmDialog("個別確認", "選択した 1 件を確認済みにしますか？"))) return;
+            setBusy("個別確認", "確認処理を実行しています...");
             await invokeApi("confirm_one", { loan_id: state.confirmation.selectedLoanId });
             await refreshConfirmationSearch();
             await refreshConfirmationBatches();
-            clearConfirmationForm();
             toast("完了", "確認が完了しました。");
             break;
           case "confirmation-all":
@@ -2405,24 +2709,6 @@ _HTML = r"""<!DOCTYPE html>
           case "confirmation-refresh":
             setBusy("バッチ再読込", "確認済みバッチを更新しています...");
             await refreshConfirmationBatches();
-            break;
-          case "confirmation-delete-batch":
-            if (!state.confirmation.selectedBatchMachineCode) return;
-            if (!(await confirmDialog("確認済バッチ削除", `${state.confirmation.selectedBatchMachineCode} の確認待ちデータを削除しますか？`))) return;
-            setBusy("確認済バッチ削除", "確認待ちデータを削除しています...");
-            {
-              const data = await invokeApi("delete_confirmation_batch", {
-                machine_code: state.confirmation.selectedBatchMachineCode,
-                returned_on: state.confirmation.selectedBatchReturnedOn || null,
-              });
-              state.confirmation.caseNo = "";
-              state.confirmation.detailLoans = [];
-              state.confirmation.selectedLoanId = null;
-              state.confirmation.selectedBatchMachineCode = "";
-              state.confirmation.selectedBatchReturnedOn = "";
-              await refreshConfirmationBatches();
-              toast("完了", `${data.count || 0}件を削除しました。`);
-            }
             break;
           case "pg-search":
             if (!(await confirmDialog("PGマスタ検索", "PGマスタを検索しますか？"))) return;
@@ -2566,9 +2852,32 @@ _HTML = r"""<!DOCTYPE html>
       }
       if (screen === "return") {
         applyReturnPreview();
+        if (field === "caseNo") {
+          updateReturnCaseNoControls();
+        }
       }
       if (target.id === "loan-edit-machine-prefix" || target.id === "loan-edit-machine-suffix") {
         updateLoanEditMachinePreview();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (event.key !== "Enter") return;
+      if (target.dataset.screen !== "return" || target.dataset.field !== "caseNo") return;
+
+      event.preventDefault();
+      setBoundValue(target);
+      updateReturnCaseNoControls();
+
+      const nextAction = state.return.selectedLoanId
+        ? document.querySelector('[data-action="return-one"]')
+        : document.querySelector('[data-action="return-all"]');
+      if (nextAction && !nextAction.disabled) {
+        nextAction.focus();
+      } else {
+        target.blur();
       }
     });
 
@@ -2580,13 +2889,24 @@ _HTML = r"""<!DOCTYPE html>
       if (!screen || !field) return;
       setBoundValue(target);
       if (screen === "lending" && field === "registerMachinePrefix") {
-        refreshLendingStaffMembers().catch((error) => toast("処理失敗", error.message || String(error)));
+        refreshLendingStaffMembers(true).catch((error) => toast("処理失敗", error.message || String(error)));
+      }
+      if (screen === "lending" && field === "registerMachineSuffix") {
+        focusLendingRegisterNext(field);
+      }
+      if (screen === "lending" && field === "registerStaffId") {
+        focusLendingRegisterNext(field);
       }
       if (screen === "lending" && field === "searchMachinePrefix") {
         applyLendingPreview();
       }
       if (screen === "return" && field === "machinePrefix") {
         applyReturnPreview();
+        focusReturnMachineNext(field);
+      }
+      if (screen === "return" && field === "machineSuffix") {
+        applyReturnPreview();
+        focusReturnMachineNext(field);
       }
       if (target.id === "loan-edit-machine-prefix" || target.id === "loan-edit-machine-suffix") {
         updateLoanEditMachinePreview();

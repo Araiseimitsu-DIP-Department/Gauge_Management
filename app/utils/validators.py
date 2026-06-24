@@ -95,6 +95,15 @@ def validate_return_case_no(case_no: str) -> str:
     return normalized
 
 
+def validate_confirmation_case_no(case_no: str) -> str:
+    normalized = case_no.strip().upper()
+    if not normalized:
+        raise AppValidationError("確認対象のケースNoを入力してください。")
+    if len(normalized) > 20:
+        raise AppValidationError("確認対象のケースNoは20文字以内にしてください。")
+    return normalized
+
+
 def validate_pg_master_record(size: str, holding_count: int | None, case_no: str) -> tuple[str, int, str]:
     normalized_size = size.strip().upper()
     normalized_case_no = case_no.strip().upper()
