@@ -281,27 +281,6 @@ _HTML = r"""<!DOCTYPE html>
       display: flex;
       flex-direction: column;
     }
-    .header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
-    .header h2 {
-      margin: 0;
-      font-size: 1.5rem;
-      line-height: 1.2;
-      font-weight: 600;
-      letter-spacing: -0.025em;
-      color: var(--color-text);
-    }
-    .header p {
-      margin: 0.375rem 0 0;
-      color: var(--color-text-secondary);
-      font-size: 0.875rem;
-      font-weight: 400;
-    }
     .screen {
       display: grid;
       gap: 1.25rem;
@@ -869,7 +848,6 @@ _HTML = r"""<!DOCTYPE html>
       }
       body.lending-active .main { padding: 0.75rem; }
       body.lending-active .main-shell { min-height: calc(100vh - 1.5rem); }
-      body.lending-active .header,
       body.lending-active .app-footer {
         display: none;
       }
@@ -888,7 +866,6 @@ _HTML = r"""<!DOCTYPE html>
         border-right: 0;
         border-bottom: 1px solid rgba(214, 223, 233, 0.8);
       }
-      body.lending-active .header { display: flex; }
       body.lending-active .app-footer { display: block; }
       body.lending-active .lending-layout { grid-template-columns: 1fr; }
       body.lending-active .lending-layout .size-grid {
@@ -900,7 +877,6 @@ _HTML = r"""<!DOCTYPE html>
       .main-shell { min-height: calc(100vh - 2rem); }
       .card-inner { padding: 1rem; }
       .field-group.inline { grid-template-columns: 1fr; }
-      .header { align-items: flex-start; flex-direction: column; }
       .size-grid { grid-template-columns: 1fr; gap: 0.75rem; }
     }
     @media (max-height: 819px) {
@@ -960,16 +936,9 @@ _HTML = r"""<!DOCTYPE html>
       }
       body.lending-active .main { padding: 0.75rem; }
       body.lending-active .main-shell { min-height: calc(100vh - 1.5rem); }
-      body.lending-active .header,
       body.lending-active .app-footer {
         display: none;
       }
-      .header {
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-      }
-      .header h2 { font-size: 1.25rem; }
-      .header p { margin-top: 0.25rem; }
       .screen { gap: 0.875rem; }
       .card-inner { padding: 1rem; }
       .card-head { margin-bottom: 0.625rem; }
@@ -1223,7 +1192,6 @@ _HTML = r"""<!DOCTYPE html>
     }
 
     function renderApp() {
-      const title = state.screenTitles[state.currentScreen];
       const screenClass = `screen ${state.currentScreen}-screen`;
       const app = document.getElementById("app");
       document.body.classList.toggle("lending-active", state.currentScreen === "lending");
@@ -1270,12 +1238,6 @@ _HTML = r"""<!DOCTYPE html>
             </aside>
             <main class="main">
               <div class="main-shell">
-                <div class="header">
-                  <div>
-                    <h2 id="screen-title">${escapeHtml(title.title)}</h2>
-                    <p id="screen-subtitle">${escapeHtml(title.subtitle)}</p>
-                  </div>
-                </div>
                 <div class="${screenClass}" id="screen-root">${renderCurrentScreen()}</div>
                 <footer class="app-footer">© ARAISEIMITSU 2026 - Created By DIP Department</footer>
               </div>
@@ -1284,16 +1246,12 @@ _HTML = r"""<!DOCTYPE html>
         `;
         state.shellRendered = true;
       } else {
-        const titleNode = document.getElementById("screen-title");
-        const subtitleNode = document.getElementById("screen-subtitle");
         const screenRoot = document.getElementById("screen-root");
         const sidebar = document.querySelector(".sidebar");
         const navButtons = Array.from(document.querySelectorAll("[data-action=\"navigate\"]"));
         const masterButton = document.querySelector("[data-action=\"toggle-master\"]");
         const sidebarToggle = document.querySelector("[data-action=\"toggle-sidebar\"]");
         const subList = document.querySelector(".nav-sub-list");
-        if (titleNode) titleNode.textContent = title.title;
-        if (subtitleNode) subtitleNode.textContent = title.subtitle;
         if (screenRoot) {
           screenRoot.className = screenClass;
           screenRoot.innerHTML = renderCurrentScreen();
