@@ -21,6 +21,7 @@
 - 各ページ冒頭のメインタイトルと補足文を非表示にし、操作カードから表示を開始するよう変更。
 - Access から PostgreSQL へ再取込を実施し、README に画面運用メモと移行結果を追記。
 - ターミナルから起動したアプリを中断した際に `KeyboardInterrupt` の traceback を表示せず終了するよう調整。
+- PostgreSQL 利用時の貸出新規登録で、`pin_gauge_lending.id` をアプリ側 `MAX(id)+1` 採番から DB の IDENTITY 自動採番へ変更。同時登録時の ID 競合リスクを解消。
 
 ## 2026-06-19
 

@@ -96,16 +96,11 @@ class PostgresLendingRepository:
         return [LendingRowMapper.to_loan_record(row) for row in rows]
 
     def insert_loans(self, request: LendingRegistrationRequest) -> int:
+        # id は PostgreSQL IDENTITY により DB 側で自動採番する
         sql = f'''
             INSERT INTO {self._table(PIN_GAUGE_LENDING_TABLE)}
-                ("id", "size", "staff_id", "machine_no", "lent_date")
-            VALUES (
-                (SELECT COALESCE(MAX(existing."id"), 0) + 1 FROM {self._table(PIN_GAUGE_LENDING_TABLE)} AS existing),
-                %s,
-                %s,
-                %s,
-                %s
-            )
+                ("size", "staff_id", "machine_no", "lent_date")
+            VALUES (%s, %s, %s, %s)
         '''
         parameters = [
             (size, request.staff_id, request.machine_code, request.lent_on)
