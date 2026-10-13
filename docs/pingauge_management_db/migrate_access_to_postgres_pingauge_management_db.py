@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -21,6 +22,11 @@ import pyodbc
 import psycopg2
 from dotenv import dotenv_values
 from psycopg2.extras import execute_values
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+from scripts.postgres_sequence import synchronize_loan_sequence
 
 
 TARGET_DIR = Path(__file__).resolve().parent
@@ -317,6 +323,16 @@ def append_missing_rows(
         postgres_connection.autocommit = False
         for result in results:
             append_missing_rows_for_table(access_connection, postgres_connection, schema, result, batch_size)
+        if any(result.table.postgres_name == "pin_gauge_lending" for result in results):
+            with postgres_connection.cursor() as postgres_cursor:
+                postgres_cursor.execute(
+                    "SELECT pg_get_serial_sequence(%s, 'id')",
+                    (qualified_name(schema, "pin_gauge_lending"),),
+                )
+                if postgres_cursor.fetchone()[0] is not None:
+                    synchronize_loan_sequence(postgres_cursor, schema)
+                else:
+                    logging.warning("貸出IDは旧BIGINT構成のため採番補正を省略しました。アプリ運用前にDB定義の確認が必要です。")
         postgres_connection.commit()
     except Exception:
         postgres_connection.rollback()

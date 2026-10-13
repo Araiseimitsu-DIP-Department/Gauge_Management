@@ -20,10 +20,11 @@ def open_postgres_connection(settings: PostgresDbSettings) -> Iterator[object]:
         raise ConfigurationError("PostgreSQL backend requires psycopg. Install psycopg[binary].") from exc
 
     try:
-        with psycopg.connect(connection_url) as connection:
-            yield connection
+        connection = psycopg.connect(connection_url)
     except Exception as exc:
         raise DataAccessError("Failed to connect to PostgreSQL.") from exc
+    with connection:
+        yield connection
 
 
 @contextmanager

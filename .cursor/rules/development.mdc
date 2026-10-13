@@ -1,0 +1,8 @@
+---
+description: 既存仕様と変更範囲を守る開発制約
+alwaysApply: true
+---
+
+日本語・品質・テスト・ログ・簡素化の制約はAGENTS.mdに従う。
+Access対応コードを保持し、PostgreSQL・GUIの共通依存を推測で除外しない。
+Confirmedのみ仕様とし、Assumption/Unknownは区別する。仕様変更を伴う自動リファクタリングは禁止。

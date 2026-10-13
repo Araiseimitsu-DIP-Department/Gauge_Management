@@ -160,7 +160,8 @@ Dry run complete. PostgreSQL was not modified.
 - 不足する履歴サイズを `pin_gauge_master` にプレースホルダ追加
 - `pin_gauge_lending.id` の identity sequence 調整
 
-`docs/pingauge_management_db/migrate_access_to_postgres_pingauge_management_db.py` は、同フォルダのメタ情報を使う対象専用スクリプトです。既存テーブルがある場合は停止する設計なので、再投入ではなく新規移行・件数検証用として扱います。
+`docs/pingauge_management_db/migrate_access_to_postgres_pingauge_management_db.py` は、同フォルダのメタ情報を使う対象専用スクリプトです。通常の新規移行は既存テーブルがある場合に停止します。明示した `--append-missing` では不足行をIDごと追記し、関連シーケンスがある場合は追記と同じトランザクションで採番を同期します。旧BIGINTのみの構成には自動採番を後付けしません。
+ID明示投入後の確認と補正は [loan-sequence.md](loan-sequence.md) を参照してください。
 
 ### 5. インデックス作成
 

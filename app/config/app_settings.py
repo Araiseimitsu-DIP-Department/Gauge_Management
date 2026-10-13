@@ -26,11 +26,12 @@ class AppSettings:
 def load_app_settings(env_file: Path | None = None) -> AppSettings:
     env_path = env_file or _resolve_default_env_file()
     env_values = load_env_file(env_path) if env_path is not None else {}
+    default_backend = "postgres" if getattr(sys, "frozen", False) else "access"
 
     return AppSettings(
         app_name=env_values.get("APP_NAME", "ピンゲージ管理").strip() or "ピンゲージ管理",
         environment=env_values.get("APP_ENV", "local").strip() or "local",
-        database_backend=env_values.get(DATABASE_BACKEND_KEY, "access").strip().lower() or "access",
+        database_backend=env_values.get(DATABASE_BACKEND_KEY, default_backend).strip().lower() or default_backend,
         access_db=load_access_db_settings(env_values),
         postgres_db=load_postgres_db_settings(env_values),
     )

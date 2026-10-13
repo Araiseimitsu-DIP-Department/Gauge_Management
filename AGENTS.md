@@ -84,3 +84,11 @@ README.md には以下を必ず記載する: セットアップ手順、実行�
 ユーザー承認なしで DB の破壊的操作を行うこと
 仕様変更を伴う自動リファクタリングを行うこと
 
+11. AIハーネスの参照先
+構成は docs/ARCHITECTURE.md、業務条件は docs/BUSINESS_RULES.md、DBは docs/DATABASE.md、ビルドは docs/BUILD.md を参照する。
+調査の Confirmed / Assumption / Unknown と役割分担は docs/HARNESS.md を参照する。
+開発・検証・承認の手順は .agents/skills/development-workflow/SKILL.md。作業種別に応じて implement-feature、fix-bug、review-code、release を参照する。
+DB切替・ビルド最適化は .agents/skills/datasource-build/SKILL.md、簡素化は .agents/skills/code-simplifier/SKILL.md。
+データ更新に関係する場合だけ .agents/skills/development-workflow/references/data-update-verification.md を適用する。
+再利用できる学びは同 references/learning-feedback.md に従い具体案を提案し、その案へのユーザー承認後に反映する。
+

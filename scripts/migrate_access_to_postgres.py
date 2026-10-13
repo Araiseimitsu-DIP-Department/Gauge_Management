@@ -18,6 +18,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.config.app_settings import load_app_settings  # noqa: E402
+from scripts.postgres_sequence import synchronize_loan_sequence  # noqa: E402
 
 
 NUMERIC_SIZE_PATTERN = re.compile(r"^[0-9]+(\.[0-9]+)?$")
@@ -128,7 +129,7 @@ def migrate(config: MigrationConfig) -> None:
             for _, target_table in TABLES:
                 insert_rows(cursor, target_table, TARGET_COLUMNS[target_table], extracted[target_table])
 
-            reset_loan_id_sequence(cursor)
+            reset_loan_id_sequence(cursor, config.schema)
 
         postgres_connection.commit()
 
@@ -210,16 +211,8 @@ def normalize_loan_size(size: Any, master_sizes: set[str]) -> Any:
     return text
 
 
-def reset_loan_id_sequence(cursor: Any) -> None:
-    cursor.execute(
-        """
-        SELECT setval(
-          pg_get_serial_sequence('"pin_gauge_lending"', 'id'),
-          COALESCE((SELECT MAX("id") FROM "pin_gauge_lending"), 1),
-          true
-        )
-        """
-    )
+def reset_loan_id_sequence(cursor: Any, schema: str = "public") -> None:
+    synchronize_loan_sequence(cursor, schema)
 
 
 def execute_sql_file(cursor: Any, path: Path) -> None:
