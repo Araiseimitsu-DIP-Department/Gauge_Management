@@ -130,7 +130,7 @@ SCRIPT = r"""
             break;
           case "return-one":
             if (!hasReturnCaseNo()) {
-              await showNotice("返却ケースNo未入力", "返却ケースNoを入力してから返却してください。");
+              await showNotice("返却ケースNoを確認してください", getReturnCaseNoError());
               return;
             }
             if (!(await confirmDialog("単票返却", "選択した 1 件を返却しますか？"))) return;
@@ -147,7 +147,7 @@ SCRIPT = r"""
             break;
           case "return-all":
             if (!hasReturnCaseNo()) {
-              await showNotice("返却ケースNo未入力", "返却ケースNoを入力してから返却してください。");
+              await showNotice("返却ケースNoを確認してください", getReturnCaseNoError());
               return;
             }
             if (!(await confirmDialog("一括返却", "表示中の返却対象をすべて返却しますか？"))) return;

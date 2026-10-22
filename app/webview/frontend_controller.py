@@ -453,7 +453,13 @@ SCRIPT = r"""
     }
 
     function hasReturnCaseNo() {
-      return String(state.return.caseNo || "").trim() !== "";
+      return getReturnCaseNoError() === "";
+    }
+
+    function getReturnCaseNoError() {
+      const value = String(state.return.caseNo || "").trim();
+      if (!value) return "返却するには返却ケースNoを入力してください。";
+      return /^[0-9]{1,2}$/.test(value) ? "" : "返却ケースNoは半角数字1～2桁で入力してください。";
     }
 
     function selectedConfirmationLoan() {
@@ -467,8 +473,10 @@ SCRIPT = r"""
       const allButton = document.querySelector('[data-action="return-all"]');
 
       if (note) {
-        note.textContent = hasCaseNo ? "" : "返却するには返却ケースNoを入力してください。";
+        note.textContent = getReturnCaseNoError();
       }
+      const input = document.querySelector('[data-screen="return"][data-field="caseNo"]');
+      if (input) input.setAttribute("aria-invalid", String(!hasCaseNo));
       if (oneButton) {
         oneButton.disabled = !state.return.selectedLoanId || !hasCaseNo;
         oneButton.classList.toggle("ready", !!state.return.selectedLoanId);

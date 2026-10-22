@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+import re
 
 from app.utils.errors import AppValidationError
 
@@ -87,11 +88,11 @@ def validate_lending_search(
 
 
 def validate_return_case_no(case_no: str) -> str:
-    normalized = case_no.strip().upper()
+    normalized = case_no.strip()
     if not normalized:
         raise AppValidationError("返却ケースNoを入力してください。")
-    if len(normalized) > 2:
-        raise AppValidationError("返却ケースNoは2桁以内にしてください。")
+    if re.fullmatch(r"[0-9]{1,2}", normalized) is None:
+        raise AppValidationError("返却ケースNoは半角数字1～2桁で入力してください。")
     return normalized
 
 

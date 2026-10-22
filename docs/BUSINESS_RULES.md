@@ -5,7 +5,7 @@
 | 領域 | 条件と根拠 | 自動テスト |
 |---|---|---|
 | 貸出 | 日付・機番・担当者・少なくとも1つのサイズが必要。サイズは空欄除去・大文字化。`utils/validators.py`、`lending_usecase.py` | `test_business_rules.py` |
-| 返却 | 個別返却は対象ID・日付が必要。ケースNoは空白除去・大文字化、必須かつ2文字以内。`operation_usecase.py` | `test_business_rules.py` |
+| 返却 | 個別返却は対象ID・日付が必要。ケースNoは前後空白除去後、半角数字1～2桁のみ。英字・記号・全角数字は不可。`operation_usecase.py` | `test_business_rules.py` |
 | 確認 | ケースNoは必須かつ20文字以内。個別確認は対象ID、一括確認は空でないID一覧が必要。`operation_usecase.py` | 境界値は `test_business_rules.py`、DB連携未検証 |
 | PGマスタ | サイズ・保有数・ケースNoが必須。貸出履歴に参照されるサイズは削除禁止。`master_usecase.py` | 削除禁止は `test_business_rules.py` |
 | 担当者 | 更新時は担当者IDと氏名が必須。`master_usecase.py` | 未追加 |

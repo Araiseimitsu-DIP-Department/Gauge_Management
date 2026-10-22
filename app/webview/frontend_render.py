@@ -508,8 +508,8 @@ SCRIPT = r"""
       const s = state.return;
       const selectedLoan = selectedReturnLoan();
       const selectedSize = selectedLoan ? selectedLoan.size || "" : "";
-      const hasReturnCaseNo = String(s.caseNo || "").trim() !== "";
-      const returnCaseNote = hasReturnCaseNo ? "" : "返却するには返却ケースNoを入力してください。";
+      const returnCaseNote = getReturnCaseNoError();
+      const hasReturnCaseNo = !returnCaseNote;
       return `
         <div class="return-layout">
           <section class="card">
@@ -547,7 +547,7 @@ SCRIPT = r"""
                     <div class="field-label">返却ケースNo</div>
                     <div class="return-case-note">${escapeHtml(returnCaseNote)}</div>
                   </div>
-                  <input class="field-control compact" maxlength="2" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="返却ケースNoを入力　例：1、2、3" />
+                  <input class="field-control compact" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}" aria-invalid="${!hasReturnCaseNo}" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="半角数字1～2桁　例：1、2、3" />
                 </div>
                 <div aria-hidden="true"></div>
                 <div class="return-selected-size">

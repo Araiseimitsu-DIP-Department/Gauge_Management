@@ -24,10 +24,33 @@ class BusinessRulesTests(unittest.TestCase):
             )
 
     def test_return_case_boundary(self):
-        self.assertEqual(validate_return_case_no(" a1 "), "A1")
-        for value in ("", " ", "ABC"):
+        for value in ("0", "1", "9", "10", "99", "00", " 12 "):
+            with self.subTest(value=value):
+                self.assertEqual(validate_return_case_no(value), value.strip())
+        for value in ("", " ", "ABC", "F8", "F-8", "AB", "F", "-1", "1.0", "123", "１", "１２", "1 2", "1\n2"):
             with self.subTest(value=value), self.assertRaises(AppValidationError):
                 validate_return_case_no(value)
+
+    def test_invalid_return_case_never_writes_individual_or_batch(self):
+        repository = Mock()
+        usecase = OperationUseCase(repository)
+        for value in ("F8", "F-8", "AB", "１", "123", ""):
+            with self.subTest(value=value):
+                with self.assertRaises(AppValidationError):
+                    usecase.return_one_loan(loan_id=1, case_no=value, returned_on=date(2026, 10, 22))
+                with self.assertRaises(AppValidationError):
+                    usecase.return_all_loans(machine_prefix="A", machine_suffix="1", case_no=value, returned_on=date(2026, 10, 22), target_count=2)
+        repository.return_one_loan.assert_not_called()
+        repository.return_all_loans.assert_not_called()
+
+    def test_numeric_return_case_is_passed_to_individual_and_batch(self):
+        repository = Mock()
+        usecase = OperationUseCase(repository)
+        today = date(2026, 10, 22)
+        usecase.return_one_loan(loan_id=1, case_no=" 12 ", returned_on=today)
+        repository.return_one_loan.assert_called_once_with(1, today, "12")
+        usecase.return_all_loans(machine_prefix="A", machine_suffix="1", case_no=" 2 ", returned_on=today, target_count=2)
+        repository.return_all_loans.assert_called_once_with("A-1", today, "2")
 
     def test_confirmation_case_boundary(self):
         self.assertEqual(validate_confirmation_case_no("a" * 20), "A" * 20)
