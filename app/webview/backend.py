@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from dataclasses import asdict, is_dataclass
 from datetime import date, datetime
+import logging
 from typing import Any
 
 from app.config.app_settings import AppSettings
+from app.config.ui_preferences import save_theme
 from app.services.lending_service import LendingService
 from app.services.master_service import MasterService
 from app.services.operation_service import OperationService
@@ -25,6 +27,17 @@ class WebviewBridge:
         self._lending_service = lending_service
         self._operation_service = operation_service
         self._master_service = master_service
+
+    def save_theme(self, payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            if not isinstance(payload, dict):
+                raise ValueError("表示設定の形式が不正です。")
+            theme = payload.get("theme")
+            save_theme(theme)
+            return self._ok({"theme": theme})
+        except (OSError, ValueError) as exc:
+            logging.getLogger(__name__).error("表示モードの保存に失敗しました。", exc_info=True)
+            return self._fail(exc)
 
     def bootstrap(self) -> dict[str, Any]:
         errors: list[str] = []

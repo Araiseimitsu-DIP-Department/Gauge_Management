@@ -34,10 +34,12 @@ Access版ではURL・SCHEMAを同梱せず、ACCESS_DB_DIRECTORYを同梱する�
 
 成果物は `dist/ピンゲージ管理.exe`。既存成果物のサイズを記録し、必要なら別ディレクトリへ退避してからビルドする。
 モジュール・DLL・データはPyInstallerの `Analysis-00.toc` とexeのアーカイブ一覧で確認する。
+バージョンは `app/version.py` に集約する。分離した `app.webview.frontend_*` と `app.config.ui_preferences` は通常のPythonインポートで収録し、フロントエンド用の外部CSS/JavaScriptファイルの同梱は不要。exeのPYZ一覧でこれらのモジュールと `app.version` が含まれることを確認する。
 通常版にAccess実装、pyodbc/pypyodbc、accdb/mdb、ODBCドライバー、移行資料がないこと、psycopgとGUI依存があることを確認する。
 設定値の内容は出力せず、許可したキー集合だけを確認する。
 実DBの確認は更新を伴わない `SELECT 1` とテーブル存在・件数確認から行う。
 GUIの初期化は部署UPDATEを含むため、本番設定では無断で実行しない。
+表示モードの設定ファイルは利用者の `%LOCALAPPDATA%\PinGaugeMgmt\ui-theme.txt` に実行時に保存する。ビルド元PCの表示設定はexeに同梱しない。
 
 ## 配布の条件
 
