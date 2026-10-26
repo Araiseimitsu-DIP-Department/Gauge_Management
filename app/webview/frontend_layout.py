@@ -13,14 +13,10 @@ LAYOUT_STYLES = r"""
     .screen { min-height: 0; gap: 10px; }
     .two-col, .two-col.equal { gap: 10px; align-items: stretch; min-height: 0; }
     .two-col { grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr); }
-    .confirmation-screen .two-col { grid-template-columns: minmax(0, 1fr) 210px; }
-    .confirmation-screen .two-col > .card:last-child .card-head { flex-wrap: wrap; gap: 4px; }
-    .return-screen .table-wrap table, .confirmation-screen .table-wrap table { font-size: 12px; }
-    .return-screen .table-wrap th, .confirmation-screen .table-wrap th { font-size: 11px; }
-    .return-screen .table-wrap th, .return-screen .table-wrap td,
-    .confirmation-screen .table-wrap th, .confirmation-screen .table-wrap td { padding: 3px 6px; line-height: 18px; }
-    .return-screen tbody td:first-child,
-    .confirmation-screen .two-col > .card:first-child tbody td:first-child { font-weight: 700; }
+    .return-screen .table-wrap table { font-size: 12px; }
+    .return-screen .table-wrap th { font-size: 11px; }
+    .return-screen .table-wrap th, .return-screen .table-wrap td { padding: 3px 6px; line-height: 18px; }
+    .return-screen tbody td:first-child { font-weight: 700; }
     .split-table-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: start; }
     .table-segment { min-width: 0; }
     .table-segment + .table-segment { border-left: 1px solid var(--color-border); }
@@ -67,8 +63,6 @@ LAYOUT_STYLES = r"""
     .return-case-note:empty { display: none; }
     .return-actions { flex-wrap: nowrap; gap: 6px; }
     .return-selected-size .value { min-height: var(--control-height); padding: 3px 7px; font-size: 13px; }
-    .confirmation-search-row { grid-template-columns: minmax(0, 1fr) 90px; gap: 8px; margin-bottom: 8px; }
-    .confirmation-action-row { grid-template-columns: 150px minmax(0, 1fr) auto; gap: 8px; margin-bottom: 4px; }
     .app-footer { flex: 0 0 auto; margin-top: 6px; padding-top: 4px; font-size: 11px; }
     .app-version { color: var(--color-text-secondary); font-weight: 600; }
     .help { padding: 6px 8px; }
@@ -80,7 +74,6 @@ LAYOUT_STYLES = r"""
       .sidebar-footer { padding: 6px 2px; font-size: 11px; }
     }
     @media (max-width: 1150px) and (min-width: 901px) {
-      .confirmation-screen .split-table-grid { grid-template-columns: minmax(0, 1fr); }
       .lending-layout { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
       .lending-layout .field-group.inline { grid-template-columns: 48px minmax(0, 1fr); }
       .lending-layout select[data-field*="Machine"] { width: 76px !important; }

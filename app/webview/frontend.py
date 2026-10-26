@@ -8,18 +8,20 @@ from app.config.ui_preferences import load_theme
 from app.version import APP_VERSION
 from app.webview.frontend_styles import STYLES
 from app.webview.frontend_layout import LAYOUT_STYLES
+from app.webview.confirmation_styles import CONFIRMATION_STYLES
 from app.webview.frontend_theme import THEME_SCRIPT, THEME_STYLES
 from app.webview.frontend_render import SCRIPT as RENDER_SCRIPT
 from app.webview.frontend_controller import SCRIPT as CONTROLLER_SCRIPT
+from app.webview.confirmation_layout import SCRIPT as CONFIRMATION_LAYOUT_SCRIPT
 from app.webview.frontend_events import SCRIPT as EVENTS_SCRIPT
 from app.webview.frontend_dates import SCRIPT as DATES_SCRIPT
 
 
 def build_html(app_name: str) -> str:
     return (
-        _HTML.replace("__APP_STYLES__", STYLES + THEME_STYLES + LAYOUT_STYLES)
+        _HTML.replace("__APP_STYLES__", STYLES + THEME_STYLES + LAYOUT_STYLES + CONFIRMATION_STYLES)
         .replace("__THEME_SCRIPT__", THEME_SCRIPT)
-        .replace("__APP_SCRIPT__", RENDER_SCRIPT + CONTROLLER_SCRIPT + DATES_SCRIPT + EVENTS_SCRIPT)
+        .replace("__APP_SCRIPT__", RENDER_SCRIPT + CONTROLLER_SCRIPT + CONFIRMATION_LAYOUT_SCRIPT + DATES_SCRIPT + EVENTS_SCRIPT)
         .replace("__INITIAL_THEME__", load_theme())
         .replace("__APP_VERSION__", APP_VERSION)
         .replace("__APP_NAME__", _escape_html(app_name))

@@ -242,6 +242,7 @@ SCRIPT = r"""
       applyTheme();
       renderModal();
       renderBusy();
+      observeConfirmationTable();
     }
 
     function renderBusy() {
@@ -581,41 +582,42 @@ SCRIPT = r"""
       return `
         <div class="two-col equal">
           <section class="card">
-            <div class="card-inner">
+            <div class="card-inner confirmation-workspace">
               <div class="card-head">
                 <h3>確認対象</h3>
                 <span class="metric-pill">${s.detailLoans.length}件</span>
               </div>
-              <div class="confirmation-search-row">
-                <div class="field-group" style="margin:0;">
-                  <div class="field-label">返却ケースNo</div>
-                  <input class="field-control compact" maxlength="20" data-screen="confirmation" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="返却ケースNo" />
+              <div class="confirmation-toolbar">
+                <div class="confirmation-search-row">
+                  <div class="field-group" style="margin:0;">
+                    <div class="field-label">返却ケースNo</div>
+                    <input class="field-control compact" maxlength="20" data-screen="confirmation" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="返却ケースNo" />
+                  </div>
+                  <button class="btn secondary" data-action="confirmation-search">検索</button>
                 </div>
-                <button class="btn secondary" data-action="confirmation-search">検索</button>
+                <div class="confirmation-action-row">
+                  <div class="return-selected-size">
+                    <div class="field-label">選択中のサイズ</div>
+                    <div class="value">${escapeHtml(selectedSize || "未選択")}</div>
+                  </div>
+                  <div class="return-actions">
+                    <button class="btn return-one-action small ${s.selectedLoanId ? "ready" : ""}" data-action="confirmation-one" ${s.selectedLoanId ? "" : "disabled"}>個別確認</button>
+                    <button class="btn return-all-action small" data-action="confirmation-all" ${s.detailLoans.length ? "" : "disabled"}>一括確認</button>
+                  </div>
+                </div>
               </div>
-              <div class="confirmation-action-row">
-                <div class="return-selected-size">
-                  <div class="field-label">選択中のサイズ</div>
-                  <div class="value">${escapeHtml(selectedSize || "未選択")}</div>
-                </div>
-                <div aria-hidden="true"></div>
-                <div class="return-actions">
-                  <button class="btn return-one-action small ${s.selectedLoanId ? "ready" : ""}" data-action="confirmation-one" ${s.selectedLoanId ? "" : "disabled"}>個別確認</button>
-                  <button class="btn return-all-action small" data-action="confirmation-all" ${s.detailLoans.length ? "" : "disabled"}>一括確認</button>
-                </div>
-              </div>
-              <div class="table-wrap" style="margin-top:12px;">
-                ${renderOperationTable(
+              <div class="table-wrap confirmation-targets" style="margin-top:12px;">
+                ${renderTable(
                   s.detailLoans,
-                  ["サイズ", "担当者", "返却日", "ケースNo", "状態"],
-                  (row) => [row.size || "", row.staff_name || "", formatDate(row.returned_on), row.case_no || "", formatCompletionFlag(row.completion_flag)],
+                  ["サイズ", "ケースNo", "担当者", "返却日", "状態"],
+                  (row) => [row.size || "", row.case_no || "", row.staff_name || "", formatDate(row.returned_on), formatCompletionFlag(row.completion_flag)],
                   s.selectedLoanId,
                   (row) => row.loan_id
                 )}
               </div>
             </div>
           </section>
-          <section class="card">
+          <section class="card confirmation-batches">
             <div class="card-inner">
               <div class="card-head">
                 <h3>確認済みバッチ</h3>

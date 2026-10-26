@@ -5,6 +5,7 @@ import unittest
 
 from app.webview.frontend_render import SCRIPT as RENDER_SCRIPT
 from app.webview.frontend_controller import SCRIPT as CONTROLLER_SCRIPT
+from app.webview.confirmation_layout import SCRIPT as CONFIRMATION_LAYOUT_SCRIPT
 
 NODE = shutil.which("node")
 
@@ -14,7 +15,7 @@ class OperationTableTests(unittest.TestCase):
     def run_script(self, scenario):
         result = subprocess.run(
             [NODE, "-"],
-            input="const assert = require('node:assert/strict');\n" + RENDER_SCRIPT + CONTROLLER_SCRIPT + scenario,
+            input="const assert = require('node:assert/strict');\n" + RENDER_SCRIPT + CONTROLLER_SCRIPT + CONFIRMATION_LAYOUT_SCRIPT + scenario,
             capture_output=True, text=True, encoding="utf-8",
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -28,6 +29,19 @@ for (const count of [0, 1, 12, 13, 20, 25, 30, 60]) {
   assert.deepEqual(indices, Array.from({length:count},(_,i)=>i));
   assert.equal((html.match(/<table>/g)||[]).length, count===0?0:count<=12?1:2);
 }
+""")
+
+    def test_confirmation_splits_only_when_height_overflows_and_width_allows(self):
+        self.run_script(r"""
+assert.equal(confirmationTableNeedsSplit(16, 595, 600, 900), false);
+assert.equal(confirmationTableNeedsSplit(16, 595, 595, 900), false);
+assert.equal(confirmationTableNeedsSplit(16, 595.1, 595, 900), true);
+assert.equal(confirmationTableNeedsSplit(16, 595, 500, 815), false);
+assert.equal(confirmationTableNeedsSplit(16, 595, 500, 816), true);
+assert.equal(confirmationTableNeedsSplit(60, 2135, 2200, 1200), false);
+assert.equal(confirmationTableNeedsSplit(2, 105, 100, 900), true);
+assert.equal(confirmationTableNeedsSplit(1, 105, 100, 900), false);
+assert.equal(confirmationTableNeedsSplit(16, 595, 0, 900), false);
 """)
 
     def test_right_column_selection_uses_original_id_for_both_screens(self):

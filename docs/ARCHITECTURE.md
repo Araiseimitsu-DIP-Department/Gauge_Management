@@ -6,7 +6,7 @@ Python 3.12、pywebview 5系、Windows Forms / Edge WebView2を使用する。
 ## 起動とデータ経路
 
 `main.py` → `app/bootstrap.py` → 設定読込・repository選択・service構築 → pywebview画面。
-画面は `app/webview/frontend.py` がHTMLを組み立てる。CSSは `frontend_styles.py`・`frontend_layout.py`、配色と切替は `frontend_theme.py`、JavaScriptは描画の `frontend_render.py`・制御の `frontend_controller.py`・イベントの `frontend_events.py` に分離する。各Pythonモジュールの文字列をHTMLに埋め込むため、外部リソース配信は不要。
+画面は `app/webview/frontend.py` がHTMLを組み立てる。CSSは `frontend_styles.py`・`frontend_layout.py`、確認画面専用の配置と表は `confirmation_styles.py`、高さに応じた列数調整は `confirmation_layout.py`、配色と切替は `frontend_theme.py`、JavaScriptは描画の `frontend_render.py`・制御の `frontend_controller.py`・イベントの `frontend_events.py` に分離する。各Pythonモジュールの文字列をHTMLに埋め込むため、外部リソース配信は不要。
 Pythonとの入口は `backend.py` の `WebviewBridge`。表示モードは `config/ui_preferences.py` でWindowsユーザーごとのファイルに保存し、業務DBとは独立する。バージョンの定義は `app/version.py` に集約する。
 日付の自動更新は `frontend_dates.py` がPCの現地日付を確認し、貸出・返却の入力日だけを更新する。DBへの更新や画面全体の再描画は行わない。
 処理は bridge → services → application/usecases → repository port → infrastructure実装。
