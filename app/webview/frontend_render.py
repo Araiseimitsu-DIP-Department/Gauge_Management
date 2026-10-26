@@ -156,11 +156,14 @@ SCRIPT = r"""
     }
 
     function renderApp() {
-      const screenClass = `screen ${state.currentScreen}-screen`;
+      const workspace = ['lending', 'pg_master', 'staff_master'].includes(state.currentScreen);
+      const screenClass = `screen ${state.currentScreen}-screen ${workspace ? 'workspace-screen' : ''}`;
       const app = document.getElementById("app");
       document.documentElement.style.setProperty("--sidebar-width", state.sidebarCollapsed ? "4rem" : "11rem");
       document.body.classList.toggle("lending-active", state.currentScreen === "lending");
       document.body.classList.toggle("return-active", state.currentScreen === "return");
+      document.body.classList.toggle('workspace-active', workspace);
+      document.body.classList.toggle('master-active', ['pg_master', 'staff_master'].includes(state.currentScreen));
       if (!state.shellRendered || !app.firstElementChild) {
         app.innerHTML = `
           <div class="shell">
@@ -239,10 +242,27 @@ SCRIPT = r"""
           subList.style.display = !state.sidebarCollapsed && (state.currentScreen === "pg_master" || state.currentScreen === "staff_master") ? "grid" : "none";
         }
       }
-      applyTheme();
+      syncSidebarLayout();
       renderModal();
       renderBusy();
-      observeConfirmationTable();
+      observeOperationTable();
+    }
+
+    function syncSidebarLayout() {
+      const sidebar = document.querySelector('.sidebar');
+      if (!sidebar) return;
+      const automatic = ['return', 'lending', 'pg_master', 'staff_master'].includes(state.currentScreen) && window.innerWidth <= 1150;
+      const collapsed = state.sidebarCollapsed || automatic;
+      document.documentElement.style.setProperty('--sidebar-width', collapsed ? '4rem' : '11rem');
+      sidebar.classList.toggle('collapsed', collapsed);
+      const toggle = sidebar.querySelector('.sidebar-toggle');
+      toggle.hidden = automatic;
+      const label = collapsed ? 'サイドバーを展開' : 'サイドバーを折りたたむ';
+      toggle.setAttribute('aria-label', label);
+      toggle.setAttribute('title', label);
+      const subList = sidebar.querySelector('.nav-sub-list');
+      subList.style.display = ['pg_master', 'staff_master'].includes(state.currentScreen) ? 'grid' : 'none';
+      applyTheme();
     }
 
     function renderBusy() {
@@ -455,8 +475,8 @@ SCRIPT = r"""
                   <button class="btn filter ${s.searchMode === "machine" ? "active" : ""}" data-action="lending-mode" data-mode="machine">機番</button>
                 </div>
               </div>
-              <div class="stack">
-                <div class="field-row">
+              <div class="stack lending-search-panel">
+                <div class="field-row" ${s.searchMode === "size" ? "" : "hidden"}>
                   <div class="field-group search-box" style="flex:1 1 260px;">
                     <div class="field-label">サイズ検索</div>
                     <input class="field-control compact" data-screen="lending" data-field="searchSizePrefix" value="${escapeHtml(s.searchSizePrefix)}" placeholder="サイズ" ${s.searchMode === "size" ? "" : "disabled"} />
@@ -466,7 +486,7 @@ SCRIPT = r"""
                     <span class="field-label">前方一致</span>
                   </label>
                 </div>
-                <div class="field-row">
+                <div class="field-row" ${s.searchMode === "machine" ? "" : "hidden"}>
                   <div class="field-group" style="margin:0;flex:1;">
                     <div class="field-label">機番</div>
                     <div class="field-row" style="margin:0;">
@@ -483,14 +503,14 @@ SCRIPT = r"""
                   <button class="btn secondary" data-action="lending-edit" ${s.selectedLoanId ? "" : "disabled"}>選択を編集</button>
                 </div>
               </div>
-              <div class="table-wrap" style="margin-top:16px;">
+              <div class="table-wrap operation-table lending-list" style="margin-top:16px;">
                 ${renderTable(
                   s.loans,
-                  ["貸出日", "機番", "サイズ", "数量", "担当者", "状態"],
+                  ["サイズ", "機番", "貸出日", "数量", "担当者", "状態"],
                   (row) => [
-                    formatDate(row.lent_on),
-                    row.machine_code || "",
                     row.size || "",
+                    row.machine_code || "",
+                    formatDate(row.lent_on),
                     row.holding_count == null ? "" : String(row.holding_count),
                     row.staff_name || "",
                     row.returned_on ? "返却済" : "貸出中"
@@ -544,13 +564,9 @@ SCRIPT = r"""
                   <input type="date" class="field-control compact" data-screen="return" data-field="date" value="${escapeHtml(s.date)}" />
                 </div>
                 <div class="field-group return-case-field" style="margin:0;">
-                  <div class="return-case-label-row">
-                    <div class="field-label">返却ケースNo</div>
-                    <div class="return-case-note">${escapeHtml(returnCaseNote)}</div>
-                  </div>
-                  <input class="field-control compact" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}" aria-invalid="${!hasReturnCaseNo}" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="半角数字1～2桁　例：1、2、3" />
+                  <div class="field-label">返却ケースNo</div>
+                  <input class="field-control compact" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}" aria-invalid="${!hasReturnCaseNo}" aria-describedby="return-case-note" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="例：1、12" />
                 </div>
-                <div aria-hidden="true"></div>
                 <div class="return-selected-size">
                   <div class="field-label">選択中のサイズ</div>
                   <div class="value">${escapeHtml(selectedSize || "未選択")}</div>
@@ -560,11 +576,12 @@ SCRIPT = r"""
                   <button class="btn return-all-action small" data-action="return-all" ${s.loans.length && hasReturnCaseNo ? "" : "disabled"}>一括返却</button>
                 </div>
               </div>
-              <div class="table-wrap">
-                ${renderOperationTable(
+              <div class="return-case-note" id="return-case-note" aria-live="polite">${escapeHtml(returnCaseNote)}</div>
+              <div class="table-wrap operation-table return-targets">
+                ${renderTable(
                   s.loans,
-                  ["サイズ", "担当者", "機番", "貸出日", "ケースNo"],
-                  (row) => [row.size || "", row.staff_name || "", row.machine_code || "", formatDate(row.lent_on), row.case_no || ""],
+                  ["サイズ", "ケースNo", "担当者", "機番", "貸出日"],
+                  (row) => [row.size || "", row.case_no || "", row.staff_name || "", row.machine_code || "", formatDate(row.lent_on)],
                   s.selectedLoanId,
                   (row) => row.loan_id
                 )}
@@ -606,7 +623,7 @@ SCRIPT = r"""
                   </div>
                 </div>
               </div>
-              <div class="table-wrap confirmation-targets" style="margin-top:12px;">
+              <div class="table-wrap operation-table confirmation-targets" style="margin-top:12px;">
                 ${renderTable(
                   s.detailLoans,
                   ["サイズ", "ケースNo", "担当者", "返却日", "状態"],
@@ -625,7 +642,7 @@ SCRIPT = r"""
                   <button class="btn secondary small" data-action="confirmation-refresh">再読込</button>
                 </div>
               </div>
-              <div class="table-wrap">
+              <div class="table-wrap operation-table">
                 ${renderBatchTable(s.batches, s.selectedBatchMachineCode, s.selectedBatchReturnedOn)}
               </div>
             </div>
@@ -637,15 +654,15 @@ SCRIPT = r"""
     function renderPgMasterScreen() {
       const s = state.pgMaster;
       return `
-        <div class="two-col">
+        <div class="two-col master-layout">
           <section class="card">
             <div class="card-inner">
-              <div class="toolbar">
+              <div class="toolbar master-list-toolbar">
                 <div class="card-head" style="margin:0;">
                   <h3>PGマスタ一覧</h3>
                   <span class="metric-pill">${s.rows.length}件</span>
                 </div>
-                <div class="field-row" style="margin:0;">
+                <div class="field-row master-search-row" style="margin:0;">
                   <div class="field-group search-box" style="margin:0;">
                     <div class="field-label">サイズ検索</div>
                     <input class="field-control compact" data-screen="pg_master" data-field="searchQuery" value="${escapeHtml(s.searchQuery)}" placeholder="サイズ" />
@@ -656,7 +673,7 @@ SCRIPT = r"""
                   </div>
                 </div>
               </div>
-              <div class="table-wrap" data-scroll-key="pg-master-list">
+              <div class="table-wrap operation-table pg-list" data-scroll-key="pg-master-list">
                 ${renderTable(
                   s.rows,
                   ["サイズ", "数量", "ケースNo"],
@@ -673,17 +690,19 @@ SCRIPT = r"""
                 <h3>編集</h3>
                 <span class="metric-pill">${s.isNew ? "新規" : "更新"}</span>
               </div>
-              <div class="field-group">
-                <div class="field-label">サイズ</div>
-                <input class="field-control compact" data-screen="pg_master" data-field="editSize" value="${escapeHtml(s.editSize)}" ${s.isNew ? "" : "disabled"} />
-              </div>
-              <div class="field-group">
-                <div class="field-label">数量</div>
-                <input type="number" min="0" class="field-control compact" data-screen="pg_master" data-field="editHoldingCount" value="${escapeHtml(s.editHoldingCount)}" />
-              </div>
-              <div class="field-group">
-                <div class="field-label">ケースNo</div>
-                <input class="field-control compact" maxlength="20" data-screen="pg_master" data-field="editCaseNo" value="${escapeHtml(s.editCaseNo)}" />
+              <div class="master-edit-fields">
+                <div class="field-group">
+                  <div class="field-label">サイズ</div>
+                  <input class="field-control compact" data-screen="pg_master" data-field="editSize" value="${escapeHtml(s.editSize)}" ${s.isNew ? "" : "disabled"} />
+                </div>
+                <div class="field-group">
+                  <div class="field-label">数量</div>
+                  <input type="number" min="0" class="field-control compact" data-screen="pg_master" data-field="editHoldingCount" value="${escapeHtml(s.editHoldingCount)}" />
+                </div>
+                <div class="field-group">
+                  <div class="field-label">ケースNo</div>
+                  <input class="field-control compact" maxlength="20" data-screen="pg_master" data-field="editCaseNo" value="${escapeHtml(s.editCaseNo)}" />
+                </div>
               </div>
               <div class="button-row">
                 <button class="btn secondary" data-action="pg-new">新規</button>
@@ -699,15 +718,15 @@ SCRIPT = r"""
     function renderStaffMasterScreen() {
       const s = state.staffMaster;
       return `
-        <div class="two-col">
+        <div class="two-col master-layout">
           <section class="card">
             <div class="card-inner">
-              <div class="toolbar">
+              <div class="toolbar master-list-toolbar">
                 <div class="card-head" style="margin:0;">
                   <h3>担当者一覧</h3>
                   <span class="metric-pill">${s.rows.length}件</span>
                 </div>
-                <div class="field-row" style="margin:0;">
+                <div class="field-row master-search-row" style="margin:0;">
                   <div class="field-group search-box" style="margin:0;">
                     <div class="field-label">ID / 氏名検索</div>
                     <input class="field-control compact" data-screen="staff_master" data-field="searchQuery" value="${escapeHtml(s.searchQuery)}" placeholder="検索" />
@@ -715,7 +734,7 @@ SCRIPT = r"""
                   <button class="btn secondary" data-action="staff-search">検索</button>
                 </div>
               </div>
-              <div class="table-wrap">
+              <div class="table-wrap operation-table staff-list">
                 ${renderTable(
                   s.rows,
                   ["担当者ID", "氏名", "部署", "かな", "表示"],
@@ -732,23 +751,25 @@ SCRIPT = r"""
                 <h3>編集</h3>
                 <span class="metric-pill">保存用</span>
               </div>
-              <div class="field-group">
-                <div class="field-label">担当者ID</div>
-                <input class="field-control compact" data-screen="staff_master" data-field="editStaffId" value="${escapeHtml(s.editStaffId)}" disabled />
-              </div>
-              <div class="field-group">
-                <div class="field-label">氏名</div>
-                <input class="field-control compact" data-screen="staff_master" data-field="editName" value="${escapeHtml(s.editName)}" />
-              </div>
-              <div class="field-group">
-                <div class="field-label">部署</div>
-                <select class="field-control compact" data-screen="staff_master" data-field="editDepartment">
-                  ${renderOptions(state.options.departments, s.editDepartment)}
-                </select>
-              </div>
-              <div class="field-group">
-                <div class="field-label">かな</div>
-                <input class="field-control compact" data-screen="staff_master" data-field="editKana" value="${escapeHtml(s.editKana)}" />
+              <div class="master-edit-fields">
+                <div class="field-group">
+                  <div class="field-label">担当者ID</div>
+                  <input class="field-control compact" data-screen="staff_master" data-field="editStaffId" value="${escapeHtml(s.editStaffId)}" disabled />
+                </div>
+                <div class="field-group">
+                  <div class="field-label">氏名</div>
+                  <input class="field-control compact" data-screen="staff_master" data-field="editName" value="${escapeHtml(s.editName)}" />
+                </div>
+                <div class="field-group">
+                  <div class="field-label">部署</div>
+                  <select class="field-control compact" data-screen="staff_master" data-field="editDepartment">
+                    ${renderOptions(state.options.departments, s.editDepartment)}
+                  </select>
+                </div>
+                <div class="field-group">
+                  <div class="field-label">かな</div>
+                  <input class="field-control compact" data-screen="staff_master" data-field="editKana" value="${escapeHtml(s.editKana)}" />
+                </div>
               </div>
               <label class="field-row" style="margin:4px 0 0;align-items:center;">
                 <input type="checkbox" data-screen="staff_master" data-field="editVisible" ${s.editVisible ? "checked" : ""} />

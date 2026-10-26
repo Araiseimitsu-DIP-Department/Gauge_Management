@@ -119,19 +119,6 @@ SCRIPT = r"""
       return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
     }
 
-    function renderOperationTable(rows, headers, rowMapper, selectedValue, valueExtractor) {
-      const SINGLE_COLUMN_LIMIT = 12;
-      if (!rows || rows.length <= SINGLE_COLUMN_LIMIT) {
-        return renderTable(rows, headers, rowMapper, selectedValue, valueExtractor);
-      }
-      const splitAt = Math.ceil(rows.length / 2);
-      const columns = [rows.slice(0, splitAt), rows.slice(splitAt)];
-      return `<div class="split-table-grid">${columns.map((column, index) => {
-        const offset = index * splitAt;
-        return `<div class="table-segment" aria-label="${offset + 1}～${offset + column.length}件目">${renderTable(column, headers, rowMapper, selectedValue, valueExtractor, offset)}</div>`;
-      }).join("")}</div>`;
-    }
-
     function renderBatchTable(rows, selectedMachineCode, selectedReturnedOn) {
       if (!rows || !rows.length) {
         return '<div class="empty-state">確認済みバッチはありません。</div>';

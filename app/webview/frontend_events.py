@@ -1,4 +1,5 @@
 SCRIPT = r"""
+    window.addEventListener('resize', syncSidebarLayout);
     document.addEventListener("click", async (event) => {
       syncCurrentDate();
       const dialogAction = event.target.closest("[data-dialog-action]");

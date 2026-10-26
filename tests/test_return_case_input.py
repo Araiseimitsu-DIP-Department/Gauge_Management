@@ -25,6 +25,11 @@ for (const [value, valid] of [['1',true],['12',true],['99',true],[' 2 ',true],['
   assert.equal(/data-action="return-one"\s+disabled/.test(html),!valid,value);
   assert.equal(/data-action="return-all"\s+disabled/.test(html),!valid,value);
 }
+state.return.loans = [{loan_id:1,size:'BM20-25W',case_no:'A01',staff_name:'検査担当',machine_code:'A-1',lent_on:'2026-10-12'}];
+const html = renderReturnScreen();
+assert(html.includes('<th>サイズ</th><th>ケースNo</th><th>担当者</th><th>機番</th><th>貸出日</th>'));
+assert(html.includes('<td>BM20-25W</td><td>A01</td><td>検査担当</td><td>A-1</td><td>2026/10/12</td>'));
+assert(html.includes('aria-describedby="return-case-note"'));
 """
         result = subprocess.run(
             [NODE, "-"], input="const assert = require('node:assert/strict');\n" + RENDER_SCRIPT + CONTROLLER_SCRIPT + scenario,

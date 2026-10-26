@@ -48,31 +48,11 @@ CONFIRMATION_STYLES = r"""
     }
     .confirmation-screen .return-actions { gap: 8px; }
     .confirmation-screen .btn { padding: 6px 12px; }
-    .confirmation-screen .table-wrap {
-      border: 0; border-radius: 0; background: transparent;
-      scrollbar-gutter: stable;
-    }
-    .confirmation-screen .table-wrap table {
-      font-size: var(--confirmation-font-size); border-collapse: separate; border-spacing: 0;
-      table-layout: fixed;
-    }
+    .confirmation-screen .table-wrap table { font-size: var(--confirmation-font-size); }
     .confirmation-screen .table-wrap th, .confirmation-screen .table-wrap td {
       padding: 7px 9px; line-height: 20px;
     }
-    .confirmation-screen .table-wrap th {
-      font-size: 0.86em; font-weight: 600; color: var(--color-text-secondary);
-      background: var(--color-surface-secondary);
-      border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);
-    }
-    .confirmation-screen .table-wrap th:first-child { border-radius: 8px 0 0 0; }
-    .confirmation-screen .table-wrap th:last-child { border-radius: 0 8px 0 0; }
-    .confirmation-screen .table-wrap tbody tr:nth-child(even):not(.selected) {
-      background: color-mix(in srgb, var(--color-surface-secondary) 48%, transparent);
-    }
-    .confirmation-screen .table-wrap tbody tr:hover:not(.selected) { background: var(--color-accent-soft); }
-    .confirmation-screen .table-wrap td { border-bottom-color: var(--color-border-subtle); }
-    .confirmation-screen .table-wrap tr.selected td { background: var(--color-accent-soft); font-weight: 600; }
-    .confirmation-screen .table-wrap tr.selected td:first-child { box-shadow: inset 3px 0 var(--color-accent); }
+    .confirmation-screen .table-wrap th { font-size: 0.86em; }
     .confirmation-targets { position: relative; }
     .confirmation-targets table { min-width: 370px; }
     .confirmation-targets > table { width: min(100%, var(--confirmation-single-table-width)); }

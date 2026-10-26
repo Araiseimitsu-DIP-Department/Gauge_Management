@@ -47,6 +47,7 @@ assert all(type(repo).__name__.startswith("Postgres") for repo in (bundle.lendin
 with patch.object(bootstrap, "load_app_settings", return_value=settings), patch.object(bootstrap.webview, "create_window") as window, patch.object(bootstrap.webview, "start"):
     assert bootstrap.run() == 0
     window.assert_called_once()
+    assert window.call_args.kwargs["min_size"] == (680, 680)
 try:
     with open_postgres_connection(settings.postgres_db):
         pass

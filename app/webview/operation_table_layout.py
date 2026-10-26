@@ -1,28 +1,28 @@
-"""確認対象一覧を実際の表示領域に合わせて一列・二列に切り替える。"""
+"""返却・確認の対象一覧を実際の表示領域に合わせて一列・二列に切り替える。"""
 
 SCRIPT = r"""
-    let confirmationTableObserver = null;
+    const DEFAULT_MIN_SPLIT_WIDTH = 816;
+    let operationTableObserver = null;
 
-    function confirmationTableNeedsSplit(rowCount, tableHeight, availableHeight, availableWidth) {
-      const MIN_SPLIT_WIDTH = 816;
-      return rowCount > 1 && availableHeight > 0 && availableWidth >= MIN_SPLIT_WIDTH
+    function operationTableNeedsSplit(rowCount, tableHeight, availableHeight, availableWidth, minimumSplitWidth = DEFAULT_MIN_SPLIT_WIDTH) {
+      return rowCount > 1 && availableHeight > 0 && availableWidth >= minimumSplitWidth
         && Math.ceil(tableHeight) > availableHeight;
     }
 
-    function observeConfirmationTable() {
-      if (confirmationTableObserver) confirmationTableObserver.disconnect();
-      const wrap = document.querySelector('.confirmation-targets');
+    function observeOperationTable() {
+      if (operationTableObserver) operationTableObserver.disconnect();
+      const wrap = document.querySelector('.confirmation-targets, .return-targets');
       if (!wrap) return;
-      if (!confirmationTableObserver) {
-        confirmationTableObserver = new ResizeObserver((entries) => {
-          for (const entry of entries) layoutConfirmationTable(entry.target);
+      if (!operationTableObserver) {
+        operationTableObserver = new ResizeObserver((entries) => {
+          for (const entry of entries) layoutOperationTable(entry.target);
         });
       }
-      layoutConfirmationTable(wrap);
-      confirmationTableObserver.observe(wrap);
+      layoutOperationTable(wrap);
+      operationTableObserver.observe(wrap);
     }
 
-    function layoutConfirmationTable(wrap) {
+    function layoutOperationTable(wrap) {
       const table = wrap.querySelector('table');
       if (!table) return;
       const grid = wrap.querySelector('.split-table-grid');
@@ -37,7 +37,8 @@ SCRIPT = r"""
         singleTableHeight = probe.getBoundingClientRect().height;
         probe.remove();
       }
-      const split = confirmationTableNeedsSplit(rows.length, singleTableHeight, wrap.clientHeight, wrap.clientWidth);
+      const minimumSplitWidth = parseFloat(getComputedStyle(wrap).getPropertyValue('--operation-min-split-width')) || DEFAULT_MIN_SPLIT_WIDTH;
+      const split = operationTableNeedsSplit(rows.length, singleTableHeight, wrap.clientHeight, wrap.clientWidth, minimumSplitWidth);
       if (split === Boolean(grid)) return;
       const scrollTop = wrap.scrollTop;
       if (split) {
