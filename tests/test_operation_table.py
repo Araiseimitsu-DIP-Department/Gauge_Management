@@ -44,25 +44,52 @@ assert.equal(operationTableNeedsSplit(1, 105, 100, 900), false);
 assert.equal(operationTableNeedsSplit(16, 595, 0, 900), false);
 assert.equal(operationTableNeedsSplit(25, 650, 450, 895, 896), false);
 assert.equal(operationTableNeedsSplit(25, 650, 450, 896, 896), true);
+assert.equal(operationTableColumnCount(36, 900, 400, 600, 360, 180, 3), 3);
+assert.equal(operationTableColumnCount(36, 900, 500, 600, 360, 180, 3), 2);
+assert.equal(operationTableColumnCount(36, 900, 400, 500, 360, 180, 3), 2);
+assert.equal(operationTableColumnCount(36, 900, 200, 1200, 360, 180, 2), 2);
+assert.deepEqual(operationTableColumnSizes(25, 2), [13, 12]);
+assert.deepEqual(operationTableColumnSizes(36, 3), [12, 12, 12]);
+assert.deepEqual(operationTableColumnSizes(10, 3), [4, 3, 3]);
+assert.deepEqual(operationTableColumnSizes(2, 3), [1, 1]);
 """)
 
     def test_selection_uses_original_id_for_both_screens(self):
         self.run_script(r"""
 const rows = Array.from({length:25}, (_,i)=>({loan_id:1000+i, size:String(i)}));
 renderApp = () => {};
-for (const screen of ['return', 'confirmation']) {
-  state.currentScreen = screen;
-  state.return.loans = rows;
-  state.confirmation.detailLoans = rows;
-  for (const index of [0,12,13,24]) {
-    selectRowFromCurrentScreen(index);
-    const selected = state[screen].selectedLoanId;
-    assert.equal(selected,1000+index);
-    const html = renderTable(rows,['サイズ'],row=>[row.size],selected,row=>row.loan_id);
-    assert.equal((html.match(/class="selected"/g)||[]).length,1);
-    assert(html.includes(`data-row-index="${index}" class="selected"`));
-  }
+state.currentScreen = 'confirmation';
+state.confirmation.detailLoans = rows;
+for (const index of [0,12,13,24]) {
+  selectRowFromCurrentScreen(index);
+  const selected = state.confirmation.selectedLoanId;
+  assert.equal(selected,1000+index);
+  const html = renderTable(rows,['サイズ'],row=>[row.size],selected,row=>row.loan_id);
+  assert.equal((html.match(/class="selected"/g)||[]).length,1);
+  assert(html.includes(`data-row-index="${index}" class="selected"`));
 }
+state.currentScreen = 'return';
+state.return.loans = [
+  {loan_id:1,size:'1.000'},
+  {loan_id:2,size:'2.000'},
+  {loan_id:3,size:'3.000'},
+];
+state.return.selectedLoanIds = [];
+selectRowFromCurrentScreen(0);
+selectRowFromCurrentScreen(2);
+assert.deepEqual(state.return.selectedLoanIds,[1,3]);
+let html = renderReturnScreen();
+assert.equal((html.match(/class="selected"/g)||[]).length,2);
+assert(html.includes('個別返却 2件'));
+assert(html.includes('>1.000</span>'));
+assert(html.includes('>3.000</span>'));
+selectRowFromCurrentScreen(0);
+assert.deepEqual(state.return.selectedLoanIds,[3]);
+html = renderReturnScreen();
+assert.equal((html.match(/class="selected"/g)||[]).length,1);
+assert(html.includes('個別返却 1件'));
+assert(html.includes('>3.000</span>'));
+assert(!html.includes('>1.000</span>'));
 """)
 
     def test_row_callbacks_receive_original_index_and_values_are_escaped(self):

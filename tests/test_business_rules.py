@@ -40,8 +40,11 @@ class BusinessRulesTests(unittest.TestCase):
                     usecase.return_one_loan(loan_id=1, case_no=value, returned_on=date(2026, 10, 22))
                 with self.assertRaises(AppValidationError):
                     usecase.return_all_loans(machine_prefix="A", machine_suffix="1", case_no=value, returned_on=date(2026, 10, 22), target_count=2)
+                with self.assertRaises(AppValidationError):
+                    usecase.return_selected_loans(loan_ids=[1, 2], case_no=value, returned_on=date(2026, 10, 22))
         repository.return_one_loan.assert_not_called()
         repository.return_all_loans.assert_not_called()
+        repository.return_selected_loans.assert_not_called()
 
     def test_numeric_return_case_is_passed_to_individual_and_batch(self):
         repository = Mock()
@@ -64,6 +67,32 @@ class BusinessRulesTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             usecase.return_one_loan(loan_id=None, case_no="A1", returned_on=date(2026, 10, 13))
         repository.return_one_loan.assert_not_called()
+
+    def test_selected_return_requires_targets_and_date(self):
+        repository = Mock()
+        usecase = OperationUseCase(repository)
+        today = date(2026, 11, 2)
+        with self.assertRaises(ValidationError):
+            usecase.return_selected_loans(loan_ids=[], case_no="1", returned_on=today)
+        with self.assertRaises(ValidationError):
+            usecase.return_selected_loans(loan_ids=[1], case_no="1", returned_on=None)
+        repository.return_selected_loans.assert_not_called()
+
+    def test_selected_return_deduplicates_and_passes_normalized_case(self):
+        repository = Mock()
+        repository.return_selected_loans.return_value = 2
+        usecase = OperationUseCase(repository)
+        today = date(2026, 11, 2)
+        count = usecase.return_selected_loans(loan_ids=[3, 3, 1], case_no=" 7 ", returned_on=today)
+        self.assertEqual(count, 2)
+        repository.return_selected_loans.assert_called_once_with([3, 1], today, "7")
+
+    def test_selected_return_rejects_partial_update(self):
+        repository = Mock()
+        repository.return_selected_loans.return_value = 1
+        usecase = OperationUseCase(repository)
+        with self.assertRaises(ValidationError):
+            usecase.return_selected_loans(loan_ids=[1, 2], case_no="1", returned_on=date(2026, 11, 2))
 
     def test_referenced_master_never_deleted(self):
         repository = Mock()

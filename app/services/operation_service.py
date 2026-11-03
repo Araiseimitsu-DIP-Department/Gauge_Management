@@ -83,6 +83,26 @@ class OperationService:
         except RepositoryError as exc:
             raise AppDataAccessError(str(exc)) from exc
 
+    def return_selected_loans(
+        self,
+        *,
+        loan_ids: list[int],
+        case_no: str,
+        returned_on: date | None,
+    ) -> int:
+        try:
+            return self._usecase.return_selected_loans(
+                loan_ids=loan_ids,
+                case_no=case_no,
+                returned_on=returned_on,
+            )
+        except AppConfigurationError:
+            raise
+        except ValidationError as exc:
+            raise AppValidationError(str(exc)) from exc
+        except RepositoryError as exc:
+            raise AppDataAccessError(str(exc)) from exc
+
     def search_confirmation_loans(self, case_no: str) -> list[LoanRecord]:
         try:
             rows = self._usecase.search_confirmation_loans(case_no)

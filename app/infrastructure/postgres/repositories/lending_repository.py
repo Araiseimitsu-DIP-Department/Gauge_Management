@@ -52,6 +52,7 @@ class PostgresLendingRepository:
         return [LendingRowMapper.to_staff_member(row) for row in rows]
 
     def search_active_loans(self, criteria: LendingSearchCriteria) -> list[LoanRecord]:
+        # 貸出中（完了フラグなし）と返却BOX内（完了フラグ N）を表示する。確認済みは除外する。
         sql = f'''
             SELECT
                 l."id",
@@ -69,7 +70,7 @@ class PostgresLendingRepository:
                 ON l."staff_id" = s."staff_id"
             LEFT JOIN {self._table(PIN_GAUGE_MASTER_TABLE)} AS p
                 ON l."size" = p."size"
-            WHERE l."completion_flag" IS NULL
+            WHERE (l."completion_flag" IS NULL OR l."completion_flag" = 'N')
         '''
         parameters: list[object] = []
         if criteria.size_value:

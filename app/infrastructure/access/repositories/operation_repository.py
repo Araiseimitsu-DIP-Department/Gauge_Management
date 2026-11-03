@@ -86,6 +86,52 @@ class AccessOperationRepository:
             logger.exception("failed to return one loan")
             raise RepositoryError("個別返却に失敗しました。") from exc
 
+    def return_selected_loans(self, loan_ids: list[int], returned_on: date, case_no: str) -> int:
+        # 未返却の行だけ更新する。1件でも対象外なら全体を戻し、二重返却を防ぐ。
+        if not loan_ids:
+            return 0
+        sql = """
+            UPDATE t_貸出
+            SET 返却日 = ?, 機番 = ?, 完了フラグ = 'N'
+            WHERE ID = ?
+              AND 返却日 IS NULL
+              AND 完了フラグ IS NULL
+        """
+        returned_machine_code = f"返-{case_no}"
+        try:
+            with open_access_connection(self._settings) as connection:
+                cursor = connection.cursor()
+                for loan_id in loan_ids:
+                    cursor.execute(sql, returned_on, returned_machine_code, loan_id)
+                    updated_count = cursor.rowcount
+                    if updated_count == -1:
+                        # ドライバが件数を返さない場合は、同じ返却先へ更新できたか読み戻す。
+                        check_sql = """
+                            SELECT COUNT(*)
+                            FROM t_貸出
+                            WHERE ID = ?
+                              AND 機番 = ?
+                              AND 返却日 IS NOT NULL
+                              AND 完了フラグ = 'N'
+                        """
+                        checked = cursor.execute(check_sql, loan_id, returned_machine_code).fetchone()
+                        updated_count = int(checked[0]) if checked else 0
+                    if updated_count != 1:
+                        connection.rollback()
+                        logger.warning(
+                            "返却対象外の行が含まれています。loan_id=%s updated=%s",
+                            loan_id,
+                            updated_count,
+                        )
+                        raise RepositoryError("選択した行の一部は返却できません。一覧を検索し直してください。")
+                connection.commit()
+        except RepositoryError:
+            raise
+        except pyodbc.Error as exc:
+            logger.exception("failed to return selected loans")
+            raise RepositoryError("個別返却に失敗しました。") from exc
+        return len(loan_ids)
+
     def search_confirmation_loans(self, case_no: str) -> list[LoanRecord]:
         sql = """
             SELECT

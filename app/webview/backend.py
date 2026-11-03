@@ -206,6 +206,23 @@ class WebviewBridge:
         except (AppConfigurationError, AppValidationError, AppDataAccessError) as exc:
             return self._fail(exc)
 
+    def return_selected_loans(self, payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            raw_ids = payload.get("loan_ids", [])
+            if not isinstance(raw_ids, list):
+                raise AppValidationError("返却対象を選択してください。")
+            loan_ids = [int(value) for value in raw_ids]
+            count = self._operation_service.return_selected_loans(
+                loan_ids=loan_ids,
+                case_no=str(payload.get("case_no", "")),
+                returned_on=self._parse_date(payload.get("returned_on")),
+            )
+            return self._ok({"count": count})
+        except (TypeError, ValueError):
+            return self._fail(AppValidationError("返却対象を選択してください。"))
+        except (AppConfigurationError, AppValidationError, AppDataAccessError) as exc:
+            return self._fail(exc)
+
     def return_all_loans(self, payload: dict[str, Any]) -> dict[str, Any]:
         try:
             count = self._operation_service.return_all_loans(

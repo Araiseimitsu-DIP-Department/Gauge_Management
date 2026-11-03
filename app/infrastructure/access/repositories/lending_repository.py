@@ -42,6 +42,7 @@ class AccessLendingRepository:
         return [LendingRowMapper.to_staff_member(row) for row in rows]
 
     def search_active_loans(self, criteria: LendingSearchCriteria) -> list[LoanRecord]:
+        # 貸出中（完了フラグなし）と返却BOX内（完了フラグ N）を表示する。確認済みは除外する。
         base_sql = """
             SELECT
                 t_貸出.ID,
@@ -61,7 +62,7 @@ class AccessLendingRepository:
                 LEFT JOIN t_PGマスタ
                     ON t_貸出.サイズ = t_PGマスタ.サイズ
             WHERE
-                t_貸出.完了フラグ IS NULL
+                (t_貸出.完了フラグ IS NULL OR t_貸出.完了フラグ = 'N')
         """
         parameters: list[object] = []
         if criteria.size_value:

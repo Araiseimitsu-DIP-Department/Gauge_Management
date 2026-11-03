@@ -97,6 +97,53 @@ class PostgresOperationRepository:
             logger.exception("failed to return one loan")
             raise RepositoryError("個別返却に失敗しました。") from exc
 
+    def return_selected_loans(self, loan_ids: list[int], returned_on: date, case_no: str) -> int:
+        # 未返却の行だけ更新する。1件でも対象外なら全体を戻し、二重返却を防ぐ。
+        if not loan_ids:
+            return 0
+        sql = f'''
+            UPDATE {self._table(PIN_GAUGE_LENDING_TABLE)}
+            SET "returned_date" = %s, "machine_no" = %s, "completion_flag" = 'N'
+            WHERE "id" = %s
+              AND "returned_date" IS NULL
+              AND "completion_flag" IS NULL
+        '''
+        returned_machine_code = f"返-{case_no}"
+        try:
+            with open_postgres_connection(self._settings) as connection:
+                with open_postgres_cursor(connection) as cursor:
+                    for loan_id in loan_ids:
+                        cursor.execute(sql, (returned_on, returned_machine_code, loan_id))
+                        updated_count = cursor.rowcount
+                        if updated_count == -1:
+                            # ドライバが件数を返さない場合は、同じ返却先へ更新できたか読み戻す。
+                            check_sql = f'''
+                                SELECT COUNT(*) AS updated_count
+                                FROM {self._table(PIN_GAUGE_LENDING_TABLE)}
+                                WHERE "id" = %s
+                                  AND "machine_no" = %s
+                                  AND "returned_date" IS NOT NULL
+                                  AND "completion_flag" = 'N'
+                            '''
+                            cursor.execute(check_sql, (loan_id, returned_machine_code))
+                            checked = cursor.fetchone()
+                            updated_count = int(checked["updated_count"]) if checked else 0
+                        if updated_count != 1:
+                            connection.rollback()  # type: ignore[attr-defined]
+                            logger.warning(
+                                "返却対象外の行が含まれています。loan_id=%s updated=%s",
+                                loan_id,
+                                updated_count,
+                            )
+                            raise RepositoryError("選択した行の一部は返却できません。一覧を検索し直してください。")
+                connection.commit()  # type: ignore[attr-defined]
+        except RepositoryError:
+            raise
+        except Exception as exc:
+            logger.exception("failed to return selected loans")
+            raise RepositoryError("個別返却に失敗しました。") from exc
+        return len(loan_ids)
+
     def search_confirmation_loans(self, case_no: str) -> list[LoanRecord]:
         sql = f'''
             SELECT

@@ -42,6 +42,7 @@ SCRIPT = r"""
         caseNo: "",
         loans: [],
         selectedLoanId: null,
+        selectedLoanIds: [],
       },
       confirmation: {
         caseNo: "",
@@ -525,10 +526,31 @@ SCRIPT = r"""
       `;
     }
 
+    function renderReturnSelection(loans, selectedSize) {
+      const countLabel = loans.length ? `個別返却 ${loans.length}件` : "未選択";
+      const note = loans.length
+        ? "一括返却は、選択に関係なく表示中のすべてです。"
+        : "行をクリックして選びます。個別返却は選んだ行だけ、一括返却は表示中のすべてです。";
+      const chips = loans.map((row) => {
+        const label = returnLoanLabel(row);
+        const caseNo = String(row.case_no || "").trim();
+        return `<button type="button" class="return-selection-chip" data-action="return-unselect" data-loan-id="${escapeHtml(row.loan_id)}" title="選択を解除" aria-label="${escapeHtml(label)} の選択を解除"><span class="size">${escapeHtml(row.size || "")}</span>${caseNo ? `<span class="case">${escapeHtml(caseNo)}</span>` : ""}<span class="remove" aria-hidden="true">×</span></button>`;
+      }).join("");
+      return `
+        <div class="return-selection" aria-live="polite">
+          <div class="return-selection-head">
+            <span class="return-selection-count ${loans.length ? "is-selected" : ""}">${escapeHtml(countLabel)}</span>
+            <span class="return-selection-note">${escapeHtml(note)}</span>
+          </div>
+          ${chips ? `<div class="return-selection-items" title="${escapeHtml(selectedSize || "")}">${chips}</div>` : ""}
+        </div>
+      `;
+    }
+
     function renderReturnScreen() {
       const s = state.return;
-      const selectedLoan = selectedReturnLoan();
-      const selectedSize = selectedLoan ? selectedLoan.size || "" : "";
+      const selectedSize = selectedReturnSizeLabel();
+      const hasReturnSelection = selectedReturnLoanIds().length > 0;
       const returnCaseNote = getReturnCaseNoError();
       const hasReturnCaseNo = !returnCaseNote;
       return `
@@ -559,30 +581,29 @@ SCRIPT = r"""
                 <span class="metric-pill">${s.loans.length}件</span>
               </div>
               <div class="return-list-toolbar">
-                <div class="field-group" style="margin:0;">
-                  <div class="field-label">返却日</div>
-                  <input type="date" class="field-control compact" data-screen="return" data-field="date" value="${escapeHtml(s.date)}" />
+                <div class="return-input-row">
+                  <div class="field-group return-date-field" style="margin:0;">
+                    <div class="field-label">返却日</div>
+                    <input type="date" class="field-control compact" data-screen="return" data-field="date" value="${escapeHtml(s.date)}" />
+                  </div>
+                  <div class="field-group return-case-field" style="margin:0;">
+                    <div class="field-label">返却ケースNo</div>
+                    <input class="field-control compact" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}" aria-invalid="${!hasReturnCaseNo}" aria-describedby="return-case-note" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="例：1、12" />
+                  </div>
+                  <div class="return-actions">
+                    <button class="btn return-one-action small ${hasReturnSelection ? "ready" : ""}" data-action="return-one" ${hasReturnSelection && hasReturnCaseNo ? "" : "disabled"} title="選んだ行だけ返却します">個別返却</button>
+                    <button class="btn return-all-action small" data-action="return-all" ${s.loans.length && hasReturnCaseNo ? "" : "disabled"} title="表示中の一覧をすべて返却します。選択した行だけではありません。">一括返却</button>
+                  </div>
                 </div>
-                <div class="field-group return-case-field" style="margin:0;">
-                  <div class="field-label">返却ケースNo</div>
-                  <input class="field-control compact" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}" aria-invalid="${!hasReturnCaseNo}" aria-describedby="return-case-note" data-screen="return" data-field="caseNo" value="${escapeHtml(s.caseNo)}" placeholder="例：1、12" />
-                </div>
-                <div class="return-selected-size">
-                  <div class="field-label">選択中のサイズ</div>
-                  <div class="value">${escapeHtml(selectedSize || "未選択")}</div>
-                </div>
-                <div class="return-actions">
-                  <button class="btn return-one-action small ${s.selectedLoanId ? "ready" : ""}" data-action="return-one" ${s.selectedLoanId && hasReturnCaseNo ? "" : "disabled"}>個別返却</button>
-                  <button class="btn return-all-action small" data-action="return-all" ${s.loans.length && hasReturnCaseNo ? "" : "disabled"}>一括返却</button>
-                </div>
+                ${renderReturnSelection(selectedReturnLoans(), selectedSize)}
               </div>
               <div class="return-case-note" id="return-case-note" aria-live="polite">${escapeHtml(returnCaseNote)}</div>
               <div class="table-wrap operation-table return-targets">
                 ${renderTable(
                   s.loans,
-                  ["サイズ", "ケースNo", "担当者", "機番", "貸出日"],
-                  (row) => [row.size || "", row.case_no || "", row.staff_name || "", row.machine_code || "", formatDate(row.lent_on)],
-                  s.selectedLoanId,
+                  ["サイズ", "ケースNo"],
+                  (row) => [row.size || "", row.case_no || ""],
+                  s.selectedLoanIds,
                   (row) => row.loan_id
                 )}
               </div>

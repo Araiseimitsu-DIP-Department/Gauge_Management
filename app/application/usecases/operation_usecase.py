@@ -53,6 +53,40 @@ class OperationUseCase:
         normalized_case_no = validate_return_case_no(case_no)
         self._repository.return_one_loan(loan_id, returned_on, normalized_case_no)
 
+    def return_selected_loans(
+        self,
+        *,
+        loan_ids: list[int],
+        case_no: str,
+        returned_on: date | None,
+    ) -> int:
+        if returned_on is None:
+            raise ValidationError("返却日を指定してください。")
+        normalized_ids = self._unique_loan_ids(loan_ids)
+        if not normalized_ids:
+            raise ValidationError("返却対象を選択してください。")
+
+        normalized_case_no = validate_return_case_no(case_no)
+        updated_count = self._repository.return_selected_loans(
+            normalized_ids,
+            returned_on,
+            normalized_case_no,
+        )
+        if updated_count != len(normalized_ids):
+            raise ValidationError("選択した行の一部は返却できません。一覧を検索し直してください。")
+        return updated_count
+
+    @staticmethod
+    def _unique_loan_ids(loan_ids: list[int]) -> list[int]:
+        unique_ids: list[int] = []
+        seen: set[int] = set()
+        for loan_id in loan_ids:
+            if loan_id in seen:
+                continue
+            seen.add(loan_id)
+            unique_ids.append(loan_id)
+        return unique_ids
+
     def search_confirmation_loans(self, case_no: str) -> list[LoanSummaryDto]:
         normalized_case_no = validate_confirmation_case_no(case_no)
         return self._repository.search_confirmation_loans(normalized_case_no)

@@ -112,7 +112,10 @@ SCRIPT = r"""
       const head = headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
       const body = rows.map((row, localIndex) => {
         const index = localIndex + indexOffset;
-        const selected = String(selectedValue ?? "") === String(valueExtractor(row, index) ?? "");
+        const rowValue = valueExtractor(row, index);
+        const selected = Array.isArray(selectedValue)
+          ? selectedValue.some((value) => String(value ?? "") === String(rowValue ?? ""))
+          : String(selectedValue ?? "") === String(rowValue ?? "");
         const values = rowMapper(row, index).map((value) => `<td>${escapeHtml(value)}</td>`).join("");
         return `<tr data-action="select-row" data-row-index="${index}" class="${rowClasses(selected)}">${values}</tr>`;
       }).join("");
@@ -396,7 +399,11 @@ SCRIPT = r"""
           state.lending.selectedLoanId = state.lending.loans[index] ? state.lending.loans[index].loan_id : null;
           break;
         case "return":
-          state.return.selectedLoanId = state.return.loans[index] ? state.return.loans[index].loan_id : null;
+          if (state.return.loans[index]) {
+            toggleReturnSelection(state.return.loans[index].loan_id);
+          } else {
+            clearReturnSelection();
+          }
           break;
         case "confirmation":
           state.confirmation.selectedLoanId = state.confirmation.detailLoans[index] ? state.confirmation.detailLoans[index].loan_id : null;
@@ -435,8 +442,45 @@ SCRIPT = r"""
       state.staffMaster.editVisible = !!row.visible;
     }
 
-    function selectedReturnLoan() {
-      return state.return.loans.find((row) => String(row.loan_id) === String(state.return.selectedLoanId)) || null;
+    function selectedReturnLoanIds() {
+      return Array.isArray(state.return.selectedLoanIds) ? state.return.selectedLoanIds : [];
+    }
+
+    function clearReturnSelection() {
+      state.return.selectedLoanIds = [];
+      state.return.selectedLoanId = null;
+    }
+
+    function toggleReturnSelection(loanId) {
+      const current = selectedReturnLoanIds().slice();
+      const index = current.findIndex((value) => String(value) === String(loanId));
+      if (index >= 0) {
+        current.splice(index, 1);
+      } else {
+        current.push(loanId);
+      }
+      state.return.selectedLoanIds = current;
+      state.return.selectedLoanId = current.length ? current[current.length - 1] : null;
+    }
+
+    function selectedReturnLoans() {
+      const selected = new Set(selectedReturnLoanIds().map((value) => String(value)));
+      return state.return.loans.filter((row) => selected.has(String(row.loan_id)));
+    }
+
+    function returnLoanLabel(row) {
+      const size = String(row && row.size || "").trim();
+      const caseNo = String(row && row.case_no || "").trim();
+      if (size && caseNo) return `${size} ${caseNo}`;
+      return size || caseNo;
+    }
+
+    function selectedReturnSizeLabel() {
+      const loans = selectedReturnLoans();
+      if (!loans.length) return "未選択";
+      const labels = loans.map((row) => returnLoanLabel(row)).filter((label) => label);
+      if (loans.length === 1) return labels[0] || "";
+      return `${loans.length}件：${labels.join("、")}`;
     }
 
     function hasReturnCaseNo() {
@@ -465,8 +509,9 @@ SCRIPT = r"""
       const input = document.querySelector('[data-screen="return"][data-field="caseNo"]');
       if (input) input.setAttribute("aria-invalid", String(!hasCaseNo));
       if (oneButton) {
-        oneButton.disabled = !state.return.selectedLoanId || !hasCaseNo;
-        oneButton.classList.toggle("ready", !!state.return.selectedLoanId);
+        const hasSelection = selectedReturnLoanIds().length > 0;
+        oneButton.disabled = !hasSelection || !hasCaseNo;
+        oneButton.classList.toggle("ready", hasSelection);
       }
       if (allButton) {
         allButton.disabled = !state.return.loans.length || !hasCaseNo;
@@ -511,7 +556,7 @@ SCRIPT = r"""
         machine_suffix: state.return.machineSuffix,
       });
       state.return.loans = data.loans || [];
-      state.return.selectedLoanId = null;
+      clearReturnSelection();
       renderApp();
     }
 
@@ -581,15 +626,7 @@ SCRIPT = r"""
       state.return.machinePrefix = "";
       state.return.machineSuffix = "";
       state.return.caseNo = "";
-      state.return.selectedLoanId = null;
-      renderApp();
-    }
-
-    function clearReturnSelectionAfterOne() {
-      state.return.date = state.currentDate || state.return.date;
-      state.return.machinePrefix = "";
-      state.return.machineSuffix = "";
-      state.return.selectedLoanId = null;
+      clearReturnSelection();
       renderApp();
     }
 

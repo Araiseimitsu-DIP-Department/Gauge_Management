@@ -16,6 +16,9 @@ class OperationRepositoryPort(Protocol):
     def return_one_loan(self, loan_id: int, returned_on: date, case_no: str) -> None:
         ...
 
+    def return_selected_loans(self, loan_ids: list[int], returned_on: date, case_no: str) -> int:
+        ...
+
     def search_confirmation_loans(self, case_no: str) -> list[LoanSummaryDto]:
         ...
 

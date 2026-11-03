@@ -55,6 +55,11 @@ SCRIPT = r"""
         selectRowFromCurrentScreen(Number(target.dataset.rowIndex));
         return;
       }
+      if (action === "return-unselect") {
+        toggleReturnSelection(target.dataset.loanId);
+        renderApp();
+        return;
+      }
       if (action === "select-batch") {
         const row = state.confirmation.batches[Number(target.dataset.rowIndex)];
         if (!row) return;
@@ -134,17 +139,25 @@ SCRIPT = r"""
               await showNotice("返却ケースNoを確認してください", getReturnCaseNoError());
               return;
             }
-            if (!(await confirmDialog("単票返却", "選択した 1 件を返却しますか？"))) return;
-            setBusy("単票返却", "返却処理を実行しています...");
-            await invokeApi("return_one_loan", {
-              loan_id: state.return.selectedLoanId,
-              case_no: state.return.caseNo,
-              returned_on: state.return.date,
-            });
-            await refreshReturnSearch();
-            await refreshConfirmationBatches();
-            clearReturnSelectionAfterOne();
-            toast("完了", "返却が完了しました。");
+            {
+              const selectedLoans = selectedReturnLoans();
+              if (!selectedLoans.length) return;
+              const sizeText = selectedLoans.map((row) => returnLoanLabel(row)).filter((label) => label).join("、");
+              const confirmMessage = sizeText
+                ? `選択した ${selectedLoans.length} 件（${sizeText}）を返却しますか？`
+                : `選択した ${selectedLoans.length} 件を返却しますか？`;
+              if (!(await confirmDialog("個別返却", confirmMessage))) return;
+              setBusy("個別返却", "返却処理を実行しています...");
+              const data = await invokeApi("return_selected_loans", {
+                loan_ids: selectedReturnLoanIds(),
+                case_no: state.return.caseNo,
+                returned_on: state.return.date,
+              });
+              await refreshReturnSearch();
+              await refreshConfirmationBatches();
+              const completedCount = data.count || selectedLoans.length;
+              toast("完了", completedCount === 1 ? "返却が完了しました。" : `${completedCount}件の返却が完了しました。`);
+            }
             break;
           case "return-all":
             if (!hasReturnCaseNo()) {
@@ -356,7 +369,7 @@ SCRIPT = r"""
       setBoundValue(target);
       updateReturnCaseNoControls();
 
-      const nextAction = state.return.selectedLoanId
+      const nextAction = selectedReturnLoanIds().length
         ? document.querySelector('[data-action="return-one"]')
         : document.querySelector('[data-action="return-all"]');
       if (nextAction && !nextAction.disabled) {
